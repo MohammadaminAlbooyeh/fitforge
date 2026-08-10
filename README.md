@@ -1,55 +1,54 @@
-# intor_to_threading
+# FitForge
 
-A tiny demo project that shows how to introduce simple threading to a Python script using
-`concurrent.futures.ThreadPoolExecutor`.
+Fitness tracking app: workout planning, nutrition logging, and progress analytics.
 
-## Goals
+## Architecture
 
-- Provide a minimal `src/main.py` entrypoint that can be extended to process tasks concurrently.
-- Show a small, reproducible quickstart for running and testing the project.
+```
+.
+├── fitforge-backend/   # FastAPI + SQLAlchemy + Celery API
+├── fitforge-mobile/    # React Native (Expo) app
+├── shared/             # Shared API type contracts
+└── .github/            # CI workflows
+```
 
-## Requirements
+## Backend
 
-- Python 3.8+
-
-## Quickstart
-
-Create and activate a virtual environment, then install dependencies:
+FastAPI application with layered structure: api → services → repositories → models.
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
+cd fitforge-backend
+cp .env.example .env
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+
+# dev database only (postgres + redis)
+docker compose up -d db redis
+
+# run migrations
+alembic upgrade head
+
+# start API and Celery worker
+uvicorn app.main:app --reload
+celery -A app.core.celery_app.celery_app worker --loglevel=info
 ```
 
-Run the demo script:
+Tests run with `pytest` (uses an in-memory SQLite DB).
+
+## Mobile
+
+Expo + React Native app.
 
 ```bash
-python src/main.py
-# or
-python -m src.main
+cd fitforge-mobile
+npm install
+npx expo start
 ```
 
-## What to expect
+Set `EXPO_PUBLIC_API_URL` in `.env` to point at your backend.
 
-The repository contains a minimal `src/main.py` that will be extended to use a thread pool
-to process a set of tasks. The implementation uses the standard library (`concurrent.futures`) so
-no extra runtime libraries are required for the threading itself.
-
-## Testing
-
-We include `pytest` as a development dependency. To run tests:
+## Full stack with Docker
 
 ```bash
-pytest -q
+docker compose up
 ```
-
-## Next steps
-
-- Add or implement `process_item`, `create_tasks`, and `run_thread_pool` in `src/main.py`.
-- Decide whether you want results in input order (`executor.map`) or completion order (`as_completed`).
-- Tell me when to proceed to the next step and I'll implement the threading code into `src/main.py`.
-
----
-
-If you want a different layout (e.g., separate `src/concurrency.py`), tell me and I'll adapt.

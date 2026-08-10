@@ -1,0 +1,47 @@
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+*.log
+
+# Node / React Native / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+*.tsbuildinfo
+.expo-shared/
+
+# Native build artifacts
+ios/
+android/
+
+# EAS / credentials
+.eas/
+eas-hooks/
+
+# Env files
+.env.local
+.env.*.local
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Alembic / DB
+*.sqlite3
+*.db
+
+# Misc
+coverage/
+htmlcov/

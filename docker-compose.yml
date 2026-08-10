@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fitforge
+      POSTGRES_PASSWORD: fitforge
+      POSTGRES_DB: fitforge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./fitforge-backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./fitforge-backend:/app
+    environment:
+      - DATABASE_URL=postgresql+psycopg://fitforge:fitforge@postgres:5432/fitforge
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build: ./fitforge-backend
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info
+    volumes:
+      - ./fitforge-backend:/app
+    environment:
+      - DATABASE_URL=postgresql+psycopg://fitforge:fitforge@postgres:5432/fitforge
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  postgres_data:
