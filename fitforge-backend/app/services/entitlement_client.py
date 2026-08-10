@@ -39,6 +39,7 @@ def get_entitlements(user_id: int) -> Entitlements:
         response = httpx.get(
             f"{settings.SUBSCRIPTION_SERVICE_URL}/entitlements/{user_id}",
             timeout=settings.ENTITLEMENTS_TIMEOUT_SECONDS,
+            headers=_service_headers(settings),
         )
         response.raise_for_status()
         data = response.json()
@@ -78,7 +79,15 @@ def _call_subscription(method: str, path: str, payload: dict | None = None) -> N
             f"{settings.SUBSCRIPTION_SERVICE_URL}{path}",
             json=payload,
             timeout=settings.ENTITLEMENTS_TIMEOUT_SECONDS,
+            headers=_service_headers(settings),
         )
         response.raise_for_status()
     except httpx.HTTPError:
         raise UpstreamServiceError("Subscription service unavailable")
+
+
+def _service_headers(settings) -> dict[str, str]:
+    headers: dict[str, str] = {}
+    if settings.SERVICE_TOKEN:
+        headers["X-Service-Token"] = settings.SERVICE_TOKEN
+    return headers

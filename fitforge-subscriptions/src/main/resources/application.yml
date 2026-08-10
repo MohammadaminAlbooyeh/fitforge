@@ -6,8 +6,8 @@ spring:
     name: fitforge-subscriptions
   datasource:
     url: jdbc:postgresql://localhost:5432/fitforge
-    username: fitforge
-    password: fitforge
+    username: ${SPRING_DATASOURCE_USERNAME:fitforge}
+    password: ${SPRING_DATASOURCE_PASSWORD:fitforge}
   jpa:
     hibernate:
       ddl-auto: validate

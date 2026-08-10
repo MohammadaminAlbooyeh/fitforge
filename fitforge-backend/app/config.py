@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     SUBSCRIPTION_SERVICE_URL: str = "http://localhost:8081"
     ENTITLEMENTS_TIMEOUT_SECONDS: float = 2.0
+    SERVICE_TOKEN: str | None = None
 
     CORS_ORIGINS: list[str] = ["*"]
 
