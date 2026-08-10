@@ -12,3 +12,20 @@ export async function getDailySummary(day: string): Promise<DailyNutritionSummar
   });
   return data;
 }
+
+export async function getNutritionLog(id: number): Promise<NutritionLog> {
+  const { data } = await api.get<NutritionLog>(`/nutrition/${id}`);
+  return data;
+}
+
+export async function updateNutritionLog(
+  id: number,
+  input: Partial<NutritionLogCreateInput>
+): Promise<NutritionLog> {
+  const { data } = await api.patch<NutritionLog>(`/nutrition/${id}`, input);
+  return data;
+}
+
+export async function deleteNutritionLog(id: number): Promise<void> {
+  await api.delete(`/nutrition/${id}`);
+}

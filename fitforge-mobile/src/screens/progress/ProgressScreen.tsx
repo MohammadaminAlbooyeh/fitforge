@@ -5,6 +5,8 @@ import { ProgressChart } from '@/components/charts/ProgressChart';
 import { useHealthSync } from '@/hooks/useHealthSync';
 import { theme } from '@/constants/theme';
 
+// TODO: fetch and display fetchAnalyticsSummary() (src/api/analytics.ts) here -
+// backend workout/session totals aren't shown anywhere in the app yet.
 export function ProgressScreen() {
   const { summary, ready, error } = useHealthSync();
 

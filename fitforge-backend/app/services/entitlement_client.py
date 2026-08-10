@@ -34,6 +34,12 @@ def _normalize_period_end(value) -> str | None:
 
 
 def get_entitlements(user_id: int) -> Entitlements:
+    """Fetch entitlements from the subscription service.
+
+    Raises UpstreamServiceError if the service is unreachable or returns an
+    invalid response, rather than silently downgrading the user to "free" -
+    that would incorrectly deny Pro access during an outage.
+    """
     settings = get_settings()
     try:
         response = httpx.get(
@@ -43,8 +49,8 @@ def get_entitlements(user_id: int) -> Entitlements:
         )
         response.raise_for_status()
         data = response.json()
-    except (httpx.HTTPError, ValueError):
-        return Entitlements(user_id=user_id, plan="free", status="ACTIVE")
+    except (httpx.HTTPError, ValueError) as exc:
+        raise UpstreamServiceError("Subscription service unavailable") from exc
 
     return Entitlements(
         user_id=data.get("userId", user_id),

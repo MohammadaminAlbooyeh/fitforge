@@ -1,13 +1,26 @@
-export type User = {
-  id: number;
-  email: string;
-  full_name: string;
-  gender?: string | null;
-  birth_date?: string | null;
-  height_cm?: number | null;
-  weight_kg?: number | null;
-  goal?: string | null;
-};
+import type {
+  UserContract,
+  WorkoutContract,
+  WorkoutExerciseContract,
+  ExerciseContract,
+  WorkoutSessionContract,
+  WorkoutSessionSetContract,
+  NutritionLogContract,
+  DailyNutritionSummaryContract,
+  SubscriptionPlanContract,
+  EntitlementsContract,
+} from '../../../shared/types/api-contracts';
+
+export type User = UserContract;
+export type Exercise = ExerciseContract;
+export type WorkoutExercise = WorkoutExerciseContract;
+export type Workout = WorkoutContract;
+export type NutritionLog = NutritionLogContract;
+export type DailyNutritionSummary = DailyNutritionSummaryContract;
+export type SubscriptionPlan = SubscriptionPlanContract;
+export type Entitlements = EntitlementsContract;
+export type WorkoutSessionSetInput = WorkoutSessionSetContract;
+export type WorkoutSession = WorkoutSessionContract;
 
 export type AuthResponse = {
   access_token: string;
@@ -26,29 +39,6 @@ export type SignupInput = {
   password: string;
 };
 
-export type Exercise = {
-  id: number;
-  name: string;
-  muscle_group: string;
-  instructions?: string | null;
-};
-
-export type WorkoutExercise = {
-  id: number;
-  exercise: Exercise;
-  sets: number;
-  reps?: number | null;
-  weight_kg?: number | null;
-};
-
-export type Workout = {
-  id: number;
-  name: string;
-  description?: string | null;
-  scheduled_at?: string | null;
-  exercises: WorkoutExercise[];
-};
-
 export type WorkoutExerciseInput = {
   exercise_id: number;
   sets?: number;
@@ -63,35 +53,25 @@ export type WorkoutCreateInput = {
   exercises?: WorkoutExerciseInput[];
 };
 
-export type WorkoutSessionSetInput = {
-  exercise_id: number;
-  weight_kg?: number | null;
-  reps?: number | null;
-};
-
 export type WorkoutSessionCreateInput = {
   performed_at?: string | null;
   notes?: string | null;
   sets?: WorkoutSessionSetInput[];
 };
 
-export type WorkoutSession = {
-  id: number;
-  workout_id: number;
-  performed_at: string;
-  notes?: string | null;
-  sets: WorkoutSessionSetInput[];
+export type AnalyticsSummary = {
+  total_workouts: number;
+  total_sessions: number;
+  total_sets: number;
+  most_recent_workout?: string | null;
 };
 
-export type NutritionLog = {
-  id: number;
-  log_date: string;
-  meal?: string | null;
-  food_item: string;
-  calories: number;
-  protein_g: number;
-  carbs_g: number;
-  fat_g: number;
+export type UserUpdateInput = {
+  gender?: string | null;
+  birth_date?: string | null;
+  height_cm?: number | null;
+  weight_kg?: number | null;
+  goal?: string | null;
 };
 
 export type NutritionLogCreateInput = {
@@ -102,22 +82,4 @@ export type NutritionLogCreateInput = {
   protein_g?: number;
   carbs_g?: number;
   fat_g?: number;
-};
-
-export type DailyNutritionSummary = {
-  log_date: string;
-  total_calories: number;
-  total_protein_g: number;
-  total_carbs_g: number;
-  total_fat_g: number;
-};
-
-export type SubscriptionPlan = 'FREE' | 'PRO';
-
-export type Entitlements = {
-  userId: number;
-  plan: SubscriptionPlan;
-  status: 'ACTIVE' | 'CANCELLED' | 'EXPIRED';
-  storeProductId?: string | null;
-  currentPeriodEnd?: string | null;
 };

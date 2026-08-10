@@ -9,11 +9,21 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build: ./fitforge-backend
@@ -25,11 +35,14 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - SERVICE_TOKEN=dev-service-token
+      - DEBUG=true
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   worker:
     build: ./fitforge-backend
@@ -40,9 +53,12 @@ services:
       - DATABASE_URL=postgresql+psycopg://fitforge:fitforge@postgres:5432/fitforge
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - DEBUG=true
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   subscriptions:
     build: ./fitforge-subscriptions
@@ -51,11 +67,12 @@ services:
       - SPRING_DATASOURCE_USERNAME=fitforge
       - SPRING_DATASOURCE_PASSWORD=fitforge
       - SERVICE_TOKEN=dev-service-token
-      - REVENUECAT_WEBHOOK_SECRET=
+      - REVENUECAT_WEBHOOK_SECRET=dev-revenuecat-webhook-secret
     ports:
       - "8081:8081"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

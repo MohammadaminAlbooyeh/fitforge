@@ -1,5 +1,5 @@
 import { api } from './client';
-import { AuthResponse, LoginInput, SignupInput } from './types';
+import { AuthResponse, LoginInput, SignupInput, User, UserUpdateInput } from './types';
 
 export async function loginRequest(input: LoginInput): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>('/auth/login', input);
@@ -13,5 +13,10 @@ export async function signupRequest(input: SignupInput): Promise<AuthResponse> {
 
 export async function fetchProfile(): Promise<AuthResponse['user']> {
   const { data } = await api.get('/users/me');
+  return data;
+}
+
+export async function updateProfile(input: UserUpdateInput): Promise<User> {
+  const { data } = await api.patch<User>('/users/me', input);
   return data;
 }

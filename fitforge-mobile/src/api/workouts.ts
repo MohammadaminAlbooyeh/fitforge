@@ -27,3 +27,8 @@ export async function createWorkoutSession(
   const { data } = await api.post<WorkoutSession>(`/workouts/${workoutId}/sessions`, input);
   return data;
 }
+
+export async function listWorkoutSessions(workoutId: number): Promise<WorkoutSession[]> {
+  const { data } = await api.get<WorkoutSession[]>(`/workouts/${workoutId}/sessions`);
+  return data;
+}

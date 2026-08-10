@@ -12,6 +12,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 @Component
 public class RevenueCatSignatureFilter extends OncePerRequestFilter {
@@ -23,17 +24,25 @@ public class RevenueCatSignatureFilter extends OncePerRequestFilter {
             return;
         }
 
-        String signature = extractSignature(request);
         String secret = System.getenv("REVENUECAT_WEBHOOK_SECRET");
-        if (secret == null || secret.isBlank() || signature == null || signature.isBlank()) {
-            filterChain.doFilter(request, response);
+        if (secret == null || secret.isBlank()) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Webhook secret not configured");
+            return;
+        }
+
+        String signature = extractSignature(request);
+        if (signature == null || signature.isBlank()) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing webhook signature");
             return;
         }
 
         try {
             String payload = new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             String expected = hmacSha256(secret, payload);
-            if (expected.equals(signature)) {
+            boolean matches = MessageDigest.isEqual(
+                    expected.getBytes(StandardCharsets.UTF_8),
+                    signature.getBytes(StandardCharsets.UTF_8));
+            if (matches) {
                 filterChain.doFilter(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid webhook signature");

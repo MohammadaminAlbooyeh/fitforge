@@ -16,6 +16,20 @@ jobs:
     defaults:
       run:
         working-directory: fitforge-backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fitforge
+          POSTGRES_PASSWORD: fitforge
+          POSTGRES_DB: fitforge
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fitforge"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
@@ -30,3 +44,11 @@ jobs:
 
       - name: Run tests
         run: pytest -q
+
+      - name: Check for model/migration drift
+        env:
+          DATABASE_URL: postgresql+psycopg://fitforge:fitforge@localhost:5432/fitforge
+          DEBUG: "true"
+        run: |
+          alembic upgrade head
+          alembic check

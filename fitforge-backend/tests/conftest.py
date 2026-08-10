@@ -2,6 +2,7 @@ import os
 import sys
 
 os.environ["DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
+os.environ["DEBUG"] = "true"
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import pytest

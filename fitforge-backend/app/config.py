@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -30,6 +31,14 @@ class Settings(BaseSettings):
     SERVICE_TOKEN: str | None = None
 
     CORS_ORIGINS: list[str] = ["*"]
+
+    @model_validator(mode="after")
+    def _require_secret_key_outside_debug(self) -> "Settings":
+        if not self.DEBUG and self.SECRET_KEY == "change-me":
+            raise ValueError(
+                "SECRET_KEY must be set to a non-default value when DEBUG is False"
+            )
+        return self
 
 
 @lru_cache

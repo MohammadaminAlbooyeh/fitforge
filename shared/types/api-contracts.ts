@@ -60,6 +60,20 @@ export interface DailyNutritionSummaryContract {
   total_fat_g: number;
 }
 
+export interface WorkoutSessionSetContract {
+  exercise_id: number;
+  weight_kg?: number | null;
+  reps?: number | null;
+}
+
+export interface WorkoutSessionContract {
+  id: number;
+  workout_id: number;
+  performed_at: string;
+  notes?: string | null;
+  sets: WorkoutSessionSetContract[];
+}
+
 // ---- fitforge-subscriptions (Java / Spring Boot) ----
 
 export type SubscriptionPlanContract = 'FREE' | 'PRO';
