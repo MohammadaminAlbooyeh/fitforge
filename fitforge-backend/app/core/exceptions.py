@@ -21,3 +21,18 @@ class ConflictError(FitForgeError):
 class UnauthorizedError(FitForgeError):
     status_code = 401
     detail = "Unauthorized"
+
+
+class ForbiddenError(FitForgeError):
+    status_code = 403
+    detail = "Forbidden"
+
+
+class PaymentRequiredError(FitForgeError):
+    status_code = 402
+    detail = "Payment required"
+
+
+class UpstreamServiceError(FitForgeError):
+    status_code = 503
+    detail = "Upstream service unavailable"

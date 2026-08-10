@@ -16,6 +16,12 @@ export type MainTabsParamList = {
   Profile: undefined;
 };
 
+export type RootStackParamList = {
+  MainTabs: undefined;
+  Paywall: undefined;
+  ManageSubscription: undefined;
+};
+
 export type RootParamList = {
   Auth: undefined;
   Main: undefined;

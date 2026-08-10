@@ -43,5 +43,16 @@ services:
       - postgres
       - redis
 
+  subscriptions:
+    build: ./fitforge-subscriptions
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/fitforge
+      - SPRING_DATASOURCE_USERNAME=fitforge
+      - SPRING_DATASOURCE_PASSWORD=fitforge
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:

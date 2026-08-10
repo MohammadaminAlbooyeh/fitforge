@@ -91,3 +91,13 @@ export type DailyNutritionSummary = {
   total_carbs_g: number;
   total_fat_g: number;
 };
+
+export type SubscriptionPlan = 'FREE' | 'PRO';
+
+export type Entitlements = {
+  userId: number;
+  plan: SubscriptionPlan;
+  status: 'ACTIVE' | 'CANCELLED' | 'EXPIRED';
+  storeProductId?: string | null;
+  currentPeriodEnd?: string | null;
+};

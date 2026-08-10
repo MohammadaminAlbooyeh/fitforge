@@ -59,3 +59,25 @@ export interface DailyNutritionSummaryContract {
   total_carbs_g: number;
   total_fat_g: number;
 }
+
+// ---- fitforge-subscriptions (Java / Spring Boot) ----
+
+export type SubscriptionPlanContract = 'FREE' | 'PRO';
+
+export type SubscriptionStatusContract = 'ACTIVE' | 'CANCELLED' | 'EXPIRED';
+
+export interface EntitlementsContract {
+  userId: number;
+  plan: SubscriptionPlanContract;
+  status: SubscriptionStatusContract;
+  storeProductId?: string | null;
+  currentPeriodEnd?: string | null;
+}
+
+export interface WebhookPayloadContract {
+  type: string;
+  appUserId: string;
+  productId?: string;
+  expirationAtMs?: number;
+  purchasedAtMs?: number;
+}

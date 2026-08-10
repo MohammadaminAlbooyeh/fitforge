@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
 
+    SUBSCRIPTION_SERVICE_URL: str = "http://localhost:8081"
+    ENTITLEMENTS_TIMEOUT_SECONDS: float = 2.0
+
     CORS_ORIGINS: list[str] = ["*"]
 
 
