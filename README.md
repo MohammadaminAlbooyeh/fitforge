@@ -103,6 +103,49 @@ the **Exercise** screen.
 
 Source: [Hevy's free 5-Day Bro Split guide](https://www.hevyapp.com/bro-split-workout-program-guide/).
 
+## Personalized workout plan engine
+
+A separate, database-backed system for generating a plan tailored to each user (as opposed to
+the static Hevy split above). Plans (the prescription) and logs (what actually happened) are
+kept as distinct tables so progressive-overload history can be computed from real logged sets.
+
+- **Exercise library**: `exercises` table, seeded from a curated set of 76 bodyweight/dumbbell/
+  barbell/machine/cable movements (a starting set, not exhaustive - grow it over time) tagged
+  with a `muscle_group`, `secondary_muscle_groups`, a `movement_role` (compound/isolation),
+  and a `video_url` placeholder to fill in with licensed demo clips later.
+  `alternative_exercise_id` isn't in the source data - it's auto-computed at seed time,
+  pairing each exercise with another in the same muscle group on different (ideally
+  bodyweight) equipment. Seed/refresh with:
+  ```bash
+  cd fitforge-backend && python -m app.seed
+  ```
+- **Split algorithm** (`app/services/plan_generator.py`): a fixed lookup table, no ML and no
+  branching on experience level (that's a v2 concern) — more available days means more
+  muscle-group specialization, fewer days means more full-body coverage per session:
+  | Days | Split | Days |
+  |---|---|---|
+  | 1 | Full Body | Full Body |
+  | 2 | Full Body ×2 | Full Body A, Full Body B |
+  | 3 | Full Body ×3 | Full Body A/B/C |
+  | 4 | Upper/Lower ×2 | Upper A, Lower A, Upper B, Lower B |
+  | 5 | Push/Pull/Legs + Upper/Lower | Push, Pull, Legs, Upper, Lower |
+
+  Each day type maps to a fixed exercise "slot" list (e.g. Full Body = quads, hamstrings,
+  chest, back, shoulders, core = 6 exercises; Push = chest×2, shoulders, triceps×2 = 5).
+  Slots are filled from the exercise library, filtered by the user's `available_equipment`
+  and capped at their `experience_level` (set via `PATCH /api/v1/users/me`), preferring
+  compound movements first and varying exercise choice across repeated day types (so
+  Full Body A/B/C aren't identical).
+- **Endpoints**:
+  - `POST /api/v1/workout-plans/generate {days_per_week: 1-5}` — archives any existing active
+    plan and generates a new one
+  - `GET /api/v1/workout-plans/active` — the current plan with all days/exercises
+  - `POST /api/v1/workout-logs/` — log a completed/partial session (actual weights/reps)
+  - `GET /api/v1/workout-logs/` — a user's logged history
+
+The mobile app is not yet wired to this engine (it still shows the static Hevy split on the
+Exercise screen) — that's the next step if you want it surfaced in the UI.
+
 ## Full stack with Docker
 
 ```bash

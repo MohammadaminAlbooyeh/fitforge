@@ -20,6 +20,9 @@ class UserUpdate(BaseModel):
     height_cm: Optional[float] = None
     weight_kg: Optional[float] = None
     goal: Optional[str] = None
+    experience_level: Optional[str] = None
+    available_days_per_week: Optional[int] = Field(default=None, ge=1, le=5)
+    available_equipment: Optional[list[str]] = None
 
 
 class UserRead(UserBase):
@@ -31,6 +34,9 @@ class UserRead(UserBase):
     height_cm: Optional[float] = None
     weight_kg: Optional[float] = None
     goal: Optional[str] = None
+    experience_level: Optional[str] = None
+    available_days_per_week: Optional[int] = None
+    available_equipment: Optional[list[str]] = None
 
 
 class TokenResponse(BaseModel):

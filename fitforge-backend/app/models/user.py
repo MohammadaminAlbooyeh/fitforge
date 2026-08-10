@@ -1,4 +1,4 @@
-from sqlalchemy import Date, Enum, Float, Integer, String
+from sqlalchemy import Date, Enum, Float, Integer, JSON, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -17,6 +17,12 @@ class FitnessGoal(str, enum.Enum):
     maintain = "maintain"
 
 
+class ExperienceLevel(str, enum.Enum):
+    beginner = "beginner"
+    intermediate = "intermediate"
+    advanced = "advanced"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -29,6 +35,11 @@ class User(Base):
     height_cm: Mapped[float] = mapped_column(Float, nullable=True)
     weight_kg: Mapped[float] = mapped_column(Float, nullable=True)
     goal: Mapped[FitnessGoal] = mapped_column(Enum(FitnessGoal), nullable=True)
+    experience_level: Mapped[ExperienceLevel] = mapped_column(
+        Enum(ExperienceLevel), nullable=True
+    )
+    available_days_per_week: Mapped[int] = mapped_column(Integer, nullable=True)
+    available_equipment: Mapped[list] = mapped_column(JSON, nullable=True)
 
     workouts = relationship("Workout", back_populates="user")
     nutrition_logs = relationship("NutritionLog", back_populates="user")

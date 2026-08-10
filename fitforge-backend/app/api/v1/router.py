@@ -11,6 +11,8 @@ from app.api.v1 import (
     subscriptions,
     users,
     workouts,
+    workout_logs,
+    workout_plans,
     workout_sessions,
 )
 
@@ -26,3 +28,5 @@ api_router.include_router(entitlements.router, prefix="/entitlements", tags=["en
 api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 api_router.include_router(plans.router, prefix="/plans", tags=["plans"])
+api_router.include_router(workout_plans.router, prefix="/workout-plans", tags=["workout-plans"])
+api_router.include_router(workout_logs.router, prefix="/workout-logs", tags=["workout-logs"])
