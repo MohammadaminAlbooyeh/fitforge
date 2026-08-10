@@ -7,12 +7,13 @@ type Props = {
   title?: string;
   subtitle?: string;
   onPress?: () => void;
+  style?: object;
   children?: React.ReactNode;
 };
 
-export function Card({ title, subtitle, onPress, children }: Props) {
+export function Card({ title, subtitle, onPress, style, children }: Props) {
   const content = (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       {title && <Text style={styles.title}>{title}</Text>}
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
       {children}
@@ -20,7 +21,11 @@ export function Card({ title, subtitle, onPress, children }: Props) {
   );
 
   if (onPress) {
-    return <Pressable onPress={onPress}>{content}</Pressable>;
+    return (
+      <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
+        {content}
+      </Pressable>
+    );
   }
   return content;
 }
@@ -28,10 +33,16 @@ export function Card({ title, subtitle, onPress, children }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.colors.card,
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.lg,
     padding: theme.spacing.md,
     gap: theme.spacing.xs,
+    shadowColor: '#3A2E6B',
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
-  title: { color: theme.colors.text, fontSize: 18, fontWeight: '600' },
-  subtitle: { color: theme.colors.muted, fontSize: 14 },
+  pressed: { opacity: 0.85 },
+  title: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
+  subtitle: { color: theme.colors.muted, fontSize: 13 },
 });

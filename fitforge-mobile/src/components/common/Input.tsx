@@ -17,9 +17,9 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: theme.colors.card,
     color: theme.colors.text,
-    borderRadius: theme.radius.md,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.md,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: 14,
     borderWidth: 1,
     borderColor: theme.colors.border,
   },

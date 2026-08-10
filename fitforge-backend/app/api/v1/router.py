@@ -7,6 +7,7 @@ from app.api.v1 import (
     exercises,
     notifications,
     nutrition,
+    plans,
     subscriptions,
     users,
     workouts,
@@ -24,3 +25,4 @@ api_router.include_router(notifications.router, prefix="/notifications", tags=["
 api_router.include_router(entitlements.router, prefix="/entitlements", tags=["entitlements"])
 api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+api_router.include_router(plans.router, prefix="/plans", tags=["plans"])

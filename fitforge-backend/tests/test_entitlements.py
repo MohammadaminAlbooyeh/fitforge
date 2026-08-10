@@ -3,9 +3,40 @@ def test_get_my_entitlements_returns_503_when_subscription_service_unavailable(c
     assert resp.status_code == 503
 
 
-def test_get_my_entitlements_requires_auth(client):
-    resp = client.get("/api/v1/entitlements/me")
+def test_daily_plan_requires_auth(client):
+    resp = client.get("/api/v1/plans/daily")
     assert resp.status_code == 401
+
+
+def test_daily_plan_returns_todays_plan(client, auth_headers):
+    resp = client.get("/api/v1/plans/daily", headers=auth_headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert 1 <= data["day"] <= 7
+    assert data["weekday"]
+    assert data["title"]
+    assert isinstance(data["exercises"], list)
+    assert len(data["exercises"]) > 0
+    first = data["exercises"][0]
+    assert first["name"]
+    assert first["muscle_group"]
+    assert first["sets"] >= 1
+    assert first["reps"]
+
+
+def test_daily_plan_offset_shifts_day(client, auth_headers):
+    a = client.get("/api/v1/plans/daily", headers=auth_headers).json()
+    b = client.get("/api/v1/plans/daily?offset=1", headers=auth_headers).json()
+    assert a["day"] != b["day"]
+    assert (a["day"] % 7) + 1 == b["day"]
+
+
+def test_week_returns_seven_days(client, auth_headers):
+    resp = client.get("/api/v1/plans/week", headers=auth_headers)
+    assert resp.status_code == 200
+    days = resp.json()
+    assert len(days) == 7
+    assert {d["day"] for d in days} == set(range(1, 8))
 
 
 def test_pro_analytics_blocked_for_free_user(monkeypatch, client, auth_headers):

@@ -12,11 +12,13 @@ export function WorkoutListScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>My Workouts</Text>
       <FlatList
         data={workouts}
         keyExtractor={(item) => String(item.id)}
         onRefresh={refresh}
         refreshing={loading}
+        contentContainerStyle={styles.list}
         ListEmptyComponent={
           <Text style={styles.empty}>
             {loading ? 'Loading...' : 'No workouts yet. Create your first one!'}
@@ -29,6 +31,12 @@ export function WorkoutListScreen({ navigation }: any) {
             onPress={() => navigation.navigate('WorkoutDetail', { workoutId: item.id })}
           />
         )}
+        ItemSeparatorComponent={() => <View style={{ height: theme.spacing.sm }} />}
+      />
+      <Button
+        title="Today's plan"
+        variant="ghost"
+        onPress={() => navigation.getParent()?.navigate('DailyPlan')}
       />
       <Button
         title="New workout"
@@ -45,6 +53,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     gap: theme.spacing.md,
   },
+  title: { color: theme.colors.text, fontSize: 22, fontWeight: '800' },
+  list: { paddingBottom: theme.spacing.md },
   empty: {
     color: theme.colors.muted,
     textAlign: 'center',

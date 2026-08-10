@@ -89,6 +89,20 @@ free users), e.g. `GET /api/v1/analytics/summary`. The RevenueCat SDK fires webh
 store purchases; the backend `POST /api/v1/subscriptions/purchase|cancel` routes let the app
 apply/reflect changes immediately.
 
+## Daily workout plans
+
+The app suggests a free 5-day training split (Hevy's Bro Split — Chest / Back / Shoulders &
+Traps / Legs & Abs / Arms, Monday–Friday, with the weekend as rest) through the backend:
+
+- `GET /api/v1/plans/daily?offset=0` — today's plan (offset 0–6 shifts days)
+- `GET /api/v1/plans/week` — all seven days
+
+The plan data lives in `fitforge-backend/app/services/workout_plan_service.py` as plain
+structured data, so it is trivial to customize or replace. It is surfaced in the mobile app on
+the **Exercise** screen.
+
+Source: [Hevy's free 5-Day Bro Split guide](https://www.hevyapp.com/bro-split-workout-program-guide/).
+
 ## Full stack with Docker
 
 ```bash

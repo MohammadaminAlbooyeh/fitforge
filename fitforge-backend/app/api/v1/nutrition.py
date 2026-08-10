@@ -24,6 +24,11 @@ def summary_for_day(day: date, db: DbSession, current: CurrentUser):
     return nutrition_service.daily_summary(db, current.user_id, day)
 
 
+@router.get("/day/entries", response_model=list[NutritionLogRead])
+def entries_for_day(day: date, db: DbSession, current: CurrentUser):
+    return nutrition_service.list_for_day(db, current.user_id, day)
+
+
 @router.get("/{entry_id}", response_model=NutritionLogRead)
 def get_entry(entry_id: int, db: DbSession, current: CurrentUser):
     return nutrition_service.get_entry(db, current.user_id, entry_id)

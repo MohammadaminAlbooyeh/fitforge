@@ -20,8 +20,9 @@ export function ProgressChart() {
         chartConfig={{
           backgroundGradientFrom: theme.colors.card,
           backgroundGradientTo: theme.colors.card,
-          color: (opacity = 1) => `rgba(255, 51, 102, ${opacity})`,
+          color: (opacity = 1) => `rgba(124, 92, 252, ${opacity})`,
           labelColor: () => theme.colors.muted,
+          decimalPlaces: 1,
         }}
         bezier
       />

@@ -9,6 +9,8 @@ import type {
   DailyNutritionSummaryContract,
   SubscriptionPlanContract,
   EntitlementsContract,
+  PlanExerciseContract,
+  DailyWorkoutPlanContract,
 } from '../../../shared/types/api-contracts';
 
 export type User = UserContract;
@@ -19,6 +21,8 @@ export type NutritionLog = NutritionLogContract;
 export type DailyNutritionSummary = DailyNutritionSummaryContract;
 export type SubscriptionPlan = SubscriptionPlanContract;
 export type Entitlements = EntitlementsContract;
+export type PlanExercise = PlanExerciseContract;
+export type DailyWorkoutPlan = DailyWorkoutPlanContract;
 export type WorkoutSessionSetInput = WorkoutSessionSetContract;
 export type WorkoutSession = WorkoutSessionContract;
 

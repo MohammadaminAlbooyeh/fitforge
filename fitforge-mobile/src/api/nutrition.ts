@@ -13,6 +13,13 @@ export async function getDailySummary(day: string): Promise<DailyNutritionSummar
   return data;
 }
 
+export async function getEntriesForDay(day: string): Promise<NutritionLog[]> {
+  const { data } = await api.get<NutritionLog[]>('/nutrition/day/entries', {
+    params: { day },
+  });
+  return data;
+}
+
 export async function getNutritionLog(id: number): Promise<NutritionLog> {
   const { data } = await api.get<NutritionLog>(`/nutrition/${id}`);
   return data;

@@ -27,6 +27,6 @@ export function WorkoutDetailScreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: theme.spacing.md, gap: theme.spacing.md },
-  title: { color: theme.colors.text, fontSize: 24, fontWeight: 'bold' },
+  content: { padding: theme.spacing.md, gap: theme.spacing.md, paddingBottom: 120 },
+  title: { color: theme.colors.text, fontSize: 24, fontWeight: '800' },
 });

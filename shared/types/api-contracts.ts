@@ -95,3 +95,23 @@ export interface WebhookPayloadContract {
   expirationAtMs?: number;
   purchasedAtMs?: number;
 }
+
+// ---- Daily workout plans (FastAPI /plans) ----
+
+export interface PlanExerciseContract {
+  name: string;
+  muscle_group: string;
+  sets: number;
+  reps: string;
+  rest_seconds: number;
+}
+
+export interface DailyWorkoutPlanContract {
+  day: number;
+  weekday: string;
+  title: string;
+  focus: string;
+  rest: boolean;
+  duration_minutes: number;
+  exercises: PlanExerciseContract[];
+}

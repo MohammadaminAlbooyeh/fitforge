@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { Card } from '@/components/common/Card';
 import { createNutritionLog } from '@/api/nutrition';
 import { toISODate } from '@/utils/formatters';
 import { theme } from '@/constants/theme';
@@ -42,13 +43,43 @@ export function NutritionEntryScreen({ navigation }: any) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Add food entry</Text>
-      <Input placeholder="YYYY-MM-DD" value={logDate} onChangeText={setLogDate} />
-      <Input placeholder="Meal" value={meal} onChangeText={setMeal} />
-      <Input placeholder="Food item" value={foodItem} onChangeText={setFoodItem} />
-      <Input placeholder="Calories" keyboardType="numeric" value={calories} onChangeText={setCalories} />
-      <Input placeholder="Protein (g)" keyboardType="numeric" value={protein} onChangeText={setProtein} />
-      <Input placeholder="Carbs (g)" keyboardType="numeric" value={carbs} onChangeText={setCarbs} />
-      <Input placeholder="Fat (g)" keyboardType="numeric" value={fat} onChangeText={setFat} />
+      <Card style={styles.formCard}>
+        <Input placeholder="YYYY-MM-DD" value={logDate} onChangeText={setLogDate} />
+        <Input placeholder="Meal (breakfast, lunch, dinner…)" value={meal} onChangeText={setMeal} />
+        <Input placeholder="Food item" value={foodItem} onChangeText={setFoodItem} />
+        <View style={styles.row}>
+          <Input
+            style={styles.half}
+            placeholder="Calories"
+            keyboardType="numeric"
+            value={calories}
+            onChangeText={setCalories}
+          />
+          <Input
+            style={styles.half}
+            placeholder="Protein (g)"
+            keyboardType="numeric"
+            value={protein}
+            onChangeText={setProtein}
+          />
+        </View>
+        <View style={styles.row}>
+          <Input
+            style={styles.half}
+            placeholder="Carbs (g)"
+            keyboardType="numeric"
+            value={carbs}
+            onChangeText={setCarbs}
+          />
+          <Input
+            style={styles.half}
+            placeholder="Fat (g)"
+            keyboardType="numeric"
+            value={fat}
+            onChangeText={setFat}
+          />
+        </View>
+      </Card>
       {error && <Text style={styles.error}>{error}</Text>}
       <Button title="Save entry" onPress={handleSave} loading={saving} />
     </ScrollView>
@@ -58,6 +89,9 @@ export function NutritionEntryScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   content: { padding: theme.spacing.md, gap: theme.spacing.md },
-  title: { color: theme.colors.text, fontSize: 24, fontWeight: 'bold' },
+  title: { color: theme.colors.text, fontSize: 24, fontWeight: '800' },
+  formCard: { gap: theme.spacing.sm },
+  row: { flexDirection: 'row', gap: theme.spacing.sm },
+  half: { flex: 1 },
   error: { color: theme.colors.danger },
 });

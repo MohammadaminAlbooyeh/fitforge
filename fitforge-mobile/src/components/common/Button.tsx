@@ -8,7 +8,7 @@ type Props = {
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-  variant?: 'primary' | 'ghost';
+  variant?: 'primary' | 'ghost' | 'accent';
 };
 
 export function Button({ title, onPress, loading, disabled, variant = 'primary' }: Props) {
@@ -21,12 +21,12 @@ export function Button({ title, onPress, loading, disabled, variant = 'primary' 
       disabled={isDisabled}
       style={[
         styles.base,
-        isGhost ? styles.ghost : styles.primary,
+        isGhost ? styles.ghost : variant === 'accent' ? styles.accent : styles.primary,
         isDisabled && styles.disabled,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={theme.colors.text} />
+        <ActivityIndicator color={isGhost ? theme.colors.primary : '#FFFFFF'} />
       ) : (
         <Text style={[styles.label, isGhost && styles.ghostLabel]}>{title}</Text>
       )}
@@ -36,14 +36,15 @@ export function Button({ title, onPress, loading, disabled, variant = 'primary' 
 
 const styles = StyleSheet.create({
   base: {
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.radius.md,
+    paddingVertical: 16,
+    borderRadius: theme.radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primary: { backgroundColor: theme.colors.primary },
+  accent: { backgroundColor: theme.colors.accent },
   ghost: { backgroundColor: 'transparent' },
   disabled: { opacity: 0.5 },
-  label: { color: theme.colors.text, fontSize: 16, fontWeight: '600' },
+  label: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   ghostLabel: { color: theme.colors.primary },
 });

@@ -30,6 +30,18 @@ def test_daily_summary(client, auth_headers):
     assert body["total_protein_g"] == 65
 
 
+def test_entries_for_day(client, auth_headers):
+    _log(client, auth_headers, meal="lunch")
+    _log(client, auth_headers, food_item="Protein shake", meal="snack")
+    _log(client, auth_headers, log_date="2026-08-11", food_item="Other day")
+
+    resp = client.get("/api/v1/nutrition/day/entries?day=2026-08-10", headers=auth_headers)
+    assert resp.status_code == 200
+    items = resp.json()
+    assert len(items) == 2
+    assert {item["food_item"] for item in items} == {"Chicken salad", "Protein shake"}
+
+
 def test_update_entry(client, auth_headers):
     entry = _log(client, auth_headers, food_item="Salad").json()
     resp = client.patch(
