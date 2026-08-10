@@ -6,13 +6,14 @@ import { theme } from '@/constants/theme';
 
 type Props = {
   index: number;
+  label?: string;
   onChange: (field: 'weight' | 'reps', value: string) => void;
 };
 
-export function SetLogger({ index, onChange }: Props) {
+export function SetLogger({ index, label, onChange }: Props) {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Set {index + 1}</Text>
+      <Text style={styles.label}>{label ? `${label}` : `Set ${index + 1}`}</Text>
       <Input
         placeholder="Weight (kg)"
         keyboardType="numeric"

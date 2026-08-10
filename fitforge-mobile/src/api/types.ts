@@ -63,6 +63,26 @@ export type WorkoutCreateInput = {
   exercises?: WorkoutExerciseInput[];
 };
 
+export type WorkoutSessionSetInput = {
+  exercise_id: number;
+  weight_kg?: number | null;
+  reps?: number | null;
+};
+
+export type WorkoutSessionCreateInput = {
+  performed_at?: string | null;
+  notes?: string | null;
+  sets?: WorkoutSessionSetInput[];
+};
+
+export type WorkoutSession = {
+  id: number;
+  workout_id: number;
+  performed_at: string;
+  notes?: string | null;
+  sets: WorkoutSessionSetInput[];
+};
+
 export type NutritionLog = {
   id: number;
   log_date: string;

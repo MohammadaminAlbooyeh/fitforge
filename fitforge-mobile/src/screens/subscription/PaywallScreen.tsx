@@ -6,10 +6,10 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { theme } from '@/constants/theme';
 
 export function PaywallScreen({ navigation }: any) {
-  const { isPro, entitlements } = useSubscription();
+  const { isPro, entitlements, purchase } = useSubscription();
 
   const startPurchase = async () => {
-    // TODO: revenuecat SDK purchase flow, then refresh() to re-check entitlements.
+    await purchase();
   };
 
   return (

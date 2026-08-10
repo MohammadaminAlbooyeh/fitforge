@@ -7,3 +7,7 @@ class EntitlementsResponse(BaseModel):
     status: str | None = None
     storeProductId: str | None = None
     currentPeriodEnd: str | None = None
+
+
+class PurchaseRequest(BaseModel):
+    productId: str | None = None

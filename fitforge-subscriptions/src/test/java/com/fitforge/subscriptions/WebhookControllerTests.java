@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -42,6 +43,7 @@ class WebhookControllerTests {
         pro.setPlan(Plan.PRO);
         pro.setStatus(Subscription.Status.ACTIVE);
         when(subscriptionService.findByUser(1L)).thenReturn(Optional.of(pro));
+        when(subscriptionService.save(any())).thenAnswer(inv -> inv.getArgument(0));
     }
 
     @Test
@@ -71,5 +73,22 @@ class WebhookControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"appUserId\":\"42\"}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void purchaseUpgradesToPro() throws Exception {
+        mockMvc.perform(post("/entitlements/1/purchase")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"productId\":\"fitforge_pro\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.plan").value("PRO"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
+
+    @Test
+    void cancelMarksSubscriptionCancelled() throws Exception {
+        mockMvc.perform(post("/entitlements/1/cancel"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"));
     }
 }

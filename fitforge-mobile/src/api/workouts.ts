@@ -1,5 +1,5 @@
 import { api } from './client';
-import { Workout, WorkoutCreateInput } from './types';
+import { Workout, WorkoutCreateInput, WorkoutSession, WorkoutSessionCreateInput } from './types';
 
 export async function listWorkouts(): Promise<Workout[]> {
   const { data } = await api.get<Workout[]>('/workouts/');
@@ -18,4 +18,12 @@ export async function createWorkout(input: WorkoutCreateInput): Promise<Workout>
 
 export async function deleteWorkout(id: number): Promise<void> {
   await api.delete(`/workouts/${id}`);
+}
+
+export async function createWorkoutSession(
+  workoutId: number,
+  input: WorkoutSessionCreateInput
+): Promise<WorkoutSession> {
+  const { data } = await api.post<WorkoutSession>(`/workouts/${workoutId}/sessions`, input);
+  return data;
 }

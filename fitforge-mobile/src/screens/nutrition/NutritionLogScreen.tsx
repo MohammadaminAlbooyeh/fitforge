@@ -4,10 +4,10 @@ import { StyleSheet, View } from 'react-native';
 import { Button } from '@/components/common/Button';
 import { theme } from '@/constants/theme';
 
-export function NutritionLogScreen() {
+export function NutritionLogScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
-      <Button title="Add food entry" onPress={() => {}} />
+      <Button title="Add food entry" onPress={() => navigation.navigate('NutritionEntry')} />
     </View>
   );
 }

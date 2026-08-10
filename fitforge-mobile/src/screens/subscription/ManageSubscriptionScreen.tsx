@@ -7,10 +7,10 @@ import { theme } from '@/constants/theme';
 import { formatDate } from '@/utils/formatters';
 
 export function ManageSubscriptionScreen({ navigation }: any) {
-  const { entitlements, isPro } = useSubscription();
+  const { entitlements, isPro, cancel } = useSubscription();
 
   const disableAutoRenew = async () => {
-    // TODO: revenuecat SDK -> restore/refund or server-side cancel via webhook.
+    await cancel();
   };
 
   return (

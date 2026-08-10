@@ -30,7 +30,10 @@ export function WorkoutListScreen({ navigation }: any) {
           />
         )}
       />
-      <Button title="New workout" onPress={() => navigation.navigate('LogSession', { workoutId: 0 })} />
+      <Button
+        title="New workout"
+        onPress={() => navigation.getParent()?.navigate('WorkoutEditor')}
+      />
     </View>
   );
 }

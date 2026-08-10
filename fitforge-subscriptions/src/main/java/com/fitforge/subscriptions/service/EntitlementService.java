@@ -1,6 +1,7 @@
 package com.fitforge.subscriptions.service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import com.fitforge.subscriptions.dto.WebhookPayload;
 import com.fitforge.subscriptions.model.Plan;
@@ -27,6 +28,29 @@ public class EntitlementService {
         Subscription subscription = getOrCreateEntitlement(userId);
         return subscription.getPlan() == Plan.PRO
                 && subscription.getStatus() == Subscription.Status.ACTIVE;
+    }
+
+    @Transactional
+    public Subscription purchase(Long userId, String productId) {
+        Subscription subscription = getOrCreateEntitlement(userId);
+        Instant now = Instant.now();
+        if (subscription.getCreatedAt() == null) {
+            subscription.setCreatedAt(now);
+        }
+        subscription.setUpdatedAt(now);
+        subscription.setPlan(Plan.PRO);
+        subscription.setStatus(Subscription.Status.ACTIVE);
+        subscription.setStoreProductId(productId);
+        subscription.setCurrentPeriodEnd(now.plus(30, ChronoUnit.DAYS));
+        return subscriptionService.save(subscription);
+    }
+
+    @Transactional
+    public Subscription cancel(Long userId) {
+        Subscription subscription = getOrCreateEntitlement(userId);
+        subscription.setStatus(Subscription.Status.CANCELLED);
+        subscription.setUpdatedAt(Instant.now());
+        return subscriptionService.save(subscription);
     }
 
     @Transactional

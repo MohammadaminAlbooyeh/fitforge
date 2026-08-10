@@ -1,6 +1,7 @@
 package com.fitforge.subscriptions;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -62,6 +63,39 @@ class SubscriptionServiceTests {
 
         when(repository.findByUserId(7L)).thenReturn(Optional.of(pro));
 
+        assertThat(entitlementService.isPro(7L)).isFalse();
+    }
+
+    @Test
+    void purchaseGrantsActiveProSubscription() {
+        Subscription free = new Subscription();
+        free.setUserId(7L);
+        free.setPlan(Plan.FREE);
+        free.setStatus(Subscription.Status.ACTIVE);
+        when(repository.findByUserId(7L)).thenReturn(Optional.of(free));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Subscription subscription = entitlementService.purchase(7L, "fitforge_pro");
+
+        assertThat(subscription.getPlan()).isEqualTo(Plan.PRO);
+        assertThat(subscription.getStatus()).isEqualTo(Subscription.Status.ACTIVE);
+        assertThat(subscription.getStoreProductId()).isEqualTo("fitforge_pro");
+        assertThat(subscription.getCurrentPeriodEnd()).isNotNull();
+        assertThat(entitlementService.isPro(7L)).isTrue();
+    }
+
+    @Test
+    void cancelMarksProSubscriptionCancelled() {
+        Subscription pro = new Subscription();
+        pro.setUserId(7L);
+        pro.setPlan(Plan.PRO);
+        pro.setStatus(Subscription.Status.ACTIVE);
+        when(repository.findByUserId(7L)).thenReturn(Optional.of(pro));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Subscription subscription = entitlementService.cancel(7L);
+
+        assertThat(subscription.getStatus()).isEqualTo(Subscription.Status.CANCELLED);
         assertThat(entitlementService.isPro(7L)).isFalse();
     }
 }

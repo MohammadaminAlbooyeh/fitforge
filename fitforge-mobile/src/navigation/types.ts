@@ -7,6 +7,7 @@ export type WorkoutStackParamList = {
   WorkoutList: undefined;
   WorkoutDetail: { workoutId: number };
   LogSession: { workoutId: number };
+  WorkoutEditor: { workoutId?: number } | undefined;
 };
 
 export type MainTabsParamList = {
@@ -20,6 +21,9 @@ export type RootStackParamList = {
   MainTabs: undefined;
   Paywall: undefined;
   ManageSubscription: undefined;
+  WorkoutEditor: { workoutId?: number } | undefined;
+  WorkoutDetail: { workoutId: number };
+  LogSession: { workoutId: number };
 };
 
 export type RootParamList = {

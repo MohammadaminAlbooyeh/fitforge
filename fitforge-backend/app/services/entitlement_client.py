@@ -2,6 +2,7 @@ import httpx
 from datetime import datetime, timezone
 
 from app.config import get_settings
+from app.core.exceptions import UpstreamServiceError
 
 
 class Entitlements:
@@ -59,3 +60,25 @@ def get_entitlement_plan(user_id: int) -> str:
 
 def is_pro(user_id: int) -> bool:
     return get_entitlements(user_id).is_pro
+
+
+def purchase(user_id: int, product_id: str | None = None) -> None:
+    _call_subscription("POST", f"/entitlements/{user_id}/purchase", {"productId": product_id})
+
+
+def cancel(user_id: int) -> None:
+    _call_subscription("POST", f"/entitlements/{user_id}/cancel")
+
+
+def _call_subscription(method: str, path: str, payload: dict | None = None) -> None:
+    settings = get_settings()
+    try:
+        response = httpx.request(
+            method,
+            f"{settings.SUBSCRIPTION_SERVICE_URL}{path}",
+            json=payload,
+            timeout=settings.ENTITLEMENTS_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+    except httpx.HTTPError:
+        raise UpstreamServiceError("Subscription service unavailable")

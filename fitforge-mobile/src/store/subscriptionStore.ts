@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { fetchEntitlements } from '@/api/subscriptions';
+import { cancelPlan, fetchEntitlements, purchasePlan } from '@/api/subscriptions';
 import { Entitlements } from '@/api/types';
 
 type SubscriptionState = {
@@ -8,7 +8,9 @@ type SubscriptionState = {
   loading: boolean;
   error: string | null;
   isPro: boolean;
-  refresh: (userId: number) => Promise<void>;
+  refresh: () => Promise<void>;
+  purchase: () => Promise<void>;
+  cancel: () => Promise<void>;
   setEntitlements: (entitlements: Entitlements | null) => void;
 };
 
@@ -22,13 +24,33 @@ export const useSubscriptionStore = create<SubscriptionState>((set) => ({
   error: null,
   isPro: false,
 
-  refresh: async (userId) => {
+  refresh: async () => {
     set({ loading: true, error: null });
     try {
-      const entitlements = await fetchEntitlements(userId);
+      const entitlements = await fetchEntitlements();
       set({ entitlements, loading: false, isPro: isPro(entitlements) });
     } catch (e: any) {
       set({ error: e.message ?? 'Failed to load entitlements', loading: false });
+    }
+  },
+
+  purchase: async () => {
+    set({ loading: true, error: null });
+    try {
+      const entitlements = await purchasePlan();
+      set({ entitlements, loading: false, isPro: isPro(entitlements) });
+    } catch (e: any) {
+      set({ error: e.message ?? 'Purchase failed', loading: false });
+    }
+  },
+
+  cancel: async () => {
+    set({ loading: true, error: null });
+    try {
+      const entitlements = await cancelPlan();
+      set({ entitlements, loading: false, isPro: isPro(entitlements) });
+    } catch (e: any) {
+      set({ error: e.message ?? 'Cancel failed', loading: false });
     }
   },
 
