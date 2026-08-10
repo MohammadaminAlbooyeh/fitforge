@@ -1,24 +1,101 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { Avatar } from '@/components/common/Avatar';
 import { Card } from '@/components/common/Card';
+import { Button } from '@/components/common/Button';
 import { useAuth } from '@/hooks/useAuth';
-import { useDailyPlan } from '@/hooks/useDailyPlan';
+import { useWorkoutPlan } from '@/hooks/useWorkoutPlan';
+import { createWorkoutLog } from '@/api/workoutLogs';
+import { PlanDayExercise } from '@/api/types';
 import { theme } from '@/constants/theme';
-import { PlanExercise } from '@/api/types';
 
-const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+function midpointReps(repsRange: string): number {
+  const [lo, hi] = repsRange.split('-').map((n) => parseInt(n, 10));
+  if (Number.isFinite(lo) && Number.isFinite(hi)) return Math.round((lo + hi) / 2);
+  return Number.isFinite(lo) ? lo : 10;
+}
 
 export function DailyPlanScreen({ navigation }: any) {
   const { user } = useAuth();
-  const [offset, setOffset] = useState(0);
-  const { plan, loading, error } = useDailyPlan(offset);
+  const { plan, loading, error, reload } = useWorkoutPlan();
+  const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [logging, setLogging] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      reload();
+    }, [reload])
+  );
+
+  const selectedDay = useMemo(() => {
+    if (!plan) return null;
+    return plan.plan_days.find((d) => d.id === selectedDayId) ?? plan.plan_days[0] ?? null;
+  }, [plan, selectedDayId]);
 
   const doneCount = Object.values(checked).filter(Boolean).length;
-  const total = plan?.exercises.length ?? 0;
+  const total = selectedDay?.plan_day_exercises.length ?? 0;
+
+  const handleLogSession = async () => {
+    if (!selectedDay) return;
+    const doneExercises = selectedDay.plan_day_exercises.filter(
+      (pde) => checked[String(pde.id)]
+    );
+    if (doneExercises.length === 0) {
+      Alert.alert('Nothing checked off', 'Check off the exercises you completed first.');
+      return;
+    }
+    setLogging(true);
+    try {
+      await createWorkoutLog({
+        plan_day_id: selectedDay.id,
+        status: doneExercises.length === total ? 'completed' : 'partial',
+        sets: doneExercises.map((pde) => ({
+          exercise_id: pde.exercise.id,
+          reps: midpointReps(pde.reps_range),
+          set_number: 1,
+        })),
+      });
+      setChecked({});
+      Alert.alert('Session logged', 'Nice work — this session was added to your history.');
+    } catch (e: any) {
+      Alert.alert('Could not log session', e?.message ?? 'Something went wrong.');
+    } finally {
+      setLogging(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.muted}>Loading your plan…</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.muted}>{error}</Text>
+        <Button title="Retry" variant="ghost" onPress={reload} />
+      </View>
+    );
+  }
+
+  if (!plan) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.title}>No plan yet</Text>
+        <Text style={styles.muted}>
+          Answer a few questions and we'll build a split around your schedule and equipment.
+        </Text>
+        <Button title="Build my plan" onPress={() => navigation.navigate('GeneratePlan')} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -28,16 +105,15 @@ export function DailyPlanScreen({ navigation }: any) {
         <Avatar name={user?.full_name} size={32} />
       </View>
 
-      <View style={styles.weekStrip}>
-        {WEEKDAYS.map((label, i) => {
-          const dayOffset = i;
-          const isSelected = dayOffset === offset;
+      <View style={styles.dayStrip}>
+        {plan.plan_days.map((day) => {
+          const isSelected = day.id === (selectedDay?.id ?? plan.plan_days[0].id);
           return (
-            <View key={i} style={styles.dayColumn} onTouchEnd={() => setOffset(dayOffset)}>
-              <Text style={styles.weekdayLabel}>{label}</Text>
+            <View key={day.id} style={styles.dayColumn} onTouchEnd={() => setSelectedDayId(day.id)}>
+              <Text style={styles.dayNumberLabel}>Day {day.day_number}</Text>
               <View style={[styles.dayCircle, isSelected && styles.dayCircleActive]}>
-                <Text style={[styles.dayNumber, isSelected && styles.dayNumberActive]}>
-                  {isSelected && plan ? plan.day : dayOffset + 1}
+                <Text style={[styles.dayTitleShort, isSelected && styles.dayTitleShortActive]}>
+                  {day.title.slice(0, 2).toUpperCase()}
                 </Text>
               </View>
             </View>
@@ -45,11 +121,7 @@ export function DailyPlanScreen({ navigation }: any) {
         })}
       </View>
 
-      {error && <Text style={styles.error}>{error}</Text>}
-
-      {loading || !plan ? (
-        <Text style={styles.muted}>Loading…</Text>
-      ) : (
+      {selectedDay && (
         <>
           <View style={styles.progressRow}>
             <Text style={styles.progressLabel}>
@@ -57,31 +129,20 @@ export function DailyPlanScreen({ navigation }: any) {
             </Text>
           </View>
           <View style={styles.progressTrack}>
-            <View
-              style={[styles.progressFill, { width: `${total ? (doneCount / total) * 100 : 0}%` }]}
-            />
+            <View style={[styles.progressFill, { width: `${total ? (doneCount / total) * 100 : 0}%` }]} />
           </View>
 
-          <Text style={styles.planTitle}>{plan.title}</Text>
+          <Text style={styles.planTitle}>{selectedDay.title}</Text>
+          <Text style={styles.planMeta}>
+            {plan.split_type.replace(/_/g, ' ')} · {plan.days_per_week} days/week
+          </Text>
 
-          <View style={styles.metaRow}>
-            <MetaStat label="Calories" value={`${plan.duration_minutes * 8} cal`} />
-            <MetaStat label="Time" value={`${plan.duration_minutes} mins`} />
-            <MetaStat label="Level" value={plan.rest ? 'Rest' : 'Medium'} />
-          </View>
-
-          <View style={styles.roundHeader}>
-            <Text style={styles.roundTitle}>Round 1</Text>
-            <Text style={styles.roundSubtitle}>{plan.focus}</Text>
-          </View>
-
-          {plan.exercises.map((exercise: PlanExercise, index: number) => {
-            const key = `${exercise.name}-${index}`;
-            const isDone = !!checked[key];
+          {selectedDay.plan_day_exercises.map((pde: PlanDayExercise) => {
+            const isDone = !!checked[String(pde.id)];
             return (
               <Card
-                key={key}
-                onPress={() => setChecked((prev) => ({ ...prev, [key]: !prev[key] }))}
+                key={pde.id}
+                onPress={() => setChecked((prev) => ({ ...prev, [String(pde.id)]: !prev[String(pde.id)] }))}
                 style={styles.exerciseRow}
               >
                 <View style={[styles.checkCircle, isDone && styles.checkCircleDone]}>
@@ -91,55 +152,60 @@ export function DailyPlanScreen({ navigation }: any) {
                   <Ionicons name="body-outline" size={20} color={theme.colors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.exerciseName}>{exercise.name}</Text>
+                  <Text style={styles.exerciseName}>{pde.exercise.name}</Text>
                   <Text style={styles.exerciseMeta}>
-                    {exercise.sets} sets · {exercise.reps} reps
-                    {exercise.rest_seconds > 0 ? ` · rest ${exercise.rest_seconds}s` : ''}
+                    {pde.sets} sets · {pde.reps_range} reps · rest {pde.rest_seconds}s
+                  </Text>
+                  <Text style={styles.exerciseSub}>
+                    {pde.exercise.muscle_group} · {pde.exercise.equipment}
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color={theme.colors.muted} />
               </Card>
             );
           })}
+
+          <Button title="Log this session" onPress={handleLogSession} loading={logging} variant="accent" />
+          <Button title="Rebuild plan" variant="ghost" onPress={() => navigation.navigate('GeneratePlan')} />
         </>
       )}
     </ScrollView>
   );
 }
 
-function MetaStat({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.metaStat}>
-      <Text style={styles.metaValue}>{value}</Text>
-      <Text style={styles.metaLabel}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   content: { padding: theme.spacing.md, gap: theme.spacing.md, paddingBottom: 60 },
+  centered: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.spacing.lg,
+    gap: theme.spacing.md,
+  },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { color: theme.colors.text, fontSize: 20, fontWeight: '800' },
-  weekStrip: { flexDirection: 'row', justifyContent: 'space-between' },
+  dayStrip: { flexDirection: 'row', gap: theme.spacing.sm, flexWrap: 'wrap' },
   dayColumn: { alignItems: 'center', gap: 6 },
-  weekdayLabel: { color: theme.colors.muted, fontSize: 12 },
-  dayCircle: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  dayNumberLabel: { color: theme.colors.muted, fontSize: 11 },
+  dayCircle: {
+    minWidth: 40,
+    height: 40,
+    paddingHorizontal: 8,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.card,
+  },
   dayCircleActive: { backgroundColor: theme.colors.primary },
-  dayNumber: { color: theme.colors.text, fontSize: 13, fontWeight: '600' },
-  dayNumberActive: { color: '#FFFFFF' },
+  dayTitleShort: { color: theme.colors.text, fontSize: 12, fontWeight: '700' },
+  dayTitleShortActive: { color: '#FFFFFF' },
   progressRow: { flexDirection: 'row', justifyContent: 'space-between' },
   progressLabel: { color: theme.colors.text, fontSize: 13, fontWeight: '700' },
   progressTrack: { height: 6, borderRadius: 3, backgroundColor: theme.colors.border, overflow: 'hidden' },
   progressFill: { height: 6, backgroundColor: theme.colors.accent },
   planTitle: { color: theme.colors.text, fontSize: 24, fontWeight: '800' },
-  metaRow: { flexDirection: 'row', gap: theme.spacing.lg },
-  metaStat: { gap: 2 },
-  metaValue: { color: theme.colors.text, fontSize: 14, fontWeight: '700' },
-  metaLabel: { color: theme.colors.muted, fontSize: 11 },
-  roundHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  roundTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
-  roundSubtitle: { color: theme.colors.muted, fontSize: 12 },
+  planMeta: { color: theme.colors.muted, fontSize: 12, textTransform: 'capitalize' },
   exerciseRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm },
   checkCircle: {
     width: 22,
@@ -161,6 +227,6 @@ const styles = StyleSheet.create({
   },
   exerciseName: { color: theme.colors.text, fontSize: 14, fontWeight: '700' },
   exerciseMeta: { color: theme.colors.muted, fontSize: 12 },
-  muted: { color: theme.colors.muted, textAlign: 'center', marginTop: theme.spacing.lg },
-  error: { color: theme.colors.danger },
+  exerciseSub: { color: theme.colors.muted, fontSize: 11, textTransform: 'capitalize' },
+  muted: { color: theme.colors.muted, textAlign: 'center' },
 });

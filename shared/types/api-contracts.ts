@@ -11,6 +11,9 @@ export interface UserContract {
   height_cm?: number | null;
   weight_kg?: number | null;
   goal?: string | null;
+  experience_level?: string | null;
+  available_days_per_week?: number | null;
+  available_equipment?: string[] | null;
 }
 
 export interface AuthResponseContract {
@@ -114,4 +117,79 @@ export interface DailyWorkoutPlanContract {
   rest: boolean;
   duration_minutes: number;
   exercises: PlanExerciseContract[];
+}
+
+// ---- Personalized workout plan engine (FastAPI /workout-plans, /workout-logs) ----
+
+export interface ExerciseLibraryContract {
+  id: number;
+  name: string;
+  muscle_group: string;
+  secondary_muscle_groups?: string[] | null;
+  equipment: string;
+  difficulty: string;
+  movement_role: string;
+  video_url?: string | null;
+  instructions?: string | null;
+  alternative_exercise_id?: number | null;
+}
+
+export interface PlanDayExerciseContract {
+  id: number;
+  exercise: ExerciseLibraryContract;
+  sets: number;
+  reps_range: string;
+  rest_seconds: number;
+  order_index: number;
+}
+
+export interface PlanDayContract {
+  id: number;
+  day_number: number;
+  title: string;
+  weekday?: number | null;
+  plan_day_exercises: PlanDayExerciseContract[];
+}
+
+export interface WorkoutPlanContract {
+  id: number;
+  days_per_week: number;
+  split_type: 'full_body' | 'upper_lower' | 'push_pull_legs';
+  start_date: string;
+  status: 'active' | 'archived';
+  plan_days: PlanDayContract[];
+}
+
+export interface GeneratePlanRequestContract {
+  days_per_week: number;
+}
+
+export interface LogSetInputContract {
+  exercise_id: number;
+  weight_kg?: number | null;
+  reps: number;
+  set_number: number;
+}
+
+export interface LogSetContract {
+  id: number;
+  exercise_id: number;
+  weight_kg?: number | null;
+  reps: number;
+  set_number: number;
+}
+
+export interface WorkoutLogCreateContract {
+  plan_day_id?: number | null;
+  completed_at?: string | null;
+  status?: 'completed' | 'partial';
+  sets: LogSetInputContract[];
+}
+
+export interface WorkoutLogContract {
+  id: number;
+  plan_day_id?: number | null;
+  completed_at: string;
+  status: 'completed' | 'partial';
+  log_sets: LogSetContract[];
 }

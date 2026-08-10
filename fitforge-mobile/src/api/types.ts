@@ -9,8 +9,15 @@ import type {
   DailyNutritionSummaryContract,
   SubscriptionPlanContract,
   EntitlementsContract,
-  PlanExerciseContract,
-  DailyWorkoutPlanContract,
+  ExerciseLibraryContract,
+  PlanDayExerciseContract,
+  PlanDayContract,
+  WorkoutPlanContract,
+  GeneratePlanRequestContract,
+  LogSetInputContract,
+  LogSetContract,
+  WorkoutLogCreateContract,
+  WorkoutLogContract,
 } from '../../../shared/types/api-contracts';
 
 export type User = UserContract;
@@ -21,10 +28,17 @@ export type NutritionLog = NutritionLogContract;
 export type DailyNutritionSummary = DailyNutritionSummaryContract;
 export type SubscriptionPlan = SubscriptionPlanContract;
 export type Entitlements = EntitlementsContract;
-export type PlanExercise = PlanExerciseContract;
-export type DailyWorkoutPlan = DailyWorkoutPlanContract;
 export type WorkoutSessionSetInput = WorkoutSessionSetContract;
 export type WorkoutSession = WorkoutSessionContract;
+export type ExerciseLibraryItem = ExerciseLibraryContract;
+export type PlanDayExercise = PlanDayExerciseContract;
+export type PlanDay = PlanDayContract;
+export type WorkoutPlan = WorkoutPlanContract;
+export type GeneratePlanRequest = GeneratePlanRequestContract;
+export type LogSetInput = LogSetInputContract;
+export type LogSet = LogSetContract;
+export type WorkoutLogCreateInput = WorkoutLogCreateContract;
+export type WorkoutLog = WorkoutLogContract;
 
 export type AuthResponse = {
   access_token: string;
@@ -76,6 +90,9 @@ export type UserUpdateInput = {
   height_cm?: number | null;
   weight_kg?: number | null;
   goal?: string | null;
+  experience_level?: string | null;
+  available_days_per_week?: number | null;
+  available_equipment?: string[] | null;
 };
 
 export type NutritionLogCreateInput = {

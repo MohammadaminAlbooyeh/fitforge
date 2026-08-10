@@ -7,6 +7,7 @@ import { MainTabs } from './MainTabs';
 import { PaywallScreen } from '@/screens/subscription/PaywallScreen';
 import { ManageSubscriptionScreen } from '@/screens/subscription/ManageSubscriptionScreen';
 import { DailyPlanScreen } from '@/screens/plan/DailyPlanScreen';
+import { GeneratePlanScreen } from '@/screens/plan/GeneratePlanScreen';
 import { RootStackParamList } from './types';
 
 type Props = {
@@ -25,6 +26,7 @@ export function RootNavigator({ isAuthenticated }: Props) {
       <Root.Screen name="Paywall" component={PaywallScreen} />
       <Root.Screen name="ManageSubscription" component={ManageSubscriptionScreen} />
       <Root.Screen name="DailyPlan" component={DailyPlanScreen} />
+      <Root.Screen name="GeneratePlan" component={GeneratePlanScreen} />
     </Root.Navigator>
   );
 }

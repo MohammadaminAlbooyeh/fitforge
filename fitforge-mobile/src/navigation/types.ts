@@ -23,6 +23,7 @@ export type RootStackParamList = {
   Paywall: undefined;
   ManageSubscription: undefined;
   DailyPlan: undefined;
+  GeneratePlan: undefined;
   WorkoutEditor: { workoutId?: number } | undefined;
   WorkoutDetail: { workoutId: number };
   LogSession: { workoutId: number };
