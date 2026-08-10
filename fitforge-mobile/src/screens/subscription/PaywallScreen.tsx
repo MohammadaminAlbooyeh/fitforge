@@ -1,15 +1,34 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/common/Button';
+import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
+import { isRevenueCatConfigured, purchaseProOffering } from '@/services/revenuecat';
 import { theme } from '@/constants/theme';
 
 export function PaywallScreen({ navigation }: any) {
   const { isPro, entitlements, purchase } = useSubscription();
+  const { user } = useAuth();
+  const [buying, setBuying] = useState(false);
 
   const startPurchase = async () => {
-    await purchase();
+    setBuying(true);
+    try {
+      // If RevenueCat keys are configured, go through the real store purchase;
+      // otherwise fall back to the backend-only flow (dev/testing).
+      const productId = isRevenueCatConfigured()
+        ? await purchaseProOffering(user?.id)
+        : undefined;
+      await purchase(productId);
+    } catch (e: any) {
+      Alert.alert(
+        'Purchase failed',
+        e?.message ?? 'Something went wrong while purchasing. Please try again.',
+      );
+    } finally {
+      setBuying(false);
+    }
   };
 
   return (
@@ -26,7 +45,7 @@ export function PaywallScreen({ navigation }: any) {
       ) : (
         <>
           <Text style={styles.body}>Current plan: {entitlements?.plan ?? 'FREE'}</Text>
-          <Button title="Subscribe to Pro" onPress={startPurchase} />
+          <Button title="Subscribe to Pro" onPress={startPurchase} disabled={buying} />
           <Button
             title="Not now"
             variant="ghost"

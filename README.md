@@ -6,10 +6,11 @@ Fitness tracking app: workout planning, nutrition logging, and progress analytic
 
 ```
 .
-├── fitforge-backend/   # FastAPI + SQLAlchemy + Celery API
-├── fitforge-mobile/    # React Native (Expo) app
-├── shared/             # Shared API type contracts
-└── .github/            # CI workflows
+├── fitforge-backend/       # FastAPI + SQLAlchemy + Celery API
+├── fitforge-mobile/        # React Native (Expo) app
+├── fitforge-subscriptions/ # Spring Boot billing & entitlement service (port 8081)
+├── shared/                 # Shared API type contracts
+└── .github/                # CI workflows
 ```
 
 ## Backend
@@ -45,7 +46,48 @@ npm install
 npx expo start
 ```
 
-Set `EXPO_PUBLIC_API_URL` in `.env` to point at your backend.
+Set env vars in `.env`:
+
+| Variable | Purpose |
+| --- | --- |
+| `EXPO_PUBLIC_API_URL` | Backend base URL, e.g. `http://localhost:8000/api/v1` |
+| `EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY` | RevenueCat Apple public SDK key (for in-app purchases) |
+| `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY` | RevenueCat Google public SDK key (for in-app purchases) |
+
+### Health data
+
+`useHealthSync` reads Apple HealthKit samples (steps, workouts, heart rate) on iOS via
+`expo-health-kit`. It requires a development build (not Expo Go) and the
+`expo-health-kit` config plugin already declared in `app.config.ts`.
+
+## Subscriptions
+
+`fitforge-subscriptions` is a Spring Boot service that resolves entitlements. The backend
+proxies to it over HTTP.
+
+```bash
+cd fitforge-subscriptions
+mvn spring-boot:run
+```
+
+Set in `fitforge-backend/.env`:
+
+| Variable | Default |
+| --- | --- |
+| `SUBSCRIPTION_SERVICE_URL` | `http://localhost:8081` |
+| `ENTITLEMENTS_TIMEOUT_SECONDS` | `2.0` |
+
+Endpoints:
+
+- `GET  /entitlements/{userId}` — current subscription/entitlement
+- `POST /entitlements/{userId}/purchase` — upgrade to Pro (30-day period)
+- `POST /entitlements/{userId}/cancel` — mark subscription cancelled
+- `POST /webhooks/revenuecat` — RevenueCat webhook (initial purchase/renewal/cancellation/expiration)
+
+Pro-gated routes on the backend use the `RequiresPro` dependency (returns HTTP `402` for
+free users), e.g. `GET /api/v1/analytics/summary`. The RevenueCat SDK fires webhooks for real
+store purchases; the backend `POST /api/v1/subscriptions/purchase|cancel` routes let the app
+apply/reflect changes immediately.
 
 ## Full stack with Docker
 

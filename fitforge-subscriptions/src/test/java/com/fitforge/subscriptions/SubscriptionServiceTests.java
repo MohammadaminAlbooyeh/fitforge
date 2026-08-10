@@ -34,6 +34,7 @@ class SubscriptionServiceTests {
     @Test
     void unknownUserDefaultsToFree() {
         when(repository.findByUserId(42L)).thenReturn(Optional.empty());
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         Subscription subscription = entitlementService.getOrCreateEntitlement(42L);
 

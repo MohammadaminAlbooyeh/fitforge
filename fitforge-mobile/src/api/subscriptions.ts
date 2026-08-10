@@ -6,8 +6,8 @@ export async function fetchEntitlements(): Promise<Entitlements> {
   return data;
 }
 
-export async function purchasePlan(): Promise<Entitlements> {
-  const { data } = await api.post<Entitlements>('/subscriptions/purchase');
+export async function purchasePlan(productId?: string): Promise<Entitlements> {
+  const { data } = await api.post<Entitlements>('/subscriptions/purchase', { productId });
   return data;
 }
 

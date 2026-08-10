@@ -18,6 +18,10 @@ web-build/
 *.tsbuildinfo
 .expo-shared/
 
+# Java / Maven
+fitforge-subscriptions/target/
+*.class
+
 # Native build artifacts
 ios/
 android/

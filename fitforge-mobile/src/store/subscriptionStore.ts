@@ -9,7 +9,7 @@ type SubscriptionState = {
   error: string | null;
   isPro: boolean;
   refresh: () => Promise<void>;
-  purchase: () => Promise<void>;
+  purchase: (productId?: string) => Promise<void>;
   cancel: () => Promise<void>;
   setEntitlements: (entitlements: Entitlements | null) => void;
 };
@@ -34,10 +34,10 @@ export const useSubscriptionStore = create<SubscriptionState>((set) => ({
     }
   },
 
-  purchase: async () => {
+  purchase: async (productId?: string) => {
     set({ loading: true, error: null });
     try {
-      const entitlements = await purchasePlan();
+      const entitlements = await purchasePlan(productId);
       set({ entitlements, loading: false, isPro: isPro(entitlements) });
     } catch (e: any) {
       set({ error: e.message ?? 'Purchase failed', loading: false });
