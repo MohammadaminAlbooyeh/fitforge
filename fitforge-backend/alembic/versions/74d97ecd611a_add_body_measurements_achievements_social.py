@@ -18,9 +18,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    challenge_status_enum = sa.Enum('active', 'completed', name='challengestatus')
     bind = op.get_bind()
-    challenge_status_enum.create(bind, checkfirst=True)
+    bind.execute(sa.text("DO $$ BEGIN CREATE TYPE challengestatus AS ENUM ('active', 'completed'); EXCEPTION WHEN duplicate_object THEN null; END $$"))
 
     op.create_table(
         'body_measurements',
@@ -92,7 +91,7 @@ def upgrade() -> None:
         sa.Column('target_workouts', sa.Integer(), nullable=False, server_default='10'),
         sa.Column('start_date', sa.Date(), nullable=False),
         sa.Column('end_date', sa.Date(), nullable=False),
-        sa.Column('status', challenge_status_enum, nullable=False, server_default='active'),
+        sa.Column('status', sa.String(length=20), nullable=False, server_default='active'),
         sa.ForeignKeyConstraint(['creator_id'], ['users.id']),
         sa.PrimaryKeyConstraint('id'),
     )

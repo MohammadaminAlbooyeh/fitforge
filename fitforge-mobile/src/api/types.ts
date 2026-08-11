@@ -33,6 +33,7 @@ import type {
   BodyTrendContract,
   EnhancedAnalyticsContract,
   AnalyticsSummaryContract,
+  ActivityFeedItemContract,
 } from '../../../shared/types/api-contracts';
 
 export type User = UserContract;
@@ -64,6 +65,7 @@ export type UserPublicProfile = UserPublicProfileContract;
 export type LeaderboardEntry = LeaderboardEntryContract;
 export type Challenge = ChallengeContract;
 export type ChallengeParticipant = ChallengeParticipantContract;
+export type ActivityFeedItem = ActivityFeedItemContract;
 export type WeeklyVolume = WeeklyVolumeContract;
 export type ExerciseProgression = ExerciseProgressionContract;
 export type BodyTrend = BodyTrendContract;

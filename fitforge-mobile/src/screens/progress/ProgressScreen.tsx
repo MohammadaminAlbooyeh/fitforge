@@ -5,10 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { CircularProgress } from '@/components/common/CircularProgress';
 import { Card } from '@/components/common/Card';
 import { ProgressChart } from '@/components/charts/ProgressChart';
+import { WeeklyVolumeChart } from '@/components/charts/WeeklyVolumeChart';
 import { useHealthSync } from '@/hooks/useHealthSync';
 import { useSubscription } from '@/hooks/useSubscription';
 import { fetchAnalyticsSummary } from '@/api/analytics';
-import { AnalyticsSummary } from '@/api/types';
+import { api } from '@/api/client';
+import { AnalyticsSummary, EnhancedAnalytics } from '@/api/types';
 import { theme } from '@/constants/theme';
 
 const STEP_GOAL = 18000;
@@ -17,6 +19,7 @@ export function ProgressScreen({ navigation }: any) {
   const { summary, ready, error } = useHealthSync();
   const { isPro } = useSubscription();
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
+  const [enhanced, setEnhanced] = useState<EnhancedAnalytics | null>(null);
 
   useEffect(() => {
     if (!isPro) return;
@@ -24,6 +27,12 @@ export function ProgressScreen({ navigation }: any) {
       .then(setAnalytics)
       .catch(() => setAnalytics(null));
   }, [isPro]);
+
+  useEffect(() => {
+    api.get('/analytics/enhanced')
+      .then((r) => setEnhanced(r.data))
+      .catch(() => {});
+  }, []);
 
   const stepsProgress = Math.min(1, summary.steps / STEP_GOAL);
 
@@ -73,7 +82,7 @@ export function ProgressScreen({ navigation }: any) {
 
       {isPro && analytics && (
         <Card>
-          <Text style={styles.cardTitle}>Training summary</Text>
+          <Text style={styles.cardTitle}>Training Summary</Text>
           <View style={styles.activityRow}>
             <Metric label="Workouts" value={String(analytics.total_workouts)} />
             <Metric label="Sessions" value={String(analytics.total_sessions)} />
@@ -82,6 +91,17 @@ export function ProgressScreen({ navigation }: any) {
         </Card>
       )}
 
+      {enhanced && (
+        <Card>
+          <Text style={styles.cardTitle}>Streak</Text>
+          <View style={styles.activityRow}>
+            <Metric label="Current" value={`${enhanced.streak_days} days`} />
+            <Metric label="Best" value={`${enhanced.longest_streak} days`} />
+          </View>
+        </Card>
+      )}
+
+      <WeeklyVolumeChart />
       <ProgressChart />
     </ScrollView>
   );

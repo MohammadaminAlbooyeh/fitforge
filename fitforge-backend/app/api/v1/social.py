@@ -94,3 +94,8 @@ def get_challenge(challenge_id: int, db: DbSession, current: CurrentUser):
 @router.get("/leaderboard", response_model=list[LeaderboardEntry])
 def get_leaderboard(db: DbSession, current: CurrentUser, limit: int = 50):
     return social_service.get_leaderboard(db, limit)
+
+
+@router.get("/feed")
+def get_activity_feed(db: DbSession, current: CurrentUser, limit: int = 30):
+    return social_service.get_activity_feed(db, current.user_id, limit)

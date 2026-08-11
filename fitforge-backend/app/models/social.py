@@ -31,8 +31,8 @@ class Challenge(Base):
     target_workouts: Mapped[int] = mapped_column(Integer, default=10)
     start_date: Mapped[date] = mapped_column(Date)
     end_date: Mapped[date] = mapped_column(Date)
-    status: Mapped[ChallengeStatus] = mapped_column(
-        Enum(ChallengeStatus), default=ChallengeStatus.active
+    status: Mapped[str] = mapped_column(
+        String(20), default="active"
     )
 
 

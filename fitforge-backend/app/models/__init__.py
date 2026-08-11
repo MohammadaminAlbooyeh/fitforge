@@ -8,7 +8,7 @@ from app.models.workout_plan import WorkoutPlan, PlanDay, PlanDayExercise, Split
 from app.models.workout_log import WorkoutLog, LogSet, LogStatus
 from app.models.body_measurement import BodyMeasurement
 from app.models.achievement import Achievement, UserXP
-from app.models.social import Follow, Challenge, ChallengeStatus, ChallengeParticipant
+from app.models.social import Follow, Challenge, ChallengeParticipant
 
 __all__ = [
     "Base",
@@ -37,6 +37,5 @@ __all__ = [
     "UserXP",
     "Follow",
     "Challenge",
-    "ChallengeStatus",
     "ChallengeParticipant",
 ]

@@ -78,6 +78,13 @@ export function BodyMeasurementsScreen({ navigation }: any) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Body Measurements</Text>
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={() => navigation.navigate('AddMeasurement')}
+        >
+          <Ionicons name="add-circle" size={20} color="#FFF" />
+          <Text style={styles.addBtnText}>Add</Text>
+        </TouchableOpacity>
       </View>
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.colors.primary} />
@@ -103,8 +110,23 @@ export function BodyMeasurementsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { padding: theme.spacing.md },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: theme.spacing.md,
+  },
   title: { color: theme.colors.text, fontSize: 24, fontWeight: '800' },
+  addBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  addBtnText: { color: '#FFF', fontSize: 13, fontWeight: '600' },
   list: { padding: theme.spacing.md, gap: theme.spacing.md },
   card: { gap: theme.spacing.sm },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between' },

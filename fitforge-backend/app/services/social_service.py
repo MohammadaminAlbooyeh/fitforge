@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, NotFoundError
 from app.models.achievement import UserXP
-from app.models.social import Challenge, ChallengeParticipant, ChallengeStatus, Follow
+from app.models.social import Challenge, ChallengeParticipant, Follow
 from app.models.user import User
+from app.models.workout import Workout
 from app.models.workout_session import WorkoutSession
 from app.schemas.social import ChallengeCreate
 
@@ -110,7 +111,7 @@ def join_challenge(db: Session, user_id: int, challenge_id: int) -> None:
 def update_challenge_progress(db: Session, user_id: int, workout_date: date) -> None:
     active = db.execute(
         select(Challenge).where(
-            Challenge.status == ChallengeStatus.active,
+            Challenge.status == "active",
             Challenge.start_date <= workout_date,
             Challenge.end_date >= workout_date,
         )
@@ -125,7 +126,7 @@ def update_challenge_progress(db: Session, user_id: int, workout_date: date) -> 
         if participant:
             participant.workouts_completed += 1
             if participant.workouts_completed >= challenge.goal_count:
-                challenge.status = ChallengeStatus.completed
+                challenge.status = "completed"
     db.commit()
 
 
@@ -167,4 +168,31 @@ def get_leaderboard(db: Session, limit: int = 50) -> list[dict]:
             "streak_days": ux.streak_days,
         }
         for i, (ux, name) in enumerate(rows)
+    ]
+
+
+def get_activity_feed(db: Session, user_id: int, limit: int = 30) -> list[dict]:
+    fids = list(db.execute(
+        select(Follow.following_id).where(Follow.follower_id == user_id)
+    ).scalars())
+    if not fids:
+        return []
+    sessions = list(db.execute(
+        select(WorkoutSession, User.full_name, Workout.name.label("workout_name"))
+        .join(User, WorkoutSession.user_id == User.id)
+        .outerjoin(Workout, WorkoutSession.workout_id == Workout.id)
+        .where(WorkoutSession.user_id.in_(fids))
+        .order_by(WorkoutSession.performed_at.desc())
+        .limit(limit)
+    ).all())
+    return [
+        {
+            "user_id": s.user_id,
+            "full_name": full_name,
+            "workout_name": workout_name,
+            "performed_at": s.performed_at.isoformat(),
+            "notes": s.notes,
+            "set_count": len(s.sets) if s.sets else 0,
+        }
+        for s, full_name, workout_name in sessions
     ]

@@ -299,6 +299,15 @@ export interface ChallengeParticipantContract {
 
 // ---- Analytics ----
 
+export interface ActivityFeedItemContract {
+  user_id: number;
+  full_name: string;
+  workout_name?: string | null;
+  performed_at: string;
+  notes?: string | null;
+  set_count: number;
+}
+
 export interface WeeklyVolumeContract {
   week_start: string;
   workouts: number;

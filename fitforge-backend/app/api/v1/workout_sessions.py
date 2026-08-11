@@ -2,7 +2,7 @@ from fastapi import APIRouter, status
 
 from app.dependencies import CurrentUser, DbSession
 from app.schemas.workout_session import WorkoutSessionCreate, WorkoutSessionRead
-from app.services import gamification_service, workout_session_service
+from app.services import gamification_service, social_service, workout_session_service
 
 router = APIRouter()
 
@@ -14,7 +14,9 @@ router = APIRouter()
 )
 def create_session(workout_id: int, payload: WorkoutSessionCreate, db: DbSession, current: CurrentUser):
     session = workout_session_service.log_session(db, current.user_id, workout_id, payload)
-    gamification_service.record_workout_xp(db, current.user_id, session.performed_at.date())
+    workout_date = session.performed_at.date()
+    gamification_service.record_workout_xp(db, current.user_id, workout_date)
+    social_service.update_challenge_progress(db, current.user_id, workout_date)
     return session
 
 

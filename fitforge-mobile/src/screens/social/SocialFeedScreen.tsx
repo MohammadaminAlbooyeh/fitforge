@@ -11,19 +11,28 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '@/api/client';
-import type { LeaderboardEntry, Challenge, UserPublicProfile } from '@/api/types';
+import type { LeaderboardEntry, Challenge, UserPublicProfile, ActivityFeedItem } from '@/api/types';
 import { Card } from '@/components/common/Card';
 import { theme } from '@/constants/theme';
 
-type Tab = 'leaderboard' | 'challenges' | 'search';
+type Tab = 'feed' | 'leaderboard' | 'challenges' | 'search';
 
 export function SocialFeedScreen() {
-  const [tab, setTab] = useState<Tab>('leaderboard');
+  const [tab, setTab] = useState<Tab>('feed');
+  const [feed, setFeed] = useState<ActivityFeedItem[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [searchResults, setSearchResults] = useState<UserPublicProfile[]>([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const loadFeed = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/social/feed');
+      setFeed(res.data);
+    } catch {} finally { setLoading(false); }
+  }, []);
 
   const loadLeaderboard = useCallback(async () => {
     setLoading(true);
@@ -51,9 +60,36 @@ export function SocialFeedScreen() {
   }, [query]);
 
   useEffect(() => {
-    if (tab === 'leaderboard') loadLeaderboard();
+    if (tab === 'feed') loadFeed();
+    else if (tab === 'leaderboard') loadLeaderboard();
     else if (tab === 'challenges') loadChallenges();
-  }, [tab, loadLeaderboard, loadChallenges]);
+  }, [tab, loadFeed, loadLeaderboard, loadChallenges]);
+
+  const timeAgo = (iso: string) => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
+
+  const renderFeedItem = ({ item }: { item: ActivityFeedItem }) => (
+    <Card style={styles.feedCard}>
+      <View style={styles.feedAvatar}>
+        <Ionicons name="person-circle" size={36} color={theme.colors.primary} />
+      </View>
+      <View style={styles.feedInfo}>
+        <Text style={styles.feedName}>{item.full_name}</Text>
+        <Text style={styles.feedDetail}>
+          {item.workout_name ?? 'Workout'} · {item.set_count} sets
+        </Text>
+        {item.notes ? <Text style={styles.feedNotes}>{item.notes}</Text> : null}
+      </View>
+      <Text style={styles.feedTime}>{timeAgo(item.performed_at)}</Text>
+    </Card>
+  );
 
   const renderLeaderboardItem = ({ item, index }: { item: LeaderboardEntry; index: number }) => (
     <Card style={styles.lbCard}>
@@ -99,7 +135,7 @@ export function SocialFeedScreen() {
       <Text style={styles.heading}>Social</Text>
 
       <View style={styles.tabs}>
-        {(['leaderboard', 'challenges', 'search'] as Tab[]).map((t) => (
+        {(['feed', 'leaderboard', 'challenges', 'search'] as Tab[]).map((t) => (
           <TouchableOpacity
             key={t}
             style={[styles.tab, tab === t && styles.tabActive]}
@@ -130,6 +166,13 @@ export function SocialFeedScreen() {
 
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.colors.primary} />
+      ) : tab === 'feed' ? (
+        <FlatList
+          data={feed}
+          renderItem={renderFeedItem}
+          keyExtractor={(_, i) => String(i)}
+          contentContainerStyle={styles.list}
+        />
       ) : tab === 'leaderboard' ? (
         <FlatList
           data={leaderboard}
@@ -166,6 +209,13 @@ const styles = StyleSheet.create({
   tabText: { color: theme.colors.muted, fontSize: 13, fontWeight: '600' },
   tabTextActive: { color: '#FFF' },
   list: { padding: theme.spacing.md, gap: theme.spacing.md },
+  feedCard: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md },
+  feedAvatar: { width: 40, alignItems: 'center' },
+  feedInfo: { flex: 1 },
+  feedName: { color: theme.colors.text, fontSize: 14, fontWeight: '700' },
+  feedDetail: { color: theme.colors.muted, fontSize: 12, marginTop: 2 },
+  feedNotes: { color: theme.colors.muted, fontSize: 11, fontStyle: 'italic', marginTop: 2 },
+  feedTime: { color: theme.colors.muted, fontSize: 11 },
   lbCard: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md },
   lbRank: { color: theme.colors.primary, fontSize: 16, fontWeight: '800', width: 36 },
   lbInfo: { flex: 1 },
