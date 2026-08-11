@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.workout_plan import PlanDay, PlanDayExercise, PlanStatus, WorkoutPlan
@@ -48,3 +48,17 @@ def save_plan_day_exercise(db: Session, plan_day_exercise: PlanDayExercise) -> P
     db.commit()
     db.refresh(plan_day_exercise)
     return plan_day_exercise
+
+
+def get_frequently_skipped_exercise_ids(db: Session, user_id: int, min_skips: int = 2) -> set[int]:
+    """Exercise ids the user has skipped at least ``min_skips`` times across
+    their past plans, so a new plan can be generated favoring alternatives."""
+    stmt = (
+        select(PlanDayExercise.exercise_id)
+        .join(PlanDay, PlanDayExercise.plan_day_id == PlanDay.id)
+        .join(WorkoutPlan, PlanDay.workout_plan_id == WorkoutPlan.id)
+        .where(WorkoutPlan.user_id == user_id, PlanDayExercise.skipped.is_(True))
+        .group_by(PlanDayExercise.exercise_id)
+        .having(func.count(PlanDayExercise.id) >= min_skips)
+    )
+    return set(db.execute(stmt).scalars())

@@ -33,6 +33,17 @@ def list_personal_records(db: Session, user_id: int) -> list[LogSet]:
     return list(db.execute(stmt).scalars())
 
 
+def get_last_set(db: Session, user_id: int, exercise_id: int) -> LogSet | None:
+    stmt = (
+        select(LogSet)
+        .join(WorkoutLog, LogSet.workout_log_id == WorkoutLog.id)
+        .where(WorkoutLog.user_id == user_id, LogSet.exercise_id == exercise_id)
+        .order_by(WorkoutLog.completed_at.desc(), LogSet.id.desc())
+        .limit(1)
+    )
+    return db.execute(stmt).scalars().first()
+
+
 def get_best_weight(db: Session, user_id: int, exercise_id: int) -> float | None:
     stmt = (
         select(func.max(LogSet.weight_kg))

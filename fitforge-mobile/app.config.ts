@@ -21,12 +21,18 @@ export default {
         backgroundColor: '#1A1A2E',
       },
       package: 'com.fitforge.app',
+      permissions: [
+        'android.permission.health.READ_STEPS',
+        'android.permission.health.READ_EXERCISE',
+        'android.permission.health.READ_HEART_RATE',
+      ],
     },
     extra: {
       apiUrl: process.env.API_URL ?? 'http://localhost:8000',
     },
     plugins: [
       ['expo-health-kit', { permissions: ['Workout', 'HealthRecords'] }],
+      'react-native-health-connect',
     ],
   },
 };

@@ -57,6 +57,7 @@ export function DailyPlanScreen({ navigation }: any) {
         status: doneExercises.length === total ? 'completed' : 'partial',
         sets: doneExercises.map((pde) => ({
           exercise_id: pde.exercise.id,
+          weight_kg: pde.target_weight_kg ?? undefined,
           reps: midpointReps(pde.reps_range),
           set_number: 1,
         })),
@@ -201,6 +202,7 @@ export function DailyPlanScreen({ navigation }: any) {
                     </Text>
                     <Text style={styles.exerciseMeta}>
                       {pde.sets} sets · {pde.reps_range} reps · rest {pde.rest_seconds}s
+                      {pde.target_weight_kg ? ` · target ${pde.target_weight_kg}kg` : ''}
                     </Text>
                     <Text style={[styles.exerciseSub, { color: visual.color }]}>
                       {visual.label} · {pde.exercise.equipment}

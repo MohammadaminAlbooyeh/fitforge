@@ -50,7 +50,7 @@ export function ProgressScreen({ navigation }: any) {
         {error ? (
           <Text style={styles.muted}>{error}</Text>
         ) : !ready ? (
-          <Text style={styles.muted}>Reading Apple Health…</Text>
+          <Text style={styles.muted}>Reading health data…</Text>
         ) : (
           <View style={styles.metricsRow}>
             <Metric label="Distance" value={`${(summary.steps * 0.0008).toFixed(2)} km`} />

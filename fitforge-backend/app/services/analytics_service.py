@@ -89,9 +89,16 @@ def get_exercise_progression(db: Session, user_id: int) -> list[ExerciseProgress
     )
     rows = db.execute(stmt).all()
 
+    exercise_ids = [row.exercise_id for row in rows]
+    exercises = (
+        {e.id: e for e in db.execute(select(Exercise).where(Exercise.id.in_(exercise_ids))).scalars()}
+        if exercise_ids
+        else {}
+    )
+
     result = []
     for row in rows:
-        exercise = db.get(Exercise, row.exercise_id)
+        exercise = exercises.get(row.exercise_id)
         if exercise:
             result.append(ExerciseProgression(
                 exercise_id=row.exercise_id,

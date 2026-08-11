@@ -144,6 +144,7 @@ export interface PlanDayExerciseContract {
   rest_seconds: number;
   order_index: number;
   skipped: boolean;
+  target_weight_kg?: number | null;
 }
 
 export interface PlanDayExerciseUpdateContract {

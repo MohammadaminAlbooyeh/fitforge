@@ -21,6 +21,7 @@ class PlanDayExerciseRead(BaseModel):
     rest_seconds: int
     order_index: int
     skipped: bool = False
+    target_weight_kg: Optional[float] = None
 
 
 class PlanDayExerciseUpdate(BaseModel):

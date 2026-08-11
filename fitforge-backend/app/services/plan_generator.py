@@ -26,6 +26,15 @@ target counts below:
 Within a day, slots are filled by querying the exercise library for that
 muscle group, filtered by the user's available equipment and capped at their
 experience level, preferring compound movements first.
+
+The split itself is still a fixed lookup table, but two things adapt per
+user each time a plan is (re)generated:
+- Progressive overload: each exercise's ``target_weight_kg`` is derived from
+  the user's most recent logged set for it — repeat the same weight until
+  they've hit the top of the prescribed rep range, then bump it up.
+- Skip avoidance: exercises the user has skipped often in past plans are
+  deprioritized (not hard-excluded, so a slot is never left unfilled) in
+  favor of other exercises for that muscle group.
 """
 
 from datetime import date
@@ -35,8 +44,14 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ConflictError
 from app.models.exercise import DifficultyLevel, EquipmentType, MovementRole, MuscleGroup
 from app.models.user import User
+from app.models.workout_log import LogSet
 from app.models.workout_plan import PlanDay, PlanDayExercise, PlanStatus, SplitType, WorkoutPlan
-from app.repositories import exercise_repo, workout_plan_repo
+from app.repositories import exercise_repo, workout_log_repo, workout_plan_repo
+
+# A set is treated as "topped out" (ready to add weight) once its reps reach
+# the top of the prescribed rep range for that movement role; otherwise the
+# next plan repeats the same weight and asks for more reps first.
+WEIGHT_PROGRESSION_FACTOR = 1.025
 
 FULL_BODY_SLOTS = [
     MuscleGroup.quads,
@@ -136,38 +151,70 @@ def _select_exercises_for_day(
     equipment: list[EquipmentType],
     difficulty: DifficultyLevel,
     plan_wide_used_ids: set[int],
+    deprioritized_ids: set[int],
 ):
     """Fill each slot with one exercise, preferring ones not already used
     elsewhere in this plan (so repeated day types like "Full Body A/B/C"
     don't end up identical) and falling back to reuse once a muscle group's
-    pool is exhausted."""
+    pool is exhausted.
+
+    Exercises the user has repeatedly skipped (``deprioritized_ids``) are
+    tried last, only once every other option in the muscle group is
+    exhausted, so a plan naturally rotates away from movements the user
+    doesn't do without ever leaving a slot unfilled."""
     chosen = []
     chosen_ids: set[int] = set()
 
     for muscle_group in slots:
-        exclude = chosen_ids | plan_wide_used_ids
-        picks = exercise_repo.find_for_plan(
-            db,
-            muscle_group=muscle_group,
-            equipment=equipment,
-            max_difficulty=difficulty,
-            exclude_ids=exclude,
-            limit=1,
-        )
-        if not picks:
+        # Tried in order, each one relaxing the previous constraint: prefer
+        # an exercise that's neither used elsewhere in this plan nor
+        # deprioritized; only reuse across days (like original Full Body
+        # A/B/C behavior) or bring back a deprioritized exercise once every
+        # stricter option is exhausted, so a slot is never left unfilled.
+        exclude_layers = [
+            chosen_ids | plan_wide_used_ids | deprioritized_ids,
+            chosen_ids | deprioritized_ids,
+            chosen_ids | plan_wide_used_ids,
+            chosen_ids,
+        ]
+        picks = []
+        for exclude in exclude_layers:
             picks = exercise_repo.find_for_plan(
                 db,
                 muscle_group=muscle_group,
                 equipment=equipment,
                 max_difficulty=difficulty,
-                exclude_ids=chosen_ids,
+                exclude_ids=exclude,
                 limit=1,
             )
+            if picks:
+                break
         if picks:
             chosen.append(picks[0])
             chosen_ids.add(picks[0].id)
 
     return chosen
+
+
+def _apply_progression(
+    db: Session, user_id: int, exercise
+) -> tuple[int, str, int, float | None]:
+    """Prescribe sets/reps/rest from the fixed SET_SCHEME, plus an advisory
+    target weight derived from the user's most recent logged set for this
+    exercise: repeat the same weight if they haven't yet hit the top of the
+    rep range, or bump it up once they have (progressive overload)."""
+    sets, reps_range, rest_seconds = SET_SCHEME[exercise.movement_role]
+
+    last_set: LogSet | None = workout_log_repo.get_last_set(db, user_id, exercise.id)
+    target_weight_kg = None
+    if last_set is not None and last_set.weight_kg:
+        _, top_reps = (int(n) for n in reps_range.split("-"))
+        if last_set.reps >= top_reps:
+            target_weight_kg = round(last_set.weight_kg * WEIGHT_PROGRESSION_FACTOR, 1)
+        else:
+            target_weight_kg = last_set.weight_kg
+
+    return sets, reps_range, rest_seconds, target_weight_kg
 
 
 def generate_plan(db: Session, user: User, days_per_week: int) -> WorkoutPlan:
@@ -179,6 +226,7 @@ def generate_plan(db: Session, user: User, days_per_week: int) -> WorkoutPlan:
     difficulty = _resolve_difficulty(user)
 
     workout_plan_repo.archive_active_plans(db, user.id)
+    deprioritized_ids = workout_plan_repo.get_frequently_skipped_exercise_ids(db, user.id)
 
     plan = WorkoutPlan(
         user_id=user.id,
@@ -203,12 +251,14 @@ def generate_plan(db: Session, user: User, days_per_week: int) -> WorkoutPlan:
         db.flush()
 
         exercises = _select_exercises_for_day(
-            db, slots, equipment, difficulty, plan_wide_used_ids
+            db, slots, equipment, difficulty, plan_wide_used_ids, deprioritized_ids
         )
         plan_wide_used_ids.update(e.id for e in exercises)
 
         for order_index, exercise in enumerate(exercises):
-            sets, reps_range, rest_seconds = SET_SCHEME[exercise.movement_role]
+            sets, reps_range, rest_seconds, target_weight_kg = _apply_progression(
+                db, user.id, exercise
+            )
             db.add(
                 PlanDayExercise(
                     plan_day_id=plan_day.id,
@@ -217,6 +267,7 @@ def generate_plan(db: Session, user: User, days_per_week: int) -> WorkoutPlan:
                     reps_range=reps_range,
                     rest_seconds=rest_seconds,
                     order_index=order_index,
+                    target_weight_kg=target_weight_kg,
                 )
             )
 

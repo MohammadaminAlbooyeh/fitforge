@@ -16,7 +16,6 @@ import { BodyMeasurementsScreen } from '@/screens/progress/BodyMeasurementsScree
 import { AddMeasurementScreen } from '@/screens/progress/AddMeasurementScreen';
 import { AchievementsScreen } from '@/screens/social/AchievementsScreen';
 import { SocialFeedScreen } from '@/screens/social/SocialFeedScreen';
-import { ActivityFeedScreen } from '@/screens/social/ActivityFeedScreen';
 import { RootStackParamList } from './types';
 
 type Props = {
@@ -44,7 +43,6 @@ export function RootNavigator({ isAuthenticated }: Props) {
       <Root.Screen name="AddMeasurement" component={AddMeasurementScreen} />
       <Root.Screen name="Achievements" component={AchievementsScreen} />
       <Root.Screen name="SocialFeed" component={SocialFeedScreen} />
-      <Root.Screen name="ActivityFeed" component={ActivityFeedScreen} />
     </Root.Navigator>
   );
 }
