@@ -41,6 +41,7 @@ export interface ExerciseContract {
   id: number;
   name: string;
   muscle_group: string;
+  image_url?: string | null;
   instructions?: string | null;
 }
 
@@ -130,6 +131,7 @@ export interface ExerciseLibraryContract {
   difficulty: string;
   movement_role: string;
   video_url?: string | null;
+  image_url?: string | null;
   instructions?: string | null;
   alternative_exercise_id?: number | null;
 }
@@ -141,6 +143,12 @@ export interface PlanDayExerciseContract {
   reps_range: string;
   rest_seconds: number;
   order_index: number;
+  skipped: boolean;
+}
+
+export interface PlanDayExerciseUpdateContract {
+  exercise_id?: number;
+  skipped?: boolean;
 }
 
 export interface PlanDayContract {
@@ -177,6 +185,7 @@ export interface LogSetContract {
   weight_kg?: number | null;
   reps: number;
   set_number: number;
+  is_personal_record: boolean;
 }
 
 export interface WorkoutLogCreateContract {
@@ -192,4 +201,141 @@ export interface WorkoutLogContract {
   completed_at: string;
   status: 'completed' | 'partial';
   log_sets: LogSetContract[];
+}
+
+export interface PersonalRecordContract {
+  id: number;
+  exercise: ExerciseLibraryContract;
+  weight_kg?: number | null;
+  reps: number;
+  set_number: number;
+  completed_at: string;
+}
+
+// ---- Body measurements ----
+
+export interface BodyMeasurementContract {
+  id: number;
+  date: string;
+  weight_kg?: number | null;
+  body_fat_pct?: number | null;
+  chest_cm?: number | null;
+  waist_cm?: number | null;
+  arms_cm?: number | null;
+  thighs_cm?: number | null;
+  notes?: string | null;
+  created_at: string;
+}
+
+// ---- Gamification ----
+
+export interface AchievementContract {
+  id: number;
+  user_id: number;
+  badge_type: string;
+  name: string;
+  description: string;
+  icon: string;
+  xp_earned: number;
+  earned_at: string;
+}
+
+export interface UserXPContract {
+  id: number;
+  user_id: number;
+  total_xp: number;
+  level: number;
+  streak_days: number;
+  longest_streak: number;
+  last_workout_date?: string | null;
+}
+
+export interface GamificationSummaryContract {
+  xp: UserXPContract;
+  achievements: AchievementContract[];
+  next_level_xp: number;
+}
+
+// ---- Social ----
+
+export interface UserPublicProfileContract {
+  user_id: number;
+  full_name: string;
+  avatar_url: string | null;
+  streak_days: number;
+  level: number;
+  workout_count: number;
+  is_following: boolean;
+}
+
+export interface LeaderboardEntryContract {
+  user_id: number;
+  full_name: string;
+  avatar_url: string | null;
+  xp: number;
+  level: number;
+  streak_days: number;
+}
+
+export interface ChallengeContract {
+  id: number;
+  title: string;
+  description: string | null;
+  challenge_type: string;
+  start_date: string;
+  end_date: string;
+  goal_count: number;
+  created_by: number;
+  created_at: string;
+  participants?: ChallengeParticipantContract[];
+  my_workouts_completed?: number;
+}
+
+export interface ChallengeParticipantContract {
+  user_id: number;
+  full_name: string;
+  workouts_completed: number;
+}
+
+// ---- Analytics ----
+
+export interface WeeklyVolumeContract {
+  week_start: string;
+  workouts: number;
+  total_sets: number;
+  total_volume_kg: number;
+}
+
+export interface ExerciseProgressionContract {
+  exercise_id: number;
+  exercise_name: string;
+  best_weight?: number | null;
+  best_reps?: number | null;
+  total_sets: number;
+  sessions: number;
+}
+
+export interface BodyTrendContract {
+  date: string;
+  weight_kg?: number | null;
+  body_fat_pct?: number | null;
+  chest_cm?: number | null;
+  waist_cm?: number | null;
+  arms_cm?: number | null;
+}
+
+export interface EnhancedAnalyticsContract {
+  summary: AnalyticsSummaryContract;
+  weekly_volume: WeeklyVolumeContract[];
+  exercise_progression: ExerciseProgressionContract[];
+  body_trend: BodyTrendContract[];
+  streak_days: number;
+  longest_streak: number;
+}
+
+export interface AnalyticsSummaryContract {
+  total_workouts: number;
+  total_sessions: number;
+  total_sets: number;
+  most_recent_workout?: string | null;
 }

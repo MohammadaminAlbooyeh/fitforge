@@ -20,6 +20,12 @@ class PlanDayExerciseRead(BaseModel):
     reps_range: str
     rest_seconds: int
     order_index: int
+    skipped: bool = False
+
+
+class PlanDayExerciseUpdate(BaseModel):
+    exercise_id: Optional[int] = None
+    skipped: Optional[bool] = None
 
 
 class PlanDayRead(BaseModel):

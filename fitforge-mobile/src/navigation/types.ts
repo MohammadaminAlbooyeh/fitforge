@@ -27,6 +27,10 @@ export type RootStackParamList = {
   WorkoutEditor: { workoutId?: number } | undefined;
   WorkoutDetail: { workoutId: number };
   LogSession: { workoutId: number };
+  PRHistory: undefined;
+  BodyMeasurements: undefined;
+  Achievements: undefined;
+  SocialFeed: undefined;
 };
 
 export type RootParamList = {

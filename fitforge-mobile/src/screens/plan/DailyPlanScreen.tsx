@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -9,8 +9,10 @@ import { Button } from '@/components/common/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkoutPlan } from '@/hooks/useWorkoutPlan';
 import { createWorkoutLog } from '@/api/workoutLogs';
+import { updatePlanDayExercise } from '@/api/workoutPlans';
 import { PlanDayExercise } from '@/api/types';
 import { theme } from '@/constants/theme';
+import { getMuscleGroupVisual } from '@/utils/muscleGroupIcon';
 
 function midpointReps(repsRange: string): number {
   const [lo, hi] = repsRange.split('-').map((n) => parseInt(n, 10));
@@ -24,6 +26,7 @@ export function DailyPlanScreen({ navigation }: any) {
   const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [logging, setLogging] = useState(false);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -36,21 +39,20 @@ export function DailyPlanScreen({ navigation }: any) {
     return plan.plan_days.find((d) => d.id === selectedDayId) ?? plan.plan_days[0] ?? null;
   }, [plan, selectedDayId]);
 
-  const doneCount = Object.values(checked).filter(Boolean).length;
-  const total = selectedDay?.plan_day_exercises.length ?? 0;
+  const activeExercises = selectedDay?.plan_day_exercises.filter((pde) => !pde.skipped) ?? [];
+  const doneCount = activeExercises.filter((pde) => checked[String(pde.id)]).length;
+  const total = activeExercises.length;
 
   const handleLogSession = async () => {
     if (!selectedDay) return;
-    const doneExercises = selectedDay.plan_day_exercises.filter(
-      (pde) => checked[String(pde.id)]
-    );
+    const doneExercises = activeExercises.filter((pde) => checked[String(pde.id)]);
     if (doneExercises.length === 0) {
       Alert.alert('Nothing checked off', 'Check off the exercises you completed first.');
       return;
     }
     setLogging(true);
     try {
-      await createWorkoutLog({
+      const log = await createWorkoutLog({
         plan_day_id: selectedDay.id,
         status: doneExercises.length === total ? 'completed' : 'partial',
         sets: doneExercises.map((pde) => ({
@@ -60,11 +62,47 @@ export function DailyPlanScreen({ navigation }: any) {
         })),
       });
       setChecked({});
-      Alert.alert('Session logged', 'Nice work — this session was added to your history.');
+      const prCount = log.log_sets.filter((s) => s.is_personal_record).length;
+      Alert.alert(
+        'Session logged',
+        prCount > 0
+          ? `Nice work — this session was added to your history. 🏆 ${prCount} new personal record${prCount > 1 ? 's' : ''}!`
+          : 'Nice work — this session was added to your history.'
+      );
     } catch (e: any) {
       Alert.alert('Could not log session', e?.message ?? 'Something went wrong.');
     } finally {
       setLogging(false);
+    }
+  };
+
+  const handleSkip = async (pde: PlanDayExercise) => {
+    setUpdatingId(pde.id);
+    try {
+      await updatePlanDayExercise(pde.id, { skipped: !pde.skipped });
+      setChecked((prev) => ({ ...prev, [String(pde.id)]: false }));
+      await reload();
+    } catch (e: any) {
+      Alert.alert('Could not update exercise', e?.message ?? 'Something went wrong.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleReplace = async (pde: PlanDayExercise) => {
+    const alternativeId = pde.exercise.alternative_exercise_id;
+    if (!alternativeId) {
+      Alert.alert('No alternative available', 'This exercise has no substitute set up yet.');
+      return;
+    }
+    setUpdatingId(pde.id);
+    try {
+      await updatePlanDayExercise(pde.id, { exercise_id: alternativeId });
+      await reload();
+    } catch (e: any) {
+      Alert.alert('Could not replace exercise', e?.message ?? 'Something went wrong.');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -139,26 +177,54 @@ export function DailyPlanScreen({ navigation }: any) {
 
           {selectedDay.plan_day_exercises.map((pde: PlanDayExercise) => {
             const isDone = !!checked[String(pde.id)];
+            const isUpdating = updatingId === pde.id;
+            const visual = getMuscleGroupVisual(pde.exercise.muscle_group);
             return (
-              <Card
-                key={pde.id}
-                onPress={() => setChecked((prev) => ({ ...prev, [String(pde.id)]: !prev[String(pde.id)] }))}
-                style={styles.exerciseRow}
-              >
-                <View style={[styles.checkCircle, isDone && styles.checkCircleDone]}>
-                  {isDone && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
+              <Card key={pde.id} style={[styles.exerciseRow, pde.skipped && styles.exerciseRowSkipped]}>
+                <View
+                  style={styles.exerciseRowInner}
+                  onTouchEnd={() => {
+                    if (!pde.skipped) {
+                      setChecked((prev) => ({ ...prev, [String(pde.id)]: !prev[String(pde.id)] }));
+                    }
+                  }}
+                >
+                  <View style={[styles.checkCircle, isDone && styles.checkCircleDone]}>
+                    {isDone && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
+                  </View>
+                  <View style={[styles.exerciseIcon, { backgroundColor: `${visual.color}22` }]}>
+                    <Ionicons name={visual.icon} size={20} color={visual.color} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.exerciseName, pde.skipped && styles.mutedText]}>
+                      {pde.exercise.name}
+                    </Text>
+                    <Text style={styles.exerciseMeta}>
+                      {pde.sets} sets · {pde.reps_range} reps · rest {pde.rest_seconds}s
+                    </Text>
+                    <Text style={[styles.exerciseSub, { color: visual.color }]}>
+                      {visual.label} · {pde.exercise.equipment}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.exerciseIcon}>
-                  <Ionicons name="body-outline" size={20} color={theme.colors.primary} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.exerciseName}>{pde.exercise.name}</Text>
-                  <Text style={styles.exerciseMeta}>
-                    {pde.sets} sets · {pde.reps_range} reps · rest {pde.rest_seconds}s
-                  </Text>
-                  <Text style={styles.exerciseSub}>
-                    {pde.exercise.muscle_group} · {pde.exercise.equipment}
-                  </Text>
+                {pde.exercise.image_url && !pde.skipped ? (
+                  <Image source={{ uri: pde.exercise.image_url }} style={styles.exerciseImage} />
+                ) : null}
+                <View style={styles.exerciseActions}>
+                  <Button
+                    title={pde.skipped ? 'Unskip' : 'Skip'}
+                    variant="ghost"
+                    loading={isUpdating}
+                    onPress={() => handleSkip(pde)}
+                  />
+                  {!pde.skipped && pde.exercise.alternative_exercise_id ? (
+                    <Button
+                      title="Replace"
+                      variant="ghost"
+                      loading={isUpdating}
+                      onPress={() => handleReplace(pde)}
+                    />
+                  ) : null}
                 </View>
               </Card>
             );
@@ -206,7 +272,17 @@ const styles = StyleSheet.create({
   progressFill: { height: 6, backgroundColor: theme.colors.accent },
   planTitle: { color: theme.colors.text, fontSize: 24, fontWeight: '800' },
   planMeta: { color: theme.colors.muted, fontSize: 12, textTransform: 'capitalize' },
-  exerciseRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm },
+  exerciseRow: { flexDirection: 'column', gap: theme.spacing.sm },
+  exerciseRowSkipped: { opacity: 0.5 },
+  exerciseActions: { flexDirection: 'row', gap: theme.spacing.sm },
+  mutedText: { textDecorationLine: 'line-through' },
+  exerciseRowInner: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm },
+  exerciseImage: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    resizeMode: 'cover',
+  },
   checkCircle: {
     width: 22,
     height: 22,

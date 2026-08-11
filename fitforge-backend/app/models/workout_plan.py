@@ -2,7 +2,7 @@ import enum
 from datetime import date
 from typing import List
 
-from sqlalchemy import Date, Enum, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Date, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -68,6 +68,7 @@ class PlanDayExercise(Base):
     reps_range: Mapped[str] = mapped_column(String(20), default="8-12")
     rest_seconds: Mapped[int] = mapped_column(Integer, default=60)
     order_index: Mapped[int] = mapped_column(Integer, default=0)
+    skipped: Mapped[bool] = mapped_column(Boolean, default=False)
 
     plan_day = relationship("PlanDay", back_populates="plan_day_exercises")
     exercise = relationship("Exercise")

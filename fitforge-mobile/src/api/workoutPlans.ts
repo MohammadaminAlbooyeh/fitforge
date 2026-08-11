@@ -1,5 +1,5 @@
 import { api } from './client';
-import { GeneratePlanRequest, WorkoutPlan } from './types';
+import { GeneratePlanRequest, PlanDayExercise, PlanDayExerciseUpdate, WorkoutPlan } from './types';
 
 export async function generateWorkoutPlan(input: GeneratePlanRequest): Promise<WorkoutPlan> {
   const { data } = await api.post<WorkoutPlan>('/workout-plans/generate', input);
@@ -16,4 +16,15 @@ export async function getActiveWorkoutPlan(): Promise<WorkoutPlan | null> {
     }
     throw e;
   }
+}
+
+export async function updatePlanDayExercise(
+  planDayExerciseId: number,
+  input: PlanDayExerciseUpdate
+): Promise<PlanDayExercise> {
+  const { data } = await api.patch<PlanDayExercise>(
+    `/workout-plans/plan-day-exercises/${planDayExerciseId}`,
+    input
+  );
+  return data;
 }

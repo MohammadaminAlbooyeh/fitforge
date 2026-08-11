@@ -16,7 +16,7 @@ def seeded(db_session):
         (2, ["Full Body A", "Full Body B"]),
         (3, ["Full Body A", "Full Body B", "Full Body C"]),
         (4, ["Upper A", "Lower A", "Upper B", "Lower B"]),
-        (5, ["Push", "Pull", "Legs", "Upper", "Lower"]),
+        (5, ["Upper A", "Lower A", "Upper B", "Lower B", "Upper C"]),
     ],
 )
 def test_generate_plan_matches_split_rules(seeded, client, auth_headers, days, expected_titles):

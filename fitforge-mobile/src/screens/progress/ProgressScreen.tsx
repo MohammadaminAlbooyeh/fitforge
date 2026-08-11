@@ -13,7 +13,7 @@ import { theme } from '@/constants/theme';
 
 const STEP_GOAL = 18000;
 
-export function ProgressScreen() {
+export function ProgressScreen({ navigation }: any) {
   const { summary, ready, error } = useHealthSync();
   const { isPro } = useSubscription();
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
@@ -61,6 +61,13 @@ export function ProgressScreen() {
         <View style={styles.activityRow}>
           <ActivityStat icon="flame-outline" label="Eaten" value="734 kcal" color={theme.colors.success} />
           <ActivityStat icon="flash-outline" label="Burned" value="363 kcal" color={theme.colors.accent} />
+        </View>
+      </Card>
+
+      <Card onPress={() => navigation.navigate('PRHistory')}>
+        <View style={styles.rowBetween}>
+          <Text style={styles.cardTitle}>Personal Records</Text>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.muted} />
         </View>
       </Card>
 

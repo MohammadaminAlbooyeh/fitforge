@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.workout_log import LogStatus
+from app.schemas.exercise import ExerciseRead
 
 
 class LogSetCreate(BaseModel):
@@ -21,6 +22,7 @@ class LogSetRead(BaseModel):
     weight_kg: Optional[float] = None
     reps: int
     set_number: int
+    is_personal_record: bool = False
 
 
 class WorkoutLogCreate(BaseModel):
@@ -38,3 +40,12 @@ class WorkoutLogRead(BaseModel):
     completed_at: date
     status: LogStatus
     log_sets: list[LogSetRead]
+
+
+class PersonalRecordRead(BaseModel):
+    id: int
+    exercise: ExerciseRead
+    weight_kg: Optional[float] = None
+    reps: int
+    set_number: int
+    completed_at: date

@@ -4,7 +4,8 @@ Sourced from `app/seed/data/fitforge_exercise_seed.xlsx` - a curated 74-exercise
 spreadsheet (10 muscle groups, 4-11 exercises each):
 target_muscle_group, secondary_muscle_group(s), equipment_required, movement_role
 (compound/isolation), difficulty, video_url (left empty - fill in later with licensed
-demo clips). This is a starting seed, not exhaustive - grow it over time.
+demo clips), image_url (external image URL - fill in per exercise). This is a starting
+seed, not exhaustive - grow it over time.
 
 ``alternative_exercise_id`` isn't in the source data, so it's computed here: each
 exercise is auto-paired with another exercise targeting the same muscle group,
@@ -19,106 +20,106 @@ from sqlalchemy.orm import Session
 
 from app.models.exercise import DifficultyLevel, EquipmentType, Exercise, MovementRole, MuscleGroup
 
-# (name, muscle_group, secondary_muscle_groups, equipment, difficulty, movement_role)
+# (name, muscle_group, secondary_muscle_groups, equipment, difficulty, movement_role, image_url?)
 EXERCISES: list[
-    tuple[str, MuscleGroup, list[MuscleGroup], EquipmentType, DifficultyLevel, MovementRole]
+    tuple[str, MuscleGroup, list[MuscleGroup], EquipmentType, DifficultyLevel, MovementRole, str | None]
 ] = [
-    ("Barbell Bench Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Incline Barbell Bench Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Dumbbell Bench Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound),
-    ("Incline Dumbbell Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound),
-    ("Push-Up", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound),
-    ("Dumbbell Chest Fly", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Cable Chest Fly", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Chest Dip", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Machine Chest Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound),
-    ("Pec Deck Machine", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation),
+    ("Barbell Bench Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg"),
+    ("Incline Barbell Bench Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/0.jpg"),
+    ("Dumbbell Bench Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/0.jpg"),
+    ("Incline Dumbbell Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Press/0.jpg"),
+    ("Push-Up", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push-Up_Wide/0.jpg"),
+    ("Dumbbell Chest Fly", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Flyes/0.jpg"),
+    ("Cable Chest Fly", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flat_Bench_Cable_Flyes/0.jpg"),
+    ("Chest Dip", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Chest_Version/0.jpg"),
+    ("Machine Chest Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Bench_Press/0.jpg"),
+    ("Pec Deck Machine", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Butterfly/0.jpg"),
 
-    ("Pull-Up", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Lat Pulldown", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound),
-    ("Chin-Up", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Straight-Arm Pulldown", MuscleGroup.back, [MuscleGroup.shoulders], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Barbell Bent-Over Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Dumbbell Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound),
-    ("Seated Cable Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.compound),
-    ("T-Bar Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Machine Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound),
-    ("Barbell Deadlift", MuscleGroup.back, [MuscleGroup.hamstrings, MuscleGroup.glutes], EquipmentType.barbell, DifficultyLevel.advanced, MovementRole.compound),
-    ("Face Pull", MuscleGroup.back, [MuscleGroup.shoulders], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
+    ("Pull-Up", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Pull_Ups/0.jpg"),
+    ("Lat Pulldown", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/0.jpg"),
+    ("Chin-Up", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chin-Up/0.jpg"),
+    ("Straight-Arm Pulldown", MuscleGroup.back, [MuscleGroup.shoulders], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight-Arm_Pulldown/0.jpg"),
+    ("Barbell Bent-Over Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg"),
+    ("Dumbbell Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/0.jpg"),
+    ("Seated Cable Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Cable_Rows/0.jpg"),
+    ("T-Bar Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/0.jpg"),
+    ("Machine Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Iso_Row/0.jpg"),
+    ("Barbell Deadlift", MuscleGroup.back, [MuscleGroup.hamstrings, MuscleGroup.glutes], EquipmentType.barbell, DifficultyLevel.advanced, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg"),
+    ("Face Pull", MuscleGroup.back, [MuscleGroup.shoulders], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/0.jpg"),
     # No exercise above covers a beginner-friendly bodyweight "pull" pattern
     # (Pull-Up/Chin-Up are intermediate) - without these, bodyweight-only
     # beginners get an empty Pull/Back day. Filling that real gap here.
-    ("Inverted Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound),
-    ("Superman", MuscleGroup.back, [MuscleGroup.glutes], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
+    ("Inverted Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Inverted_Row/0.jpg"),
+    ("Superman", MuscleGroup.back, [MuscleGroup.glutes], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Superman/0.jpg"),
 
-    ("Overhead Barbell Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Seated Dumbbell Shoulder Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound),
-    ("Arnold Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.dumbbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Lateral Raise", MuscleGroup.shoulders, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Cable Lateral Raise", MuscleGroup.shoulders, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Front Raise", MuscleGroup.shoulders, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Rear Delt Fly", MuscleGroup.shoulders, [MuscleGroup.back], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Machine Shoulder Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound),
-    ("Upright Row", MuscleGroup.shoulders, [MuscleGroup.back], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
+    ("Overhead Barbell Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/0.jpg"),
+    ("Seated Dumbbell Shoulder Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Shoulder_Press/0.jpg"),
+    ("Arnold Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.dumbbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/0.jpg"),
+    ("Lateral Raise", MuscleGroup.shoulders, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Side_Lateral_Raise/0.jpg"),
+    ("Cable Lateral Raise", MuscleGroup.shoulders, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Lateral_Raise/0.jpg"),
+    ("Front Raise", MuscleGroup.shoulders, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Dumbbell_Raise/0.jpg"),
+    ("Rear Delt Fly", MuscleGroup.shoulders, [MuscleGroup.back], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Flyes/0.jpg"),
+    ("Machine Shoulder Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Shoulder_Military_Press/0.jpg"),
+    ("Upright Row", MuscleGroup.shoulders, [MuscleGroup.back], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Upright_Barbell_Row/0.jpg"),
     # No bodyweight shoulder exercise above - without this, bodyweight-only
     # beginners get an empty shoulder slot on Full Body/Upper/Push days.
-    ("Pike Push-Up", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound),
+    ("Pike Push-Up", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Push-Up/0.jpg"),
 
-    ("Barbell Curl", MuscleGroup.biceps, [], EquipmentType.barbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Dumbbell Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Hammer Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Cable Curl", MuscleGroup.biceps, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Preacher Curl", MuscleGroup.biceps, [], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.isolation),
-    ("Concentration Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
+    ("Barbell Curl", MuscleGroup.biceps, [], EquipmentType.barbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg"),
+    ("Dumbbell Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bicep_Curl/0.jpg"),
+    ("Hammer Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hammer_Curls/0.jpg"),
+    ("Cable Curl", MuscleGroup.biceps, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Biceps_Cable_Curl/0.jpg"),
+    ("Preacher Curl", MuscleGroup.biceps, [], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Preacher_Curl/0.jpg"),
+    ("Concentration Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Concentration_Curls/0.jpg"),
 
-    ("Triceps Pushdown", MuscleGroup.triceps, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Skull Crusher", MuscleGroup.triceps, [], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.isolation),
-    ("Overhead Triceps Extension", MuscleGroup.triceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Close-Grip Bench Press", MuscleGroup.triceps, [MuscleGroup.chest], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Triceps Dip", MuscleGroup.triceps, [MuscleGroup.chest], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Cable Overhead Extension", MuscleGroup.triceps, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
+    ("Triceps Pushdown", MuscleGroup.triceps, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Pushdown/0.jpg"),
+    ("Skull Crusher", MuscleGroup.triceps, [], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/EZ-Bar_Skullcrusher/0.jpg"),
+    ("Overhead Triceps Extension", MuscleGroup.triceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Overhead_Triceps/0.jpg"),
+    ("Close-Grip Bench Press", MuscleGroup.triceps, [MuscleGroup.chest], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Barbell_Bench_Press/0.jpg"),
+    ("Triceps Dip", MuscleGroup.triceps, [MuscleGroup.chest], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/0.jpg"),
+    ("Cable Overhead Extension", MuscleGroup.triceps, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Rope_Overhead_Triceps_Extension/0.jpg"),
     # The only bodyweight triceps exercise above (Triceps Dip) is intermediate;
     # this fills the beginner-bodyweight gap.
-    ("Bench Dip", MuscleGroup.triceps, [MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
+    ("Bench Dip", MuscleGroup.triceps, [MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Dips/0.jpg"),
 
-    ("Barbell Back Squat", MuscleGroup.quads, [MuscleGroup.glutes, MuscleGroup.hamstrings], EquipmentType.barbell, DifficultyLevel.advanced, MovementRole.compound),
-    ("Front Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.barbell, DifficultyLevel.advanced, MovementRole.compound),
-    ("Leg Press", MuscleGroup.quads, [MuscleGroup.glutes, MuscleGroup.hamstrings], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound),
-    ("Walking Lunge", MuscleGroup.quads, [MuscleGroup.glutes, MuscleGroup.hamstrings], EquipmentType.dumbbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Bulgarian Split Squat", MuscleGroup.quads, [MuscleGroup.glutes, MuscleGroup.hamstrings], EquipmentType.dumbbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Leg Extension", MuscleGroup.quads, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Goblet Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound),
-    ("Hack Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.machine, DifficultyLevel.intermediate, MovementRole.compound),
+    ("Barbell Back Squat", MuscleGroup.quads, [MuscleGroup.glutes, MuscleGroup.hamstrings], EquipmentType.barbell, DifficultyLevel.advanced, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Squat/0.jpg"),
+    ("Front Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.barbell, DifficultyLevel.advanced, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Barbell_Squat/0.jpg"),
+    ("Leg Press", MuscleGroup.quads, [MuscleGroup.glutes, MuscleGroup.hamstrings], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Press/0.jpg"),
+    ("Walking Lunge", MuscleGroup.quads, [MuscleGroup.glutes, MuscleGroup.hamstrings], EquipmentType.dumbbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges/0.jpg"),
+    ("Bulgarian Split Squat", MuscleGroup.quads, [MuscleGroup.glutes, MuscleGroup.hamstrings], EquipmentType.dumbbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Split_Squat_with_Dumbbells/0.jpg"),
+    ("Leg Extension", MuscleGroup.quads, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Extensions/0.jpg"),
+    ("Goblet Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Goblet_Squat/0.jpg"),
+    ("Hack Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.machine, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hack_Squat/0.jpg"),
     # No bodyweight quad exercise above - a real gap for bodyweight-only users.
-    ("Bodyweight Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound),
+    ("Bodyweight Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bodyweight_Squat/0.jpg"),
 
-    ("Romanian Deadlift", MuscleGroup.hamstrings, [MuscleGroup.glutes, MuscleGroup.back], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Dumbbell RDL", MuscleGroup.hamstrings, [MuscleGroup.glutes, MuscleGroup.back], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound),
-    ("Lying Leg Curl", MuscleGroup.hamstrings, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Seated Leg Curl", MuscleGroup.hamstrings, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Good Morning", MuscleGroup.hamstrings, [MuscleGroup.back, MuscleGroup.glutes], EquipmentType.barbell, DifficultyLevel.advanced, MovementRole.compound),
-    ("Nordic Curl", MuscleGroup.hamstrings, [], EquipmentType.bodyweight, DifficultyLevel.advanced, MovementRole.isolation),
+    ("Romanian Deadlift", MuscleGroup.hamstrings, [MuscleGroup.glutes, MuscleGroup.back], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg"),
+    ("Dumbbell RDL", MuscleGroup.hamstrings, [MuscleGroup.glutes, MuscleGroup.back], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg"),
+    ("Lying Leg Curl", MuscleGroup.hamstrings, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Leg_Curls/0.jpg"),
+    ("Seated Leg Curl", MuscleGroup.hamstrings, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Leg_Curl/0.jpg"),
+    ("Good Morning", MuscleGroup.hamstrings, [MuscleGroup.back, MuscleGroup.glutes], EquipmentType.barbell, DifficultyLevel.advanced, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/0.jpg"),
+    ("Nordic Curl", MuscleGroup.hamstrings, [], EquipmentType.bodyweight, DifficultyLevel.advanced, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ball_Leg_Curl/0.jpg"),
 
-    ("Hip Thrust", MuscleGroup.glutes, [MuscleGroup.hamstrings], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound),
-    ("Glute Bridge", MuscleGroup.glutes, [MuscleGroup.hamstrings], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Cable Kickback", MuscleGroup.glutes, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Step-Up", MuscleGroup.glutes, [MuscleGroup.quads], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound),
+    ("Hip Thrust", MuscleGroup.glutes, [MuscleGroup.hamstrings], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg"),
+    ("Glute Bridge", MuscleGroup.glutes, [MuscleGroup.hamstrings], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Glute_Bridge/0.jpg"),
+    ("Cable Kickback", MuscleGroup.glutes, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Legged_Cable_Kickback/0.jpg"),
+    ("Step-Up", MuscleGroup.glutes, [MuscleGroup.quads], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Step_Ups/0.jpg"),
 
-    ("Standing Calf Raise", MuscleGroup.calves, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Seated Calf Raise", MuscleGroup.calves, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Dumbbell Calf Raise", MuscleGroup.calves, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Bodyweight Calf Raise", MuscleGroup.calves, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
+    ("Standing Calf Raise", MuscleGroup.calves, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/0.jpg"),
+    ("Seated Calf Raise", MuscleGroup.calves, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Calf_Raise/0.jpg"),
+    ("Dumbbell Calf Raise", MuscleGroup.calves, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Dumbbell_Calf_Raise/0.jpg"),
+    ("Bodyweight Calf Raise", MuscleGroup.calves, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rocking_Standing_Calf_Raise/0.jpg"),
 
-    ("Plank", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Hanging Leg Raise", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.isolation),
-    ("Cable Crunch", MuscleGroup.core, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Russian Twist", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Bicycle Crunch", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Ab Wheel Rollout", MuscleGroup.core, [MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.advanced, MovementRole.compound),
-    ("Side Plank", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Mountain Climber", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Sit-Up", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
-    ("Flutter Kick", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation),
+    ("Plank", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/0.jpg"),
+    ("Hanging Leg Raise", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/0.jpg"),
+    ("Cable Crunch", MuscleGroup.core, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crunch/0.jpg"),
+    ("Russian Twist", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Russian_Twist/0.jpg"),
+    ("Bicycle Crunch", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Air_Bike/0.jpg"),
+    ("Ab Wheel Rollout", MuscleGroup.core, [MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.advanced, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Roller/0.jpg"),
+    ("Side Plank", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push_Up_to_Side_Plank/0.jpg"),
+    ("Mountain Climber", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Mountain_Climbers/0.jpg"),
+    ("Sit-Up", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sit-Up/0.jpg"),
+    ("Flutter Kick", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flutter_Kicks/0.jpg"),
 ]
 
 
@@ -146,7 +147,7 @@ def seed_exercises(db: Session) -> tuple[int, int]:
     created = 0
     updated = 0
 
-    for name, muscle_group, secondary_groups, equipment, difficulty, movement_role in EXERCISES:
+    for name, muscle_group, secondary_groups, equipment, difficulty, movement_role, image_url in EXERCISES:
         secondary_values = [g.value for g in secondary_groups] or None
         row = existing.get(name)
         if row is None:
@@ -157,6 +158,7 @@ def seed_exercises(db: Session) -> tuple[int, int]:
                 equipment=equipment,
                 difficulty=difficulty,
                 movement_role=movement_role,
+                image_url=image_url,
             )
             db.add(row)
             existing[name] = row
@@ -167,11 +169,12 @@ def seed_exercises(db: Session) -> tuple[int, int]:
             row.equipment = equipment
             row.difficulty = difficulty
             row.movement_role = movement_role
+            row.image_url = image_url
             updated += 1
 
     db.flush()
 
-    for name, muscle_group, _secondary, equipment, _difficulty, _role in EXERCISES:
+    for name, muscle_group, _secondary, equipment, _difficulty, _role, _image_url in EXERCISES:
         alt_name = _pick_alternative(name, muscle_group, equipment)
         if alt_name is not None:
             existing[name].alternative_exercise_id = existing[alt_name].id

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Avatar } from '@/components/common/Avatar';
 import { Card } from '@/components/common/Card';
+import { GamificationSummaryCard } from '@/components/gamification/GamificationSummaryCard';
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { theme } from '@/constants/theme';
@@ -24,6 +25,10 @@ export function HomeScreen({ navigation }: any) {
         <Avatar name={user?.full_name} size={44} />
       </View>
 
+      <GamificationSummaryCard
+        onPressAchievements={() => navigation.getParent()?.navigate('Achievements')}
+      />
+
       <LinearGradient
         colors={theme.gradients.accent}
         start={{ x: 0, y: 0 }}
@@ -42,6 +47,23 @@ export function HomeScreen({ navigation }: any) {
           <Text style={styles.bannerSubtitle}>34 Minutes</Text>
         </View>
       </LinearGradient>
+
+      <View style={styles.quickActions}>
+        <Card
+          style={styles.actionCard}
+          onPress={() => navigation.getParent()?.navigate('BodyMeasurements')}
+        >
+          <Ionicons name="body-outline" size={20} color={theme.colors.primary} />
+          <Text style={styles.actionText}>Measurements</Text>
+        </Card>
+        <Card
+          style={styles.actionCard}
+          onPress={() => navigation.getParent()?.navigate('SocialFeed')}
+        >
+          <Ionicons name="people-outline" size={20} color={theme.colors.primary} />
+          <Text style={styles.actionText}>Social</Text>
+        </Card>
+      </View>
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Popular Exercises</Text>
@@ -81,6 +103,14 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   greeting: { color: theme.colors.muted, fontSize: 14 },
   title: { color: theme.colors.text, fontSize: 24, fontWeight: '800' },
+  quickActions: { flexDirection: 'row', gap: theme.spacing.md },
+  actionCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+  },
+  actionText: { color: theme.colors.text, fontSize: 13, fontWeight: '600' },
   banner: {
     borderRadius: theme.radius.lg,
     padding: theme.spacing.lg,

@@ -11,6 +11,10 @@ import { GeneratePlanScreen } from '@/screens/plan/GeneratePlanScreen';
 import { WorkoutDetailScreen } from '@/screens/workouts/WorkoutDetailScreen';
 import { WorkoutEditorScreen } from '@/screens/workouts/WorkoutEditorScreen';
 import { LogSessionScreen } from '@/screens/workouts/LogSessionScreen';
+import { PRHistoryScreen } from '@/screens/progress/PRHistoryScreen';
+import { BodyMeasurementsScreen } from '@/screens/progress/BodyMeasurementsScreen';
+import { AchievementsScreen } from '@/screens/social/AchievementsScreen';
+import { SocialFeedScreen } from '@/screens/social/SocialFeedScreen';
 import { RootStackParamList } from './types';
 
 type Props = {
@@ -33,6 +37,10 @@ export function RootNavigator({ isAuthenticated }: Props) {
       <Root.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
       <Root.Screen name="WorkoutEditor" component={WorkoutEditorScreen} />
       <Root.Screen name="LogSession" component={LogSessionScreen} />
+      <Root.Screen name="PRHistory" component={PRHistoryScreen} />
+      <Root.Screen name="BodyMeasurements" component={BodyMeasurementsScreen} />
+      <Root.Screen name="Achievements" component={AchievementsScreen} />
+      <Root.Screen name="SocialFeed" component={SocialFeedScreen} />
     </Root.Navigator>
   );
 }

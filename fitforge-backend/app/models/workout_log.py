@@ -2,7 +2,7 @@ import enum
 from datetime import date
 from typing import List
 
-from sqlalchemy import Date, Enum, Float, ForeignKey, Integer
+from sqlalchemy import Boolean, Date, Enum, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -40,6 +40,7 @@ class LogSet(Base):
     weight_kg: Mapped[float] = mapped_column(Float, nullable=True)
     reps: Mapped[int] = mapped_column(Integer)
     set_number: Mapped[int] = mapped_column(Integer)
+    is_personal_record: Mapped[bool] = mapped_column(Boolean, default=False)
 
     workout_log = relationship("WorkoutLog", back_populates="log_sets")
     exercise = relationship("Exercise")

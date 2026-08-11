@@ -63,6 +63,7 @@ class Exercise(Base):
         Enum(MovementRole), default=MovementRole.isolation, index=True
     )
     video_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    image_url: Mapped[str] = mapped_column(String(500), nullable=True)
     instructions: Mapped[str] = mapped_column(String, nullable=True)
     alternative_exercise_id: Mapped[int] = mapped_column(
         ForeignKey("exercises.id"), nullable=True

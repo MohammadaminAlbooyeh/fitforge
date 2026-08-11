@@ -13,6 +13,7 @@ class ExerciseCreate(BaseModel):
     difficulty: DifficultyLevel = DifficultyLevel.beginner
     movement_role: MovementRole = MovementRole.isolation
     video_url: Optional[str] = None
+    image_url: Optional[str] = None
     instructions: Optional[str] = None
     alternative_exercise_id: Optional[int] = None
 
@@ -28,5 +29,6 @@ class ExerciseRead(BaseModel):
     difficulty: DifficultyLevel
     movement_role: MovementRole
     video_url: Optional[str] = None
+    image_url: Optional[str] = None
     instructions: Optional[str] = None
     alternative_exercise_id: Optional[int] = None

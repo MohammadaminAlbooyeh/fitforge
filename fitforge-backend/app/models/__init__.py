@@ -6,6 +6,9 @@ from app.models.nutrition import NutritionLog
 from app.models.workout_session import WorkoutSession
 from app.models.workout_plan import WorkoutPlan, PlanDay, PlanDayExercise, SplitType, PlanStatus
 from app.models.workout_log import WorkoutLog, LogSet, LogStatus
+from app.models.body_measurement import BodyMeasurement
+from app.models.achievement import Achievement, UserXP
+from app.models.social import Follow, Challenge, ChallengeStatus, ChallengeParticipant
 
 __all__ = [
     "Base",
@@ -29,4 +32,11 @@ __all__ = [
     "WorkoutLog",
     "LogSet",
     "LogStatus",
+    "BodyMeasurement",
+    "Achievement",
+    "UserXP",
+    "Follow",
+    "Challenge",
+    "ChallengeStatus",
+    "ChallengeParticipant",
 ]

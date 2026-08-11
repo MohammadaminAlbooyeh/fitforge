@@ -1,17 +1,25 @@
 from fastapi import APIRouter, status
 
 from app.dependencies import CurrentUser, DbSession
-from app.schemas.workout_log import WorkoutLogCreate, WorkoutLogRead
-from app.services import workout_log_service
+from app.schemas.workout_log import PersonalRecordRead, WorkoutLogCreate, WorkoutLogRead
+from app.services import gamification_service, workout_log_service
 
 router = APIRouter()
 
 
 @router.post("/", response_model=WorkoutLogRead, status_code=status.HTTP_201_CREATED)
 def create_log(payload: WorkoutLogCreate, db: DbSession, current: CurrentUser):
-    return workout_log_service.create_log(db, current.user_id, payload)
+    log = workout_log_service.create_log(db, current.user_id, payload)
+    from datetime import date as _date
+    gamification_service.record_workout_xp(db, current.user_id, _date.today())
+    return log
 
 
 @router.get("/", response_model=list[WorkoutLogRead])
 def list_logs(db: DbSession, current: CurrentUser):
     return workout_log_service.list_logs(db, current.user_id)
+
+
+@router.get("/personal-records", response_model=list[PersonalRecordRead])
+def list_personal_records(db: DbSession, current: CurrentUser):
+    return workout_log_service.list_personal_records(db, current.user_id)

@@ -8,7 +8,9 @@ weekly frequency). Fixed lookup table, no computed logic:
 - 2 days -> Full Body x2 (varied exercise selection across A/B)
 - 3 days -> Full Body x3 (most evidence-backed default for beginners)
 - 4 days -> Upper / Lower x2 (Upper A, Lower A, Upper B, Lower B)
-- 5 days -> Push / Pull / Legs + Upper / Lower (the common real-world 5-day hybrid)
+- 5 days -> Upper / Lower x2.5 (Upper A, Lower A, Upper B, Lower B, Upper C —
+  3 upper days + 2 lower days, matching weekly training-day availability
+  more heavily toward upper body)
 
 Experience level is intentionally NOT used to pick the split type (v2 concern);
 it only affects which difficulty tier of exercise gets selected.
@@ -20,9 +22,6 @@ target counts below:
   Full Body (6): quads, hamstrings, chest, back, shoulders, core
   Upper      (5): chest, back, shoulders, biceps, triceps
   Lower      (5): quads, hamstrings, glutes, calves, core
-  Push       (5): chest x2, shoulders, triceps x2
-  Pull       (5): back x3, biceps x2
-  Legs       (6): quads x2, hamstrings x2, glutes, calves
 
 Within a day, slots are filled by querying the exercise library for that
 muscle group, filtered by the user's available equipment and capped at their
@@ -61,29 +60,6 @@ LOWER_SLOTS = [
     MuscleGroup.calves,
     MuscleGroup.core,
 ]
-PUSH_SLOTS = [
-    MuscleGroup.chest,
-    MuscleGroup.chest,
-    MuscleGroup.shoulders,
-    MuscleGroup.triceps,
-    MuscleGroup.triceps,
-]
-PULL_SLOTS = [
-    MuscleGroup.back,
-    MuscleGroup.back,
-    MuscleGroup.back,
-    MuscleGroup.biceps,
-    MuscleGroup.biceps,
-]
-LEGS_SLOTS = [
-    MuscleGroup.quads,
-    MuscleGroup.quads,
-    MuscleGroup.hamstrings,
-    MuscleGroup.hamstrings,
-    MuscleGroup.glutes,
-    MuscleGroup.calves,
-]
-
 # days_per_week -> (split_type, [(day_title, slot_list), ...])
 SPLIT_RULES: dict[int, tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]] = {
     1: (SplitType.full_body, [("Full Body", FULL_BODY_SLOTS)]),
@@ -109,13 +85,13 @@ SPLIT_RULES: dict[int, tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]] = 
         ],
     ),
     5: (
-        SplitType.push_pull_legs,
+        SplitType.upper_lower,
         [
-            ("Push", PUSH_SLOTS),
-            ("Pull", PULL_SLOTS),
-            ("Legs", LEGS_SLOTS),
-            ("Upper", UPPER_SLOTS),
-            ("Lower", LOWER_SLOTS),
+            ("Upper A", UPPER_SLOTS),
+            ("Lower A", LOWER_SLOTS),
+            ("Upper B", UPPER_SLOTS),
+            ("Lower B", LOWER_SLOTS),
+            ("Upper C", UPPER_SLOTS),
         ],
     ),
 }

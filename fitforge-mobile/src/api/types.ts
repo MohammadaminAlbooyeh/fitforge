@@ -11,6 +11,7 @@ import type {
   EntitlementsContract,
   ExerciseLibraryContract,
   PlanDayExerciseContract,
+  PlanDayExerciseUpdateContract,
   PlanDayContract,
   WorkoutPlanContract,
   GeneratePlanRequestContract,
@@ -18,6 +19,20 @@ import type {
   LogSetContract,
   WorkoutLogCreateContract,
   WorkoutLogContract,
+  PersonalRecordContract,
+  BodyMeasurementContract,
+  AchievementContract,
+  UserXPContract,
+  GamificationSummaryContract,
+  UserPublicProfileContract,
+  LeaderboardEntryContract,
+  ChallengeContract,
+  ChallengeParticipantContract,
+  WeeklyVolumeContract,
+  ExerciseProgressionContract,
+  BodyTrendContract,
+  EnhancedAnalyticsContract,
+  AnalyticsSummaryContract,
 } from '../../../shared/types/api-contracts';
 
 export type User = UserContract;
@@ -32,6 +47,7 @@ export type WorkoutSessionSetInput = WorkoutSessionSetContract;
 export type WorkoutSession = WorkoutSessionContract;
 export type ExerciseLibraryItem = ExerciseLibraryContract;
 export type PlanDayExercise = PlanDayExerciseContract;
+export type PlanDayExerciseUpdate = PlanDayExerciseUpdateContract;
 export type PlanDay = PlanDayContract;
 export type WorkoutPlan = WorkoutPlanContract;
 export type GeneratePlanRequest = GeneratePlanRequestContract;
@@ -39,6 +55,20 @@ export type LogSetInput = LogSetInputContract;
 export type LogSet = LogSetContract;
 export type WorkoutLogCreateInput = WorkoutLogCreateContract;
 export type WorkoutLog = WorkoutLogContract;
+export type PersonalRecord = PersonalRecordContract;
+export type BodyMeasurement = BodyMeasurementContract;
+export type Achievement = AchievementContract;
+export type UserXP = UserXPContract;
+export type GamificationSummary = GamificationSummaryContract;
+export type UserPublicProfile = UserPublicProfileContract;
+export type LeaderboardEntry = LeaderboardEntryContract;
+export type Challenge = ChallengeContract;
+export type ChallengeParticipant = ChallengeParticipantContract;
+export type WeeklyVolume = WeeklyVolumeContract;
+export type ExerciseProgression = ExerciseProgressionContract;
+export type BodyTrend = BodyTrendContract;
+export type EnhancedAnalytics = EnhancedAnalyticsContract;
+export type AnalyticsSummary = AnalyticsSummaryContract;
 
 export type AuthResponse = {
   access_token: string;
@@ -77,13 +107,6 @@ export type WorkoutSessionCreateInput = {
   sets?: WorkoutSessionSetInput[];
 };
 
-export type AnalyticsSummary = {
-  total_workouts: number;
-  total_sessions: number;
-  total_sets: number;
-  most_recent_workout?: string | null;
-};
-
 export type UserUpdateInput = {
   gender?: string | null;
   birth_date?: string | null;
@@ -103,4 +126,15 @@ export type NutritionLogCreateInput = {
   protein_g?: number;
   carbs_g?: number;
   fat_g?: number;
+};
+
+export type BodyMeasurementCreateInput = {
+  date: string;
+  weight_kg?: number | null;
+  body_fat_pct?: number | null;
+  chest_cm?: number | null;
+  waist_cm?: number | null;
+  arms_cm?: number | null;
+  thighs_cm?: number | null;
+  notes?: string | null;
 };

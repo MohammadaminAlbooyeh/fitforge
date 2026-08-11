@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { SetLogger } from '@/components/workout/SetLogger';
 import { RestTimer } from '@/components/workout/RestTimer';
@@ -7,11 +8,12 @@ import { Button } from '@/components/common/Button';
 import { createWorkoutSession } from '@/api/workouts';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { theme } from '@/constants/theme';
+import { getMuscleGroupVisual } from '@/utils/muscleGroupIcon';
 
 const DEFAULT_REST_SECONDS = 90;
 
 type SetEntry = { weight: string; reps: string; completed: boolean };
-type ExerciseGroup = { exerciseId: number; label: string; sets: SetEntry[] };
+type ExerciseGroup = { exerciseId: number; label: string; muscleGroup?: string | null; sets: SetEntry[] };
 
 export function LogSessionScreen({ route }: any) {
   const { workoutId } = route.params;
@@ -28,6 +30,7 @@ export function LogSessionScreen({ route }: any) {
         workout.exercises.map((entry) => ({
           exerciseId: entry.exercise.id,
           label: entry.exercise.name,
+          muscleGroup: entry.exercise.muscle_group,
           sets: Array.from({ length: entry.sets ?? 1 }, () => ({
             weight: entry.weight_kg != null ? String(entry.weight_kg) : '',
             reps: entry.reps != null ? String(entry.reps) : '',
@@ -98,9 +101,19 @@ export function LogSessionScreen({ route }: any) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Log session</Text>
       {!workout && <Text style={styles.error}>Workout not loaded yet.</Text>}
-      {groups.map((group, groupIndex) => (
+      {groups.map((group, groupIndex) => {
+        const visual = getMuscleGroupVisual(group.muscleGroup);
+        return (
         <View key={group.exerciseId} style={styles.exerciseBlock}>
-          <Text style={styles.exerciseName}>{group.label}</Text>
+          <View style={styles.exerciseHeader}>
+            <View style={[styles.exerciseIcon, { backgroundColor: `${visual.color}22` }]}>
+              <Ionicons name={visual.icon} size={20} color={visual.color} />
+            </View>
+            <View>
+              <Text style={styles.exerciseName}>{group.label}</Text>
+              <Text style={[styles.muscleLabel, { color: visual.color }]}>{visual.label}</Text>
+            </View>
+          </View>
           {group.sets.map((set, setIndex) => (
             <View key={setIndex}>
               <SetLogger
@@ -120,7 +133,8 @@ export function LogSessionScreen({ route }: any) {
             <Text style={styles.addSet}>+ Add set</Text>
           </Pressable>
         </View>
-      ))}
+        );
+      })}
       {error && <Text style={styles.error}>{error}</Text>}
       <Button title="Save session" onPress={saveSession} loading={saving} />
     </ScrollView>
@@ -140,4 +154,13 @@ const styles = StyleSheet.create({
   },
   exerciseName: { color: theme.colors.text, fontSize: 18, fontWeight: '700' },
   addSet: { color: theme.colors.primary, fontWeight: '700', paddingTop: theme.spacing.xs },
+  exerciseHeader: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm },
+  exerciseIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  muscleLabel: { fontSize: 12, fontWeight: '600' },
 });
