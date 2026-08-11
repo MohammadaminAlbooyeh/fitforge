@@ -19,7 +19,7 @@ export function WorkoutDetailScreen({ route, navigation }: any) {
       ))}
       <Button
         title="Log session"
-        onPress={() => navigation.getParent()?.navigate('LogSession', { workoutId })}
+        onPress={() => navigation.navigate('LogSession', { workoutId })}
       />
     </ScrollView>
   );

@@ -34,14 +34,15 @@ def upgrade() -> None:
     plan_status_enum = sa.Enum('active', 'archived', name='planstatus')
     log_status_enum = sa.Enum('completed', 'partial', name='logstatus')
 
+    # add_column (ALTER TABLE) does not auto-create the enum type, so these
+    # need an explicit create. create_table below auto-creates its own enum
+    # columns, so split_type_enum/plan_status_enum/log_status_enum must NOT
+    # be pre-created here or Postgres raises "type already exists".
     bind = op.get_bind()
     equipment_enum.create(bind, checkfirst=True)
     difficulty_enum.create(bind, checkfirst=True)
     movement_role_enum.create(bind, checkfirst=True)
     experience_enum.create(bind, checkfirst=True)
-    split_type_enum.create(bind, checkfirst=True)
-    plan_status_enum.create(bind, checkfirst=True)
-    log_status_enum.create(bind, checkfirst=True)
 
     op.add_column(
         'exercises',
