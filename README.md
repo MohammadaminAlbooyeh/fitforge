@@ -8,6 +8,7 @@ Fitness tracking app: workout planning, nutrition logging, and progress analytic
 .
 ├── backend/         # FastAPI + SQLAlchemy + Celery API
 ├── apps/mobile/     # React Native (Expo) app
+├── apps/web/        # (empty — no web app yet)
 ├── subscriptions/   # Spring Boot billing & entitlement service (port 8081)
 ├── shared/          # Shared API type contracts
 └── .github/         # CI workflows
