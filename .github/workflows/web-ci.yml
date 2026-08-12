@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - 'apps/web/**'
+  workflow_call: {}
 
 jobs:
   lint-and-build:

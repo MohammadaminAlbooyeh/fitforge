@@ -1,0 +1,58 @@
+# Builds and publishes the backend Docker image to GitHub Container Registry
+# on every push to main. Uses the built-in GITHUB_TOKEN, so the build/push
+# steps work with no extra setup.
+#
+# The final "deploy" step is a placeholder: point it at wherever this
+# actually runs (a `kubectl set image`, a Render/Fly/ECS deploy hook, etc.)
+# and add whatever secret it needs.
+name: CD - Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/cd-backend.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: cd-backend
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/backend
+
+jobs:
+  test:
+    uses: ./.github/workflows/backend-ci.yml
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
+
+      - name: Deploy
+        run: |
+          echo "TODO: deploy ${{ env.IMAGE_NAME }}:${{ github.sha }} to the target environment."
+          echo "e.g. kubectl set image deployment/backend backend=$IMAGE_NAME:${{ github.sha }}"
+          echo "or:  curl -X POST \$RENDER_DEPLOY_HOOK_URL"

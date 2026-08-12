@@ -1,0 +1,53 @@
+# Builds and publishes the web app Docker image to GitHub Container Registry
+# on every push to main. See cd-backend.yml for notes on the placeholder
+# deploy step (or swap this for a Vercel deploy if that's the target instead
+# of self-hosting the Docker image).
+name: CD - Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - '.github/workflows/cd-web.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: cd-web
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/web
+
+jobs:
+  test:
+    uses: ./.github/workflows/web-ci.yml
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/web
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
+
+      - name: Deploy
+        run: |
+          echo "TODO: deploy ${{ env.IMAGE_NAME }}:${{ github.sha }} to the target environment."

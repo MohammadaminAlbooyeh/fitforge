@@ -1,0 +1,58 @@
+# Builds and (optionally) submits the mobile app via EAS.
+#
+# Requires an EXPO_TOKEN repo secret (https://docs.expo.dev/eas/environment-variables/#using-secrets-in-eas-json).
+# Manual trigger only - app store submission is not something to run on every push.
+name: CD - Mobile (EAS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: all
+        type: choice
+        options: [all, ios, android]
+      profile:
+        description: 'EAS build profile (see apps/mobile/eas.json)'
+        required: true
+        default: production
+        type: choice
+        options: [preview, production]
+      submit:
+        description: 'Submit to the app store(s) after building'
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Build
+        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --no-wait
+
+      - name: EAS Submit
+        if: ${{ inputs.submit }}
+        run: eas submit --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --latest
