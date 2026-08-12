@@ -6,11 +6,11 @@ Fitness tracking app: workout planning, nutrition logging, and progress analytic
 
 ```
 .
-├── fitforge-backend/       # FastAPI + SQLAlchemy + Celery API
-├── fitforge-mobile/        # React Native (Expo) app
-├── fitforge-subscriptions/ # Spring Boot billing & entitlement service (port 8081)
-├── shared/                 # Shared API type contracts
-└── .github/                # CI workflows
+├── backend/         # FastAPI + SQLAlchemy + Celery API
+├── apps/mobile/     # React Native (Expo) app
+├── subscriptions/   # Spring Boot billing & entitlement service (port 8081)
+├── shared/          # Shared API type contracts
+└── .github/         # CI workflows
 ```
 
 ## Backend
@@ -18,7 +18,7 @@ Fitness tracking app: workout planning, nutrition logging, and progress analytic
 FastAPI application with layered structure: api → services → repositories → models.
 
 ```bash
-cd fitforge-backend
+cd backend
 cp .env.example .env
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -41,7 +41,7 @@ Tests run with `pytest` (uses an in-memory SQLite DB).
 Expo + React Native app.
 
 ```bash
-cd fitforge-mobile
+cd apps/mobile
 npm install
 npx expo start
 ```
@@ -62,15 +62,15 @@ Set env vars in `.env`:
 
 ## Subscriptions
 
-`fitforge-subscriptions` is a Spring Boot service that resolves entitlements. The backend
+`subscriptions` is a Spring Boot service that resolves entitlements. The backend
 proxies to it over HTTP.
 
 ```bash
-cd fitforge-subscriptions
+cd subscriptions
 mvn spring-boot:run
 ```
 
-Set in `fitforge-backend/.env`:
+Set in `backend/.env`:
 
 | Variable | Default |
 | --- | --- |
@@ -97,7 +97,7 @@ Traps / Legs & Abs / Arms, Monday–Friday, with the weekend as rest) through th
 - `GET /api/v1/plans/daily?offset=0` — today's plan (offset 0–6 shifts days)
 - `GET /api/v1/plans/week` — all seven days
 
-The plan data lives in `fitforge-backend/app/services/workout_plan_service.py` as plain
+The plan data lives in `backend/app/services/workout_plan_service.py` as plain
 structured data, so it is trivial to customize or replace. It is surfaced in the mobile app on
 the **Exercise** screen.
 
@@ -117,7 +117,7 @@ kept as distinct tables so progressive-overload history can be computed from rea
   pairing each exercise with another in the same muscle group on different (ideally
   bodyweight) equipment. Seed/refresh with:
   ```bash
-  cd fitforge-backend && python -m app.seed
+  cd backend && python -m app.seed
   ```
 - **Split algorithm** (`app/services/plan_generator.py`): a fixed lookup table, no ML and no
   branching on experience level (that's a v2 concern) — more available days means more

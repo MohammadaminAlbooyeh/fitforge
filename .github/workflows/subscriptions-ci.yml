@@ -4,18 +4,18 @@ on:
   push:
     branches: [main]
     paths:
-      - 'fitforge-subscriptions/**'
+      - 'subscriptions/**'
   pull_request:
     branches: [main]
     paths:
-      - 'fitforge-subscriptions/**'
+      - 'subscriptions/**'
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: fitforge-subscriptions
+        working-directory: subscriptions
 
     steps:
       - uses: actions/checkout@v4

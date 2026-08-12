@@ -10,7 +10,7 @@ from app.services.entitlement_client import get_entitlements
 def requires_pro(user: CurrentUser) -> None:
     """FastAPI dependency that blocks a route unless the user has an active Pro plan.
 
-    The entitlement is resolved through fitforge-subscriptions, either from a local
+    The entitlement is resolved through the subscriptions service, either from a local
     cache or via an HTTP call to the Java service.
     """
     entitlements = get_entitlements(user.user_id)

@@ -26,10 +26,10 @@ services:
       retries: 10
 
   backend:
-    build: ./fitforge-backend
+    build: ./backend
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ./fitforge-backend:/app
+      - ./backend:/app
     environment:
       - DATABASE_URL=postgresql+psycopg://fitforge:fitforge@postgres:5432/fitforge
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -45,10 +45,10 @@ services:
         condition: service_healthy
 
   worker:
-    build: ./fitforge-backend
+    build: ./backend
     command: celery -A app.core.celery_app.celery_app worker --loglevel=info
     volumes:
-      - ./fitforge-backend:/app
+      - ./backend:/app
     environment:
       - DATABASE_URL=postgresql+psycopg://fitforge:fitforge@postgres:5432/fitforge
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -61,7 +61,7 @@ services:
         condition: service_healthy
 
   subscriptions:
-    build: ./fitforge-subscriptions
+    build: ./subscriptions
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/fitforge
       - SPRING_DATASOURCE_USERNAME=fitforge
