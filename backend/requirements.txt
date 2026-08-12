@@ -14,6 +14,13 @@ redis==5.2.1
 # migrations
 alembic==1.14.0
 
+# observability
+opentelemetry-sdk==1.29.0
+opentelemetry-instrumentation-fastapi==0.50b0
+opentelemetry-instrumentation-sqlalchemy==0.50b0
+opentelemetry-exporter-otlp-proto-grpc==1.29.0
+prometheus-fastapi-instrumentator==7.0.0
+
 # testing
 pytest==8.3.4
 pytest-asyncio==0.25.2

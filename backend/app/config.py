@@ -32,6 +32,10 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: list[str] = ["*"]
 
+    OTEL_ENABLED: bool = False
+    OTEL_EXPORTER_OTLP_ENDPOINT: str = "http://localhost:4317"
+    OTEL_SERVICE_NAME: str = "fitforge-backend"
+
     @model_validator(mode="after")
     def _require_secret_key_outside_debug(self) -> "Settings":
         if not self.DEBUG and self.SECRET_KEY == "change-me":

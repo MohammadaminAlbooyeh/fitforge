@@ -36,6 +36,8 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - SERVICE_TOKEN=dev-service-token
       - DEBUG=true
+      - OTEL_ENABLED=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
     ports:
       - "8000:8000"
     depends_on:
@@ -68,11 +70,47 @@ services:
       - SPRING_DATASOURCE_PASSWORD=fitforge
       - SERVICE_TOKEN=dev-service-token
       - REVENUECAT_WEBHOOK_SECRET=dev-revenuecat-webhook-secret
+      - OTEL_ENABLED=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
     ports:
       - "8081:8081"
     depends_on:
       postgres:
         condition: service_healthy
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.62
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC receiver
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+      - subscriptions
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - jaeger
+
 volumes:
   postgres_data:
+  grafana_data:

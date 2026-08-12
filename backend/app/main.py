@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from app.api.v1.router import api_router
 from app.config import get_settings
 from app.core.exceptions import FitForgeError
+from app.core.telemetry import setup_telemetry
 
 settings = get_settings()
 
@@ -31,6 +32,8 @@ async def fitforge_exception_handler(_request, exc: FitForgeError):
 
 
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+setup_telemetry(app)
 
 
 @app.get("/health", tags=["health"])

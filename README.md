@@ -178,6 +178,24 @@ either fails the PR (if out of date) or auto-commits the update on `main`. To re
 ./shared/scripts/generate-api-contracts.sh
 ```
 
+## Observability
+
+The backend and subscriptions service both export OpenTelemetry traces (OTLP/gRPC) and
+Prometheus metrics, so a request spanning both services (e.g. `POST
+/api/v1/subscriptions/purchase` calling into `subscriptions`) shows up as a single connected
+trace.
+
+- Backend: `/metrics` (Prometheus), traces gated behind `OTEL_ENABLED=true` +
+  `OTEL_EXPORTER_OTLP_ENDPOINT` (off by default so `pytest`/local dev without Docker doesn't
+  need a collector running).
+- Subscriptions: `/actuator/prometheus`, traces gated behind `OTEL_ENABLED=true` (Spring
+  property `management.tracing.enabled`) + `OTEL_EXPORTER_OTLP_ENDPOINT`.
+
+`docker compose up` starts Jaeger (`localhost:16686`), Prometheus (`localhost:9090`), and
+Grafana (`localhost:3000`, anonymous viewer access, Prometheus + Jaeger datasources
+pre-provisioned via `observability/grafana/provisioning`) alongside the app services, with
+`OTEL_ENABLED=true` already set for backend/subscriptions.
+
 ## Full stack with Docker
 
 ```bash
