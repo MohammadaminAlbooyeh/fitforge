@@ -61,6 +61,16 @@ Set env vars in `.env`:
 `expo-health-kit`. It requires a development build (not Expo Go) and the
 `expo-health-kit` config plugin already declared in `app.config.ts`.
 
+## Web (admin)
+
+Next.js app for internal/admin use (managing exercises, subscriptions, etc.).
+
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+
 ## Subscriptions
 
 `subscriptions` is a Spring Boot service that resolves entitlements. The backend
@@ -146,6 +156,17 @@ kept as distinct tables so progressive-overload history can be computed from rea
 
 The mobile app is not yet wired to this engine (it still shows the static Hevy split on the
 Exercise screen) — that's the next step if you want it surfaced in the UI.
+
+## API contracts
+
+`shared/types/api-contracts.ts` is hand-written; `shared/types/api-contracts.generated.ts` is
+generated from the backend's live OpenAPI schema and kept in sync automatically by CI
+(`.github/workflows/api-contracts-sync.yml`), which regenerates it on every backend change and
+either fails the PR (if out of date) or auto-commits the update on `main`. To regenerate locally:
+
+```bash
+./shared/scripts/generate-api-contracts.sh
+```
 
 ## Full stack with Docker
 

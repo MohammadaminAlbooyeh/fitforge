@@ -1,0 +1,60 @@
+name: API Contracts Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'shared/types/api-contracts.generated.ts'
+      - 'shared/scripts/generate-api-contracts.sh'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'shared/types/api-contracts.generated.ts'
+      - 'shared/scripts/generate-api-contracts.sh'
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: Regenerate contracts
+        env:
+          DATABASE_URL: postgresql+psycopg://fitforge:fitforge@localhost:5432/fitforge
+        run: ./shared/scripts/generate-api-contracts.sh
+
+      - name: Fail if generated contracts are out of date
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! git diff --quiet -- shared/types/api-contracts.generated.ts; then
+            echo "::error::shared/types/api-contracts.generated.ts is out of date."
+            echo "Run ./shared/scripts/generate-api-contracts.sh locally and commit the result."
+            git diff -- shared/types/api-contracts.generated.ts
+            exit 1
+          fi
+
+      - name: Auto-commit on main
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          if ! git diff --quiet -- shared/types/api-contracts.generated.ts; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add shared/types/api-contracts.generated.ts
+            git commit -m "chore: sync generated API contracts [skip ci]"
+            git push
+          fi

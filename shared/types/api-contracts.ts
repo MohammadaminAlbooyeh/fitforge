@@ -1,6 +1,9 @@
-// API contracts shared across backend and mobile.
-// Keep in sync with the backend OpenAPI schema at /api/v1/openapi.json.
-// Generation (optional): run `openapi-typescript` against the live schema.
+// Hand-written, ergonomic API contracts shared across backend and mobile.
+//
+// For the fully generated, always-in-sync schema types, see
+// shared/types/api-contracts.generated.ts, produced by
+// ./shared/scripts/generate-api-contracts.sh and checked by CI
+// (.github/workflows/api-contracts-sync.yml).
 
 export interface UserContract {
   id: number;
