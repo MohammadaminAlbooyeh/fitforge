@@ -1,0 +1,60 @@
+# Runs the Maestro E2E flows in .maestro/flows against a real Android emulator.
+#
+# Requires repo secrets before this will pass:
+#   EXPO_TOKEN               - EAS build auth token (https://docs.expo.dev/eas/environment-variables)
+#   MAESTRO_TEST_EMAIL       - an existing seeded account on the target backend
+#   MAESTRO_TEST_PASSWORD    - that account's password
+# The build points at whatever EXPO_PUBLIC_API_URL is baked into the "preview" EAS
+# profile (apps/mobile/eas.json) - point that at a real staging backend.
+#
+# Left as workflow_dispatch-only (not on every push/PR) until those are configured,
+# so it doesn't fail CI for everyone by default.
+name: Mobile E2E (Maestro)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  e2e-android:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      MAESTRO_TEST_EMAIL: ${{ secrets.MAESTRO_TEST_EMAIL }}
+      MAESTRO_TEST_PASSWORD: ${{ secrets.MAESTRO_TEST_PASSWORD }}
+      MAESTRO_NEW_USER_EMAIL: maestro-${{ github.run_id }}@example.com
+      MAESTRO_NEW_USER_PASSWORD: MaestroTest123!
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/mobile
+        run: npm ci
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Build Android app (EAS local build)
+        working-directory: apps/mobile
+        run: npx eas-cli build --platform android --profile preview --local --non-interactive --output ./app-preview.apk
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Run Android emulator + Maestro flows
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          profile: pixel_6
+          script: |
+            adb install apps/mobile/app-preview.apk
+            maestro test apps/mobile/.maestro/flows/login.yaml apps/mobile/.maestro/flows/register.yaml apps/mobile/.maestro/flows/paywall.yaml apps/mobile/.maestro/flows/log-workout.yaml

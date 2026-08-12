@@ -55,6 +55,16 @@ Set env vars in `.env`:
 | `EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY` | RevenueCat Apple public SDK key (for in-app purchases) |
 | `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY` | RevenueCat Google public SDK key (for in-app purchases) |
 
+### E2E tests (Maestro)
+
+`apps/mobile/.maestro/flows/` covers login, register, paywall, and logging a workout session,
+run against a real emulator/simulator build (unit tests with Jest don't exercise real
+navigation/UI). Run locally with `maestro test apps/mobile/.maestro/flows/login.yaml` etc.
+(after installing the [Maestro CLI](https://maestro.mobile.dev) and having the app running on a
+simulator/emulator). `.github/workflows/mobile-e2e.yml` runs the full suite on an Android
+emulator in CI; it's `workflow_dispatch`-only until `EXPO_TOKEN`, `MAESTRO_TEST_EMAIL`, and
+`MAESTRO_TEST_PASSWORD` repo secrets are set up against a real staging backend.
+
 ### Health data
 
 `useHealthSync` reads Apple HealthKit samples (steps, workouts, heart rate) on iOS via

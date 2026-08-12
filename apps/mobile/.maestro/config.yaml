@@ -1,0 +1,4 @@
+# Maestro workspace config: https://maestro.mobile.dev/getting-started/maestro-cli
+# Runs all flows via `maestro test .maestro`.
+flows:
+  - .maestro/flows/*.yaml

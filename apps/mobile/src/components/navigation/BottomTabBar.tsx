@@ -46,7 +46,13 @@ export function BottomTabBar({ state, navigation }: BottomTabBarProps) {
 
           if (isCenter) {
             return (
-              <Pressable key={route.key} onPress={onPress} style={styles.fab}>
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                style={styles.fab}
+                accessibilityLabel="New workout"
+                testID="tab-new-workout"
+              >
                 <Ionicons name="add" size={28} color="#FFFFFF" />
               </Pressable>
             );
@@ -56,7 +62,13 @@ export function BottomTabBar({ state, navigation }: BottomTabBarProps) {
           const iconName = iconSet[route.name] ?? 'ellipse-outline';
 
           return (
-            <Pressable key={route.key} onPress={onPress} style={styles.tabItem}>
+            <Pressable
+              key={route.key}
+              onPress={onPress}
+              style={styles.tabItem}
+              accessibilityLabel={`${route.name} tab`}
+              testID={`tab-${route.name.toLowerCase()}`}
+            >
               <Ionicons
                 name={iconName}
                 size={22}

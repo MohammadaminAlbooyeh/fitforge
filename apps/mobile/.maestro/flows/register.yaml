@@ -1,0 +1,14 @@
+appId: com.fitforge.app
+---
+- launchApp
+- assertVisible: "Sign In"
+- tapOn: "Register"
+- assertVisible: "Sign Up"
+- tapOn: "Full name"
+- inputText: "Maestro Test User"
+- tapOn: "Email Address (e.g. john@domain.com)"
+- inputText: ${MAESTRO_NEW_USER_EMAIL}
+- tapOn: "Password (One special number must)"
+- inputText: ${MAESTRO_NEW_USER_PASSWORD}
+- tapOn: "Sign Up"
+- assertVisible: "My Workouts"

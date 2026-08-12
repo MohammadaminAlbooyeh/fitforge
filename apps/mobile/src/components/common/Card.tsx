@@ -9,9 +9,10 @@ type Props = {
   onPress?: () => void;
   style?: object;
   children?: React.ReactNode;
+  testID?: string;
 };
 
-export function Card({ title, subtitle, onPress, style, children }: Props) {
+export function Card({ title, subtitle, onPress, style, children, testID }: Props) {
   const content = (
     <View style={[styles.card, style]}>
       {title && <Text style={styles.title}>{title}</Text>}
@@ -22,7 +23,11 @@ export function Card({ title, subtitle, onPress, style, children }: Props) {
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => pressed && styles.pressed}
+        testID={testID}
+      >
         {content}
       </Pressable>
     );

@@ -29,6 +29,7 @@ export function WorkoutListScreen({ navigation }: any) {
             title={item.name}
             subtitle={`${item.exercises.length} exercise(s)`}
             onPress={() => navigation.navigate('WorkoutDetail', { workoutId: item.id })}
+            testID={`workout-card-${item.id}`}
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: theme.spacing.sm }} />}

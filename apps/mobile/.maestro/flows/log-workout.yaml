@@ -1,0 +1,19 @@
+appId: com.fitforge.app
+---
+- launchApp
+- assertVisible: "Sign In"
+- tapOn: "Email"
+- inputText: ${MAESTRO_TEST_EMAIL}
+- tapOn: "Password"
+- inputText: ${MAESTRO_TEST_PASSWORD}
+- tapOn: "Sign In"
+- assertVisible: "My Workouts"
+- tapOn: "Workouts tab"
+- assertVisible: "My Workouts"
+# Assumes the test account already has at least one workout created.
+- tapOn:
+    id: "workout-card-.*"
+    index: 0
+- assertVisible: "Log session"
+- tapOn: "Log session"
+- tapOn: "Save session"
