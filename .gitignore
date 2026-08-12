@@ -49,3 +49,5 @@ eas-hooks/
 # Misc
 coverage/
 htmlcov/
+# local database files
+data/
