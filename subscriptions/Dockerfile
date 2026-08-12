@@ -7,7 +7,7 @@ COPY src ./src
 RUN mvn -q package -DskipTests
 
 # ---- Stage 2: runtime ----
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 COPY --from=build /app/target/subscriptions-*.jar app.jar
 EXPOSE 8081
