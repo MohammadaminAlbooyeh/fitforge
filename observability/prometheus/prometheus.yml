@@ -5,9 +5,9 @@ scrape_configs:
   - job_name: fitforge-backend
     metrics_path: /metrics
     static_configs:
-      - targets: ["backend:8000"]
+      - targets: ["localhost:8000"]
 
   - job_name: fitforge-subscriptions
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["subscriptions:8081"]
+      - targets: ["localhost:8081"]
