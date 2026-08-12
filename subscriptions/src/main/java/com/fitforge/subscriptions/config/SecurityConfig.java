@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/entitlements/**").hasAuthority("SCOPE_service")
                         .requestMatchers(HttpMethod.POST, "/webhooks/**").permitAll()
                         .anyRequest().authenticated())
@@ -43,6 +44,11 @@ public class SecurityConfig {
         return new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+                String path = request.getRequestURI();
+                if (path.startsWith("/actuator")) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
                 String token = request.getHeader("X-Service-Token");
                 String expected = System.getenv("SERVICE_TOKEN");
                 if (expected != null && !expected.isBlank() && expected.equals(token)) {
