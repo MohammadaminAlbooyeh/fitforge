@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Avatar } from '@/components/common/Avatar';
 import { Card } from '@/components/common/Card';
 import { GamificationSummaryCard } from '@/components/gamification/GamificationSummaryCard';
+import { DailyPlanCard } from '@/components/plan/DailyPlanCard';
 import { useAuth } from '@/hooks/useAuth';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { theme } from '@/constants/theme';
@@ -27,6 +28,10 @@ export function HomeScreen({ navigation }: any) {
 
       <GamificationSummaryCard
         onPressAchievements={() => navigation.getParent()?.navigate('Achievements')}
+      />
+
+      <DailyPlanCard
+        onPress={() => navigation.getParent()?.navigate('DailyPlan')}
       />
 
       <LinearGradient
