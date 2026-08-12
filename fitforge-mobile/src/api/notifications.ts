@@ -1,5 +1,3 @@
-// TODO: no screen calls sendTestNotification() yet - there is no UI for
-// scheduling or testing workout reminders.
 import { api } from './client';
 
 export async function sendTestNotification(workoutName: string): Promise<void> {

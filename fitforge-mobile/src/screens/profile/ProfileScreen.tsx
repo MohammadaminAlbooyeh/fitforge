@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Avatar } from '@/components/common/Avatar';
@@ -47,7 +47,11 @@ export function ProfileScreen({ navigation }: any) {
 
       <Card>
         <MenuRow icon="person-outline" label="Edit profile" />
-        <MenuRow icon="notifications-outline" label="Notifications" />
+        <MenuRow
+          icon="notifications-outline"
+          label="Notifications"
+          onPress={() => navigation.getParent()?.navigate('NotificationSettings')}
+        />
         <MenuRow icon="shield-checkmark-outline" label="Privacy" />
       </Card>
 
@@ -65,15 +69,24 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MenuRow({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+function MenuRow({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress?: () => void;
+}) {
+  const Wrapper = onPress ? Pressable : View;
   return (
-    <View style={styles.menuRow}>
+    <Wrapper style={styles.menuRow} onPress={onPress}>
       <View style={styles.menuIcon}>
         <Ionicons name={icon} size={18} color={theme.colors.primary} />
       </View>
       <Text style={styles.menuLabel}>{label}</Text>
       <Ionicons name="chevron-forward" size={18} color={theme.colors.muted} />
-    </View>
+    </Wrapper>
   );
 }
 

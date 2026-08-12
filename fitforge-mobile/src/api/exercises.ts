@@ -1,5 +1,3 @@
-// TODO: no screen calls listExercises() yet - workout creation currently has
-// no way to pick from the exercise catalog.
 import { api } from './client';
 import { Exercise } from './types';
 

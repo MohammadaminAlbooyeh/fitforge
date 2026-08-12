@@ -32,6 +32,7 @@ export type RootStackParamList = {
   AddMeasurement: undefined;
   Achievements: undefined;
   SocialFeed: undefined;
+  NotificationSettings: undefined;
 };
 
 export type RootParamList = {
