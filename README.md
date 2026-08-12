@@ -210,6 +210,19 @@ swap it for a `kubectl set image`, a Render/Fly/ECS deploy hook, etc. once one e
 `cd-mobile.yml` builds (and optionally submits) the mobile app via EAS; it's manually triggered
 (`workflow_dispatch`) and needs an `EXPO_TOKEN` repo secret.
 
+## Security scanning
+
+- **Dependabot** (`.github/dependabot.yml`) opens PRs for outdated/vulnerable dependencies
+  across pip, npm (mobile + web), Maven, Docker base images, and GitHub Actions.
+- **CodeQL** (`.github/workflows/codeql.yml`) runs static analysis (SAST) across Python,
+  Java/Kotlin, and JS/TS on every push/PR and weekly, results in the repo's Security tab.
+- **Trivy** (`.github/workflows/trivy.yml`) scans dependency manifests for known CVEs on every
+  push/PR and weekly, also reporting into the Security tab.
+
+None of these need an external account/token — they run entirely on GitHub's own
+infrastructure. (A SonarQube/Snyk integration would add deeper code-quality/license checks but
+needs its own account and token, so it's left out for now.)
+
 ## Full stack with Docker
 
 ```bash
