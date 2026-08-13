@@ -17,6 +17,10 @@ import { AddMeasurementScreen } from '@/screens/progress/AddMeasurementScreen';
 import { AchievementsScreen } from '@/screens/social/AchievementsScreen';
 import { SocialFeedScreen } from '@/screens/social/SocialFeedScreen';
 import { NotificationSettingsScreen } from '@/screens/profile/NotificationSettingsScreen';
+import { EditProfileScreen } from '@/screens/profile/EditProfileScreen';
+import { GoalsScreen } from '@/screens/goals/GoalsScreen';
+import { ScheduleScreen } from '@/screens/schedule/ScheduleScreen';
+import { SettingsScreen } from '@/screens/settings/SettingsScreen';
 import { RootStackParamList } from './types';
 
 type Props = {
@@ -45,6 +49,10 @@ export function RootNavigator({ isAuthenticated }: Props) {
       <Root.Screen name="Achievements" component={AchievementsScreen} />
       <Root.Screen name="SocialFeed" component={SocialFeedScreen} />
       <Root.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+      <Root.Screen name="Goals" component={GoalsScreen} />
+      <Root.Screen name="Schedule" component={ScheduleScreen} />
+      <Root.Screen name="Settings" component={SettingsScreen} />
+      <Root.Screen name="EditProfile" component={EditProfileScreen} />
     </Root.Navigator>
   );
 }

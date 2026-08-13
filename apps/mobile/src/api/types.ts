@@ -114,6 +114,7 @@ export type WorkoutSessionCreateInput = {
 };
 
 export type UserUpdateInput = {
+  full_name?: string | null;
   gender?: string | null;
   birth_date?: string | null;
   height_cm?: number | null;

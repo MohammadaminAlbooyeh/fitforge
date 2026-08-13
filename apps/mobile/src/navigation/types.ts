@@ -33,6 +33,10 @@ export type RootStackParamList = {
   Achievements: undefined;
   SocialFeed: undefined;
   NotificationSettings: undefined;
+  Goals: undefined;
+  Schedule: undefined;
+  Settings: undefined;
+  EditProfile: undefined;
 };
 
 export type RootParamList = {

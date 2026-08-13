@@ -9,9 +9,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { theme } from '@/constants/theme';
 
+const GOAL_LABELS: Record<string, string> = {
+  lose_weight: 'Lose Weight',
+  gain_muscle: 'Gain Muscle',
+};
+
 export function ProfileScreen({ navigation }: any) {
   const { user, logout } = useAuth();
   const { entitlements, isPro, loading } = useSubscription();
+  const goalLabel = GOAL_LABELS[user?.goal ?? ''] ?? (user?.goal ?? '—');
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -24,7 +30,7 @@ export function ProfileScreen({ navigation }: any) {
       <View style={styles.statsRow}>
         <Stat label="Weight" value={user?.weight_kg ? `${user.weight_kg} kg` : '—'} />
         <Stat label="Height" value={user?.height_cm ? `${user.height_cm} cm` : '—'} />
-        <Stat label="Goal" value={user?.goal ?? '—'} />
+        <Stat label="Goal" value={goalLabel} />
       </View>
 
       <Card>
@@ -46,7 +52,26 @@ export function ProfileScreen({ navigation }: any) {
       </Card>
 
       <Card>
-        <MenuRow icon="person-outline" label="Edit profile" />
+        <MenuRow
+          icon="person-outline"
+          label="Edit profile"
+          onPress={() => navigation.getParent()?.navigate('EditProfile')}
+        />
+        <MenuRow
+          icon="flag-outline"
+          label="Goals"
+          onPress={() => navigation.getParent()?.navigate('Goals')}
+        />
+        <MenuRow
+          icon="calendar-outline"
+          label="Schedule"
+          onPress={() => navigation.getParent()?.navigate('Schedule')}
+        />
+        <MenuRow
+          icon="settings-outline"
+          label="Settings"
+          onPress={() => navigation.getParent()?.navigate('Settings')}
+        />
         <MenuRow
           icon="notifications-outline"
           label="Notifications"
