@@ -1,54 +1,125 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AuthGate from "@/components/AuthGate";
-import NavBar from "@/components/NavBar";
-import { apiFetch } from "@/lib/api";
-import { EntitlementsResponse } from "@/lib/types";
+import { useRouter } from "next/navigation";
+import { getEntitlements, apiFetch } from "@/lib/api";
+import { Card, Button, Badge } from "@/components/ui";
+import type { EntitlementsContract } from "@shared/types/api-contracts";
 
 export default function SubscriptionPage() {
-  return (
-    <AuthGate>
-      <NavBar />
-      <SubscriptionBody />
-    </AuthGate>
-  );
-}
-
-function SubscriptionBody() {
-  const [entitlements, setEntitlements] = useState<EntitlementsResponse | null>(null);
+  const router = useRouter();
+  const [entitlements, setEntitlements] = useState<EntitlementsContract | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    apiFetch<EntitlementsResponse>("/entitlements/me")
+    getEntitlements()
       .then(setEntitlements)
       .catch(() => setError("Could not load subscription info."));
   }, []);
 
+  const isPro = entitlements?.plan === "PRO";
+  const active = entitlements?.status === "ACTIVE";
+
+  const purchase = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = await apiFetch("/subscriptions/purchase", { method: "POST", body: "{}" });
+      setEntitlements(updated as never);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Purchase failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cancel = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await apiFetch("/subscriptions/cancel", { method: "POST" });
+      setEntitlements((prev) => (prev ? { ...prev, status: "CANCELLED" } : prev));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Cancel failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (isPro) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-extrabold text-text">Manage Subscription</h1>
+        <Card>
+          <div className="flex items-center justify-between">
+            <p className="font-bold text-text">Plan</p>
+            <Badge color="primarysoft">PRO</Badge>
+          </div>
+          <div className="mt-3 flex items-center justify-between text-sm">
+            <span className="text-muted">Status</span>
+            <span className={`font-semibold ${active ? "text-success" : "text-muted"}`}>
+              {entitlements?.status ?? "—"}
+            </span>
+          </div>
+          {entitlements?.currentPeriodEnd && (
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-muted">Renews</span>
+              <span className="font-semibold text-text">
+                {new Date(entitlements.currentPeriodEnd).toLocaleDateString()}
+              </span>
+            </div>
+          )}
+        </Card>
+        {error && <p className="text-sm text-danger">{error}</p>}
+        <Button onClick={cancel} disabled={busy} variant="accent">
+          {busy ? "Working…" : "Cancel auto-renew"}
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <main className="mx-auto max-w-2xl flex-1 space-y-4 p-6">
-      <h1 className="text-lg font-semibold">Subscription</h1>
-      <p className="text-sm text-black/60 dark:text-white/60">
-        Shows the entitlements for the signed-in account. The backend currently only exposes
-        a &quot;my entitlements&quot; endpoint (<code>GET /entitlements/me</code>) — there is no
-        system-wide subscription listing yet, so a full admin subscription-management view
-        needs a backend endpoint added first.
+    <div className="space-y-4">
+      <h1 className="text-2xl font-extrabold text-text">FitForge Pro</h1>
+      <p className="text-sm text-muted">
+        Unlock the full training experience. You have 5 days left of your 30 day trial.
       </p>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-      {entitlements && (
-        <dl className="grid grid-cols-2 gap-y-2 rounded border border-black/10 p-4 text-sm dark:border-white/10">
-          <dt className="text-black/60 dark:text-white/60">User ID</dt>
-          <dd>{entitlements.userId}</dd>
-          <dt className="text-black/60 dark:text-white/60">Plan</dt>
-          <dd>{entitlements.plan}</dd>
-          <dt className="text-black/60 dark:text-white/60">Status</dt>
-          <dd>{entitlements.status ?? "—"}</dd>
-          <dt className="text-black/60 dark:text-white/60">Store product</dt>
-          <dd>{entitlements.storeProductId ?? "—"}</dd>
-          <dt className="text-black/60 dark:text-white/60">Current period end</dt>
-          <dd>{entitlements.currentPeriodEnd ?? "—"}</dd>
-        </dl>
-      )}
-    </main>
+
+      <Card className="border-2 border-primary">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-bold text-text">6-month plan</p>
+            <p className="text-sm text-muted">$9.99 / month</p>
+          </div>
+          <Badge color="primarysoft">Best value</Badge>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-bold text-text">3-month plan</p>
+            <p className="text-sm text-muted">$15.99 / month</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card title="What's included">
+        <ul className="space-y-2 text-sm text-text">
+          <li>✓ Unlimited exercise videos</li>
+          <li>✓ Weekly diet meal plan</li>
+          <li>✓ Advice from professional trainers</li>
+        </ul>
+      </Card>
+
+      {error && <p className="text-sm text-danger">{error}</p>}
+      <Button onClick={purchase} disabled={busy}>
+        {busy ? "Purchasing…" : "Purchase Pro"}
+      </Button>
+      <Button variant="ghost" onClick={() => router.push("/profile")}>
+        Thanks, Not Now
+      </Button>
+    </div>
   );
 }

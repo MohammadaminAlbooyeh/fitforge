@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FitForge Admin",
-  description: "Internal admin console for FitForge",
+  title: "FitForge",
+  description: "Workout planning, nutrition logging, and progress analytics",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

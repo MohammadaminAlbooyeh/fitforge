@@ -11,10 +11,10 @@ export default function NavBar() {
     <nav className="flex items-center justify-between border-b border-black/10 px-6 py-3 dark:border-white/10">
       <div className="flex items-center gap-6">
         <span className="font-semibold">FitForge Admin</span>
-        <Link href="/exercises" className="text-sm hover:underline">
+        <Link href="/admin/exercises" className="text-sm hover:underline">
           Exercises
         </Link>
-        <Link href="/subscription" className="text-sm hover:underline">
+        <Link href="/admin/subscription" className="text-sm hover:underline">
           Subscription
         </Link>
       </div>

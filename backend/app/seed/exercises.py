@@ -127,6 +127,92 @@ def get_seed_rows():
     return EXERCISES
 
 
+# Short proper-form demo video per exercise (YouTube watch URLs). These are
+# embedded under each exercise in the app ("Watch demo"). Swap for licensed
+# clips when available.
+VIDEO_URLS: dict[str, str] = {
+    "Barbell Bench Press": "https://www.youtube.com/watch?v=hWbUlkb5Ms4",
+    "Incline Barbell Bench Press": "https://www.youtube.com/watch?v=kQtx01Qz6s8",
+    "Dumbbell Bench Press": "https://www.youtube.com/watch?v=oWDtW7_J8qE",
+    "Incline Dumbbell Press": "https://www.youtube.com/watch?v=sK4Rvug6ufo",
+    "Push-Up": "https://www.youtube.com/watch?v=3nnzOvAAbP8",
+    "Dumbbell Chest Fly": "https://www.youtube.com/watch?v=98aRvyw-IGg",
+    "Cable Chest Fly": "https://www.youtube.com/watch?v=Iwe6AmxVf7o",
+    "Chest Dip": "https://www.youtube.com/watch?v=xa3YhVZqBVw",
+    "Machine Chest Press": "https://www.youtube.com/watch?v=xUm0BiZCWlQ",
+    "Pec Deck Machine": "https://www.youtube.com/watch?v=hZ0CGRaKwbQ",
+    "Pull-Up": "https://www.youtube.com/watch?v=tNV6-iUDHO4",
+    "Lat Pulldown": "https://www.youtube.com/watch?v=shtopiwqaDg",
+    "Chin-Up": "https://www.youtube.com/watch?v=TaJN78G4PPk",
+    "Straight-Arm Pulldown": "https://www.youtube.com/watch?v=soX7zhZ7yfQ",
+    "Barbell Bent-Over Row": "https://www.youtube.com/watch?v=FWJR5Ve8bnQ",
+    "Dumbbell Row": "https://www.youtube.com/watch?v=pYcpY20QaE8",
+    "Seated Cable Row": "https://www.youtube.com/watch?v=7o2oolbmzeI",
+    "T-Bar Row": "https://www.youtube.com/watch?v=j3Igk5nyZE4",
+    "Machine Row": "https://www.youtube.com/watch?v=FU6YQawma2Q",
+    "Barbell Deadlift": "https://www.youtube.com/watch?v=ZaTM37cfiDs",
+    "Face Pull": "https://www.youtube.com/watch?v=rep-qVOkqgk",
+    "Inverted Row": "https://www.youtube.com/watch?v=XZV9IwluPjw",
+    "Superman": "https://www.youtube.com/watch?v=z6PJMT2y8GQ",
+    "Overhead Barbell Press": "https://www.youtube.com/watch?v=nNMR9fRGRjQ",
+    "Seated Dumbbell Shoulder Press": "https://www.youtube.com/watch?v=nHboL27_Sn0",
+    "Arnold Press": "https://www.youtube.com/watch?v=6Z15_WdXmVw",
+    "Lateral Raise": "https://www.youtube.com/watch?v=3VcKaXpzqRo",
+    "Cable Lateral Raise": "https://www.youtube.com/watch?v=Z5FA9aq3L6A",
+    "Front Raise": "https://www.youtube.com/watch?v=-t7fuZ0KhDA",
+    "Rear Delt Fly": "https://www.youtube.com/watch?v=EA7u4Q_8HQ0",
+    "Machine Shoulder Press": "https://www.youtube.com/watch?v=WvLMauqrnK8",
+    "Upright Row": "https://www.youtube.com/watch?v=jaAV-rD45I0",
+    "Pike Push-Up": "https://www.youtube.com/watch?v=0cT6ug3WVn4",
+    "Barbell Curl": "https://www.youtube.com/watch?v=dDI8ClxRS04",
+    "Dumbbell Curl": "https://www.youtube.com/watch?v=av7-8igSXTs",
+    "Hammer Curl": "https://www.youtube.com/watch?v=CFBZ4jN1CMI",
+    "Cable Curl": "https://www.youtube.com/watch?v=rfRdD5PKrko",
+    "Preacher Curl": "https://www.youtube.com/watch?v=RgN216Cumtw",
+    "Concentration Curl": "https://www.youtube.com/watch?v=Jvj2wV0vOYU",
+    "Triceps Pushdown": "https://www.youtube.com/watch?v=_w-HpW70nSQ",
+    "Skull Crusher": "https://www.youtube.com/watch?v=YUhzqUVB24I",
+    "Overhead Triceps Extension": "https://www.youtube.com/watch?v=O7e8j8K3cJo",
+    "Close-Grip Bench Press": "https://www.youtube.com/watch?v=nEF0bv2FW94",
+    "Triceps Dip": "https://www.youtube.com/watch?v=8UugSoVJLag",
+    "Cable Overhead Extension": "https://www.youtube.com/watch?v=GzmlxvSFE7A",
+    "Bench Dip": "https://www.youtube.com/watch?v=c3ZGl4pAwZ4",
+    "Barbell Back Squat": "https://www.youtube.com/watch?v=PPmvh7gBTi0",
+    "Front Squat": "https://www.youtube.com/watch?v=-L5mDFdsgZo",
+    "Leg Press": "https://www.youtube.com/watch?v=K5n2vg3oZa4",
+    "Walking Lunge": "https://www.youtube.com/watch?v=vYfp2t4XgqQ",
+    "Bulgarian Split Squat": "https://www.youtube.com/watch?v=2C-uNgKwPLE",
+    "Leg Extension": "https://www.youtube.com/watch?v=YyvSfVjQeL0",
+    "Goblet Squat": "https://www.youtube.com/watch?v=MeIiIdhvXT4",
+    "Hack Squat": "https://www.youtube.com/watch?v=eT9UyM6vzSo",
+    "Bodyweight Squat": "https://www.youtube.com/watch?v=P-yaD24bUE8",
+    "Romanian Deadlift": "https://www.youtube.com/watch?v=KN5vN3JskqI",
+    "Dumbbell RDL": "https://www.youtube.com/watch?v=hQgFixeXdZo",
+    "Lying Leg Curl": "https://www.youtube.com/watch?v=733b9_GUm9A",
+    "Seated Leg Curl": "https://www.youtube.com/watch?v=14OrOWlM5QU",
+    "Good Morning": "https://www.youtube.com/watch?v=vKPGe8zb2S4",
+    "Nordic Curl": "https://www.youtube.com/watch?v=nn743teTMTc",
+    "Hip Thrust": "https://www.youtube.com/watch?v=LM8XHLYJoYs",
+    "Glute Bridge": "https://www.youtube.com/watch?v=8bbE64NuDTU",
+    "Cable Kickback": "https://www.youtube.com/watch?v=dU1R-AHW4IM",
+    "Step-Up": "https://www.youtube.com/watch?v=vOiHvzj5XhA",
+    "Standing Calf Raise": "https://www.youtube.com/watch?v=YMmgqO8Jo-k",
+    "Seated Calf Raise": "https://www.youtube.com/watch?v=ORY-ke6vcgk",
+    "Dumbbell Calf Raise": "https://www.youtube.com/watch?v=wxwY7GXxL4k",
+    "Bodyweight Calf Raise": "https://www.youtube.com/watch?v=k8ipHzKeAkQ",
+    "Plank": "https://www.youtube.com/watch?v=pSHjTRCQxIw",
+    "Hanging Leg Raise": "https://www.youtube.com/watch?v=Pr1ieGZ5atk",
+    "Cable Crunch": "https://www.youtube.com/watch?v=ToJeyhydUxU",
+    "Russian Twist": "https://www.youtube.com/watch?v=wkD8rjkodUI",
+    "Bicycle Crunch": "https://www.youtube.com/watch?v=Iwyvozckjak",
+    "Ab Wheel Rollout": "https://www.youtube.com/watch?v=rqiTPdK1c_I",
+    "Side Plank": "https://www.youtube.com/watch?v=V2cUr7zG4hw",
+    "Mountain Climber": "https://www.youtube.com/watch?v=nmwgirgXLYM",
+    "Sit-Up": "https://www.youtube.com/watch?v=jDwoBqPH0jk",
+    "Flutter Kick": "https://www.youtube.com/watch?v=ocRe4ccKeK4",
+}
+
+
 def _pick_alternative(name: str, muscle_group: MuscleGroup, equipment: EquipmentType) -> str | None:
     """Pick another exercise in the same muscle group, preferring a different
     (ideally bodyweight) equipment type so there's always a no-equipment substitute."""
@@ -159,6 +245,7 @@ def seed_exercises(db: Session) -> tuple[int, int]:
                 difficulty=difficulty,
                 movement_role=movement_role,
                 image_url=image_url,
+                video_url=VIDEO_URLS.get(name),
             )
             db.add(row)
             existing[name] = row
@@ -170,6 +257,7 @@ def seed_exercises(db: Session) -> tuple[int, int]:
             row.difficulty = difficulty
             row.movement_role = movement_role
             row.image_url = image_url
+            row.video_url = VIDEO_URLS.get(name)
             updated += 1
 
     db.flush()

@@ -9,7 +9,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!getToken()) {
+    if (!getToken() && !window.localStorage.getItem("fitforge_admin_token")) {
       router.replace("/login");
       return;
     }

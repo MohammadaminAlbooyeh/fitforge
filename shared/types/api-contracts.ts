@@ -45,6 +45,7 @@ export interface ExerciseContract {
   name: string;
   muscle_group: string;
   image_url?: string | null;
+  video_url?: string | null;
   instructions?: string | null;
 }
 
