@@ -170,7 +170,7 @@ export default function PlanPage() {
               >
                 {isDone ? "✓" : ""}
               </span>
-              <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-primarysoft">
+              <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-primarysoft">
                 {pde.exercise.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img

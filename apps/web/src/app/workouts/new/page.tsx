@@ -77,7 +77,7 @@ export default function NewWorkoutPage() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primarysoft">
+                    <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primarysoft">
                       {exercise.image_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

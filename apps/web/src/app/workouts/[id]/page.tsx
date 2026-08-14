@@ -27,7 +27,7 @@ export default function WorkoutDetailPage() {
         {workout.exercises.map((entry, i) => (
           <Card key={entry.id ?? i}>
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primarysoft">
+              <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primarysoft">
                 {entry.exercise.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
