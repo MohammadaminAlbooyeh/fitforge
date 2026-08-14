@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 
 const tabs = [
   { href: "/", label: "Home", icon: "🏠" },
+  { href: "/exercises", label: "Exercises", icon: "🏋️" },
   { href: "/nutrition", label: "Nutrition", icon: "🥗" },
   { href: "/workouts", label: "Workouts", icon: "💪" },
   { href: "/progress", label: "Progress", icon: "📈" },
-  { href: "/profile", label: "Profile", icon: "👤" },
 ];
 
 export default function TabBar() {

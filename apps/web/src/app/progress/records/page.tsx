@@ -3,11 +3,13 @@
 import { useAsync } from "@/lib/useAsync";
 import { listPersonalRecords } from "@/lib/api";
 import { Card, EmptyState } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 export default function RecordsPage() {
   const { data: records, loading } = useAsync(listPersonalRecords, []);
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">Personal Records</h1>
       {loading ? (
@@ -36,5 +38,6 @@ export default function RecordsPage() {
         </div>
       )}
     </div>
+    </AppShell>
   );
 }

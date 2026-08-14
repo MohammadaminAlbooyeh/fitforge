@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getWorkout, createWorkoutSession } from "@/lib/api";
 import { Button, Input } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 type SetEntry = { weight: string; reps: string; completed: boolean };
 type Group = {
@@ -93,6 +94,7 @@ export default function LogSessionPage() {
   };
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">Log session</h1>
 
@@ -137,5 +139,6 @@ export default function LogSessionPage() {
         {saving ? "Saving…" : "Save session"}
       </Button>
     </div>
+    </AppShell>
   );
 }

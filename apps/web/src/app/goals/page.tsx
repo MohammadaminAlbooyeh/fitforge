@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getEnhancedAnalytics, listWorkoutLogs, fetchProfile } from "@/lib/api";
 import { Card, StatPill, Button } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 import type { EnhancedAnalyticsContract, WorkoutLogContract } from "@shared/types/api-contracts";
 
 export default function GoalsPage() {
@@ -36,6 +37,7 @@ export default function GoalsPage() {
   const adherence = Math.min(100, (thisWeek / target) * 100);
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">Goals</h1>
 
@@ -77,6 +79,7 @@ export default function GoalsPage() {
         <Button variant="ghost">Edit goals</Button>
       </Link>
     </div>
+    </AppShell>
   );
 }
 

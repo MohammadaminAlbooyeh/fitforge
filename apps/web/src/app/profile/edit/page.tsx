@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchProfile, updateProfile } from "@/lib/api";
 import { Card, Button, Input } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 const GOALS = [
   { value: "", label: "No goal selected" },
@@ -68,6 +69,7 @@ export default function EditProfilePage() {
   };
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-xl font-extrabold text-text">Edit Profile</h1>
 
@@ -112,5 +114,6 @@ export default function EditProfilePage() {
         {saving ? "Saving…" : "Save changes"}
       </Button>
     </div>
+    </AppShell>
   );
 }

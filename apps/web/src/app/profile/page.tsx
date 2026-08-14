@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchProfile, getEntitlements, clearToken } from "@/lib/api";
 import { Avatar, Card, Button, Badge } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 const GOAL_LABELS: Record<string, string> = {
   lose_weight: "Lose Weight",
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   const goalLabel = GOAL_LABELS[user.goal ?? ""] ?? (user.goal ?? "—");
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <div className="flex flex-col items-center gap-1">
         <Avatar name={user.full_name} size={72} />
@@ -73,6 +75,7 @@ export default function ProfilePage() {
         Log out
       </Button>
     </div>
+    </AppShell>
   );
 }
 

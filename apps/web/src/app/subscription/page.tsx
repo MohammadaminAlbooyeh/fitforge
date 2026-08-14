@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getEntitlements, apiFetch } from "@/lib/api";
 import { Card, Button, Badge } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 import type { EntitlementsContract } from "@shared/types/api-contracts";
 
 export default function SubscriptionPage() {
@@ -49,6 +50,7 @@ export default function SubscriptionPage() {
 
   if (isPro) {
     return (
+      <AppShell>
       <div className="space-y-4">
         <h1 className="text-2xl font-extrabold text-text">Manage Subscription</h1>
         <Card>
@@ -76,10 +78,12 @@ export default function SubscriptionPage() {
           {busy ? "Working…" : "Cancel auto-renew"}
         </Button>
       </div>
+      </AppShell>
     );
   }
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">FitForge Pro</h1>
       <p className="text-sm text-muted">
@@ -121,5 +125,6 @@ export default function SubscriptionPage() {
         Thanks, Not Now
       </Button>
     </div>
+    </AppShell>
   );
 }

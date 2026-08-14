@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useAsync } from "@/lib/useAsync";
 import { getWorkout } from "@/lib/api";
 import { Card, Button } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 export default function WorkoutDetailPage() {
   const params = useParams<{ id: string }>();
@@ -15,6 +16,7 @@ export default function WorkoutDetailPage() {
   if (!workout) return <p className="py-20 text-center text-muted">Workout not found.</p>;
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <div className="flex items-start justify-between">
         <div>
@@ -67,5 +69,6 @@ export default function WorkoutDetailPage() {
         <Button>Log session</Button>
       </Link>
     </div>
+    </AppShell>
   );
 }

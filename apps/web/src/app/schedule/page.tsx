@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getWeeklyPlan, listWorkoutLogs } from "@/lib/api";
 import { Card } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 import type { DailyWorkoutPlanContract, WorkoutLogContract } from "@shared/types/api-contracts";
 
 function toISODate(d: Date) {
@@ -25,6 +26,7 @@ export default function SchedulePage() {
   const todayIndex = (new Date().getDay() + 6) % 7;
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">This week&apos;s plan</h1>
 
@@ -68,5 +70,6 @@ export default function SchedulePage() {
         })
       )}
     </div>
+    </AppShell>
   );
 }

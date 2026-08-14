@@ -25,6 +25,7 @@ import type {
   LeaderboardEntryContract,
 } from "@shared/types/api-contracts";
 import { Card, Avatar, StatPill, Badge } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 function toISODate(d: Date) {
   const y = d.getFullYear();
@@ -92,6 +93,7 @@ export default function HomePage() {
   const ctaLabel = plan && !plan.rest ? "Start today's workout" : "Explore workouts";
 
   return (
+    <AppShell>
     <div className="space-y-6">
       {/* Hero */}
       <section className="flex items-start justify-between">
@@ -110,7 +112,9 @@ export default function HomePage() {
             </p>
           )}
         </div>
-        <Avatar name={user?.full_name ?? "You"} />
+        <Link href="/profile">
+          <Avatar name={user?.full_name ?? "You"} />
+        </Link>
       </section>
 
       {/* Primary CTA */}
@@ -216,5 +220,6 @@ export default function HomePage() {
         </p>
       )}
     </div>
+    </AppShell>
   );
 }

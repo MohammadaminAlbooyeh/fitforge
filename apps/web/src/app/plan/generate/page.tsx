@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchProfile, updateProfile, generateWorkoutPlan } from "@/lib/api";
 import { Card, Button } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 const DAY_OPTIONS = [1, 2, 3, 4, 5];
 const EQUIPMENT_OPTIONS = [
@@ -85,6 +86,7 @@ export default function GeneratePlanPage() {
   };
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">Build your plan</h1>
       <p className="text-[13px] text-muted">
@@ -134,5 +136,6 @@ export default function GeneratePlanPage() {
         {saving ? "Generating…" : "Generate my plan"}
       </Button>
     </div>
+    </AppShell>
   );
 }

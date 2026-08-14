@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createWorkout, listExercises } from "@/lib/api";
 import { Button, Input, Card } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 import type { ExerciseLibraryContract } from "@shared/types/api-contracts";
 
 export default function NewWorkoutPage() {
@@ -47,6 +48,7 @@ export default function NewWorkoutPage() {
   };
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">New workout</h1>
 
@@ -125,5 +127,6 @@ export default function NewWorkoutPage() {
         </Button>
       </div>
     </div>
+    </AppShell>
   );
 }

@@ -9,6 +9,7 @@ import {
 } from "@/lib/api";
 import type { PlanDayContract, PlanDayExerciseContract } from "@shared/types/api-contracts";
 import { Card, Button, EmptyState } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 function midpointReps(repsRange: string): number {
   const [lo, hi] = repsRange.split("-").map((n) => parseInt(n, 10));
@@ -114,6 +115,7 @@ export default function PlanPage() {
   };
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-xl font-extrabold text-text">Exercise</h1>
 
@@ -234,5 +236,6 @@ export default function PlanPage() {
         <Button variant="ghost">Rebuild plan</Button>
       </Link>
     </div>
+    </AppShell>
   );
 }

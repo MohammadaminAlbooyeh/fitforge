@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDailySummary, getEntriesForDay, createNutritionLog, deleteNutritionLog } from "@/lib/api";
 import { Card, Button, Input, Badge } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 import type { DailyNutritionSummaryContract, NutritionLogContract } from "@shared/types/api-contracts";
 
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
@@ -175,6 +176,7 @@ export default function NutritionPage() {
   };
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-extrabold text-text">
@@ -286,5 +288,6 @@ export default function NutritionPage() {
         </Card>
       )}
     </div>
+    </AppShell>
   );
 }

@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useAsync } from "@/lib/useAsync";
 import { listWorkouts, deleteWorkout } from "@/lib/api";
 import { Card, Button, EmptyState } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 export default function WorkoutsPage() {
   const { data: workouts, loading, reload } = useAsync(listWorkouts, []);
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">My Workouts</h1>
 
@@ -55,5 +57,6 @@ export default function WorkoutsPage() {
         </Link>
       </div>
     </div>
+    </AppShell>
   );
 }

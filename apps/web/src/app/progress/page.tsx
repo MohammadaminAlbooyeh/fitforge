@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAsync } from "@/lib/useAsync";
 import { getEnhancedAnalytics, listPersonalRecords, getGamificationSummary } from "@/lib/api";
 import { Card, StatPill } from "@/components/ui";
+import { AppShell } from "@/components/AppShell";
 
 function WeeklyVolumeChart({ weeks }: { weeks: { week_start: string; total_sets: number }[] }) {
   const max = Math.max(1, ...weeks.map((w) => w.total_sets));
@@ -33,6 +34,7 @@ export default function ProgressPage() {
   const { data: gamification } = useAsync(getGamificationSummary, []);
 
   return (
+    <AppShell>
     <div className="space-y-4">
       <h1 className="text-2xl font-extrabold text-text">Activity</h1>
 
@@ -102,5 +104,6 @@ export default function ProgressPage() {
         </Link>
       </Card>
     </div>
+    </AppShell>
   );
 }
