@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createWorkout, listExercises } from "@/lib/api";
 import { Button, Input, Card } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
@@ -9,6 +9,7 @@ import type { ExerciseLibraryContract } from "@shared/types/api-contracts";
 
 export default function NewWorkoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -24,6 +25,18 @@ export default function NewWorkoutPage() {
       .catch(() => {})
       .finally(() => setLoadingExercises(false));
   }, []);
+
+  useEffect(() => {
+    const preset = searchParams.get("exercises");
+    if (preset) {
+      const ids = preset
+        .split(",")
+        .map((s) => Number(s.trim()))
+        .filter((n) => Number.isFinite(n));
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- pre-select exercises from query param on mount
+      if (ids.length) setSelectedIds((prev) => Array.from(new Set([...prev, ...ids])));
+    }
+  }, [searchParams]);
 
   const toggleExercise = (id: number) => {
     setSelectedIds((prev) =>

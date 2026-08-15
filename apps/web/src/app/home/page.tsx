@@ -26,6 +26,7 @@ import type {
 } from "@shared/types/api-contracts";
 import { Card, Avatar, StatPill, Badge } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
+import ExercisePickerModal from "@/components/ExercisePickerModal";
 
 function toISODate(d: Date) {
   const y = d.getFullYear();
@@ -50,6 +51,7 @@ type Feed = {
 export default function HomePage() {
   const router = useRouter();
   const [feed, setFeed] = useState<Feed | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     const today = toISODate(new Date());
@@ -219,6 +221,22 @@ export default function HomePage() {
           {feed.totalSessions ?? 0} sessions · {feed.totalSets ?? 0} sets logged all-time
         </p>
       )}
+
+      {/* Pick an exercise */}
+      <button
+        onClick={() => setPickerOpen(true)}
+        className="flex w-full items-center gap-3 rounded-2xl border border-line bg-white p-3 text-left transition hover:border-primary"
+      >
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primarysoft text-lg">
+          🏋️
+        </span>
+        <span className="flex-1">
+          <span className="block text-sm font-bold text-text">Pick an exercise</span>
+          <span className="block text-xs text-muted">Browse the full library and start a workout.</span>
+        </span>
+        <span className="text-muted">›</span>
+      </button>
+      <ExercisePickerModal open={pickerOpen} onClose={() => setPickerOpen(false)} />
     </div>
     </AppShell>
   );

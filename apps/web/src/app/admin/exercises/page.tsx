@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Fragment, useEffect, useMemo, useState } from "react";
 import AuthGate from "@/components/AuthGate";
 import NavBar from "@/components/NavBar";
 import { apiFetch } from "@/lib/api";
@@ -55,6 +55,19 @@ function ExercisesBody() {
     load();
   }, []);
 
+  const grouped = useMemo(() => {
+    const byMuscle = new Map<string, Exercise[]>();
+    for (const ex of exercises) {
+      const list = byMuscle.get(ex.muscle_group) ?? [];
+      list.push(ex);
+      byMuscle.set(ex.muscle_group, list);
+    }
+    return MUSCLE_GROUPS.filter((m) => byMuscle.has(m)).map((m) => ({
+      muscleGroup: m,
+      items: byMuscle.get(m)!,
+    }));
+  }, [exercises]);
+
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
     setSubmitting(true);
@@ -92,14 +105,26 @@ function ExercisesBody() {
                 </tr>
               </thead>
               <tbody>
-                {exercises.map((ex) => (
-                  <tr key={ex.id} className="border-t border-black/10 dark:border-white/10">
-                    <td className="px-3 py-2">{ex.name}</td>
-                    <td className="px-3 py-2">{ex.muscle_group}</td>
-                    <td className="px-3 py-2">{ex.equipment}</td>
-                    <td className="px-3 py-2">{ex.difficulty}</td>
-                    <td className="px-3 py-2">{ex.movement_role}</td>
-                  </tr>
+                {grouped.map(({ muscleGroup, items }) => (
+                  <Fragment key={muscleGroup}>
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="bg-primary/10 px-3 py-2 text-xs font-bold uppercase tracking-wide text-primary"
+                      >
+                        {muscleGroup} <span className="font-normal normal-case text-muted">({items.length})</span>
+                      </td>
+                    </tr>
+                    {items.map((ex) => (
+                      <tr key={ex.id} className="border-t border-black/10 dark:border-white/10">
+                        <td className="px-3 py-2">{ex.name}</td>
+                        <td className="px-3 py-2 capitalize">{ex.muscle_group}</td>
+                        <td className="px-3 py-2">{ex.equipment}</td>
+                        <td className="px-3 py-2">{ex.difficulty}</td>
+                        <td className="px-3 py-2">{ex.movement_role}</td>
+                      </tr>
+                    ))}
+                  </Fragment>
                 ))}
                 {exercises.length === 0 && (
                   <tr>
