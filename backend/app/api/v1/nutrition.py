@@ -5,9 +5,12 @@ from fastapi import APIRouter, HTTPException, status
 from app.dependencies import CurrentUser, DbSession
 from app.schemas.nutrition import (
     DailyNutritionSummary,
+    DailyWaterSummary,
     NutritionLogCreate,
     NutritionLogRead,
     NutritionLogUpdate,
+    WaterLogCreate,
+    WaterLogRead,
 )
 from app.services import nutrition_service
 
@@ -17,6 +20,27 @@ router = APIRouter()
 @router.post("/", response_model=NutritionLogRead, status_code=status.HTTP_201_CREATED)
 def create_entry(payload: NutritionLogCreate, db: DbSession, current: CurrentUser):
     return nutrition_service.log_entry(db, current.user_id, payload)
+
+
+@router.post("/water", response_model=WaterLogRead, status_code=status.HTTP_201_CREATED)
+def create_water(payload: WaterLogCreate, db: DbSession, current: CurrentUser):
+    return nutrition_service.log_water(db, current.user_id, payload)
+
+
+@router.delete("/water/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_water(entry_id: int, db: DbSession, current: CurrentUser):
+    nutrition_service.delete_water(db, current.user_id, entry_id)
+    raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/water/day", response_model=DailyWaterSummary)
+def water_summary_for_day(day: date, db: DbSession, current: CurrentUser):
+    return nutrition_service.water_summary(db, current.user_id, day)
+
+
+@router.get("/water/day/entries", response_model=list[WaterLogRead])
+def water_entries_for_day(day: date, db: DbSession, current: CurrentUser):
+    return nutrition_service.list_water_for_day(db, current.user_id, day)
 
 
 @router.get("/day", response_model=DailyNutritionSummary)

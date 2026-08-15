@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, NotFoundError
 from app.models.nutrition import NutritionLog
-from app.schemas.nutrition import NutritionLogCreate, NutritionLogUpdate
+from app.models.water import WaterLog
+from app.schemas.nutrition import NutritionLogCreate, NutritionLogUpdate, WaterLogCreate
 
 
 def log_entry(db: Session, user_id: int, data: NutritionLogCreate) -> NutritionLog:
@@ -66,3 +67,39 @@ def daily_summary(db: Session, user_id: int, day: date) -> dict:
         "total_carbs_g": carbs,
         "total_fat_g": fat,
     }
+
+
+def log_water(db: Session, user_id: int, data: WaterLogCreate) -> WaterLog:
+    entry = WaterLog(user_id=user_id, **data.model_dump())
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return entry
+
+
+def delete_water(db: Session, user_id: int, entry_id: int) -> None:
+    entry = db.get(WaterLog, entry_id)
+    if entry is None or entry.user_id != user_id:
+        raise NotFoundError("Water log not found")
+    db.delete(entry)
+    db.commit()
+
+
+def water_summary(db: Session, user_id: int, day: date) -> dict:
+    total = db.scalar(
+        select(func.coalesce(func.sum(WaterLog.amount_ml), 0.0)).where(
+            WaterLog.user_id == user_id, WaterLog.log_date == day
+        )
+    )
+    return {
+        "log_date": day,
+        "total_ml": round(total, 0),
+        "cups": round(total / 250, 1),
+    }
+
+
+def list_water_for_day(db: Session, user_id: int, day: date) -> list[WaterLog]:
+    stmt = select(WaterLog).where(
+        WaterLog.user_id == user_id, WaterLog.log_date == day
+    )
+    return list(db.execute(stmt).scalars())

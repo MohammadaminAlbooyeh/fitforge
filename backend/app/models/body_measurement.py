@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import Date, Float, ForeignKey, Integer
+from sqlalchemy import Date, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -19,3 +19,4 @@ class BodyMeasurement(Base):
     hips_cm: Mapped[float] = mapped_column(Float, nullable=True)
     arms_cm: Mapped[float] = mapped_column(Float, nullable=True)
     thighs_cm: Mapped[float] = mapped_column(Float, nullable=True)
+    photo_url: Mapped[str] = mapped_column(String(500), nullable=True)

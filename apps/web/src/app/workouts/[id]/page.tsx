@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAsync } from "@/lib/useAsync";
@@ -11,9 +12,27 @@ export default function WorkoutDetailPage() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
   const { data: workout, loading } = useAsync(() => getWorkout(id), [id]);
+  const [copied, setCopied] = useState(false);
 
   if (loading) return <p className="py-20 text-center text-muted">Loading…</p>;
   if (!workout) return <p className="py-20 text-center text-muted">Workout not found.</p>;
+
+  const shareTemplate = () => {
+    const lines = [
+      `${workout.name}`,
+      `${workout.description ?? ""}`.trim() ? `${workout.description}\n` : "",
+      ...workout.exercises.map(
+        (entry) =>
+          `• ${entry.exercise.name} — ${entry.sets} sets${entry.reps != null ? ` × ${entry.reps} reps` : ""}${
+            entry.weight_kg != null ? ` @ ${entry.weight_kg} kg` : ""
+          }`
+      ),
+    ].filter(Boolean);
+    navigator.clipboard.writeText(lines.join("\n")).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   return (
     <AppShell>
@@ -23,6 +42,12 @@ export default function WorkoutDetailPage() {
           <h1 className="text-2xl font-extrabold text-text">{workout.name}</h1>
           {workout.description && <p className="text-sm text-muted">{workout.description}</p>}
         </div>
+        <button
+          onClick={shareTemplate}
+          className="flex-shrink-0 rounded-full bg-primarysoft px-3 py-1.5 text-xs font-bold text-primary transition hover:bg-primary/20"
+        >
+          {copied ? "Copied!" : "⤴ Share as template"}
+        </button>
       </div>
 
       <div className="space-y-3">

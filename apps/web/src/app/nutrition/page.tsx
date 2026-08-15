@@ -1,12 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { getDailySummary, getEntriesForDay, createNutritionLog, deleteNutritionLog } from "@/lib/api";
+import {
+  getDailySummary,
+  getEntriesForDay,
+  createNutritionLog,
+  deleteNutritionLog,
+  getWaterSummary,
+  getWaterEntries,
+  createWaterLog,
+  deleteWaterLog,
+} from "@/lib/api";
 import { Card, Button, Input, Badge } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
-import type { DailyNutritionSummaryContract, NutritionLogContract } from "@shared/types/api-contracts";
+import type {
+  DailyNutritionSummaryContract,
+  DailyWaterSummaryContract,
+  NutritionLogContract,
+  WaterLogContract,
+} from "@shared/types/api-contracts";
 
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
+const WATER_GOAL_ML = 2000;
 
 function toISODate(d: Date) {
   const y = d.getFullYear();
@@ -109,6 +124,8 @@ export default function NutritionPage() {
   const [summary, setSummary] = useState<DailyNutritionSummaryContract | null>(null);
   const [entries, setEntries] = useState<NutritionLogContract[]>([]);
   const [loading, setLoading] = useState(true);
+  const [water, setWater] = useState<DailyWaterSummaryContract | null>(null);
+  const [waterEntries, setWaterEntries] = useState<WaterLogContract[]>([]);
 
   // add form
   const [showForm, setShowForm] = useState(false);
@@ -127,9 +144,16 @@ export default function NutritionPage() {
     setLoading(true);
     try {
       const day = toISODate(selected);
-      const [s, e] = await Promise.all([getDailySummary(day), getEntriesForDay(day)]);
+      const [s, e, w, we] = await Promise.all([
+        getDailySummary(day),
+        getEntriesForDay(day),
+        getWaterSummary(day),
+        getWaterEntries(day),
+      ]);
       setSummary(s);
       setEntries(e);
+      setWater(w);
+      setWaterEntries(we);
     } finally {
       setLoading(false);
     }
@@ -219,6 +243,61 @@ export default function NutritionPage() {
             <LegendRow color="#3DD598" label="Fat" value={summary?.total_fat_g ?? 0} max={90} />
           </div>
         </div>
+      </Card>
+
+      {/* Water tracker */}
+      <Card>
+        <div className="flex items-center justify-between">
+          <p className="text-[15px] font-bold text-text">💧 Water</p>
+          <span className="text-xs text-muted">
+            {water?.total_ml ?? 0} ml · {water?.cups ?? 0} cups
+          </span>
+        </div>
+        <div className="mt-3 h-2.5 rounded-full bg-line">
+          <div
+            className="h-2.5 rounded-full bg-sky-400 transition-all"
+            style={{ width: `${Math.min(100, ((water?.total_ml ?? 0) / WATER_GOAL_ML) * 100)}%` }}
+          />
+        </div>
+        <div className="mt-1 text-right text-[11px] text-muted">
+          Goal: {WATER_GOAL_ML} ml
+        </div>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <div className="flex gap-1.5">
+            {[250, 500, 750].map((size) => (
+              <button
+                key={size}
+                onClick={async () => {
+                  await createWaterLog({ log_date: toISODate(selected), amount_ml: size });
+                  load();
+                }}
+                className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-600 transition hover:bg-sky-100"
+              >
+                +{size}ml
+              </button>
+            ))}
+          </div>
+          {waterEntries.length > 0 && (
+            <button
+              onClick={async () => {
+                await deleteWaterLog(waterEntries[waterEntries.length - 1].id);
+                load();
+              }}
+              className="text-xs text-danger"
+            >
+              Undo last
+            </button>
+          )}
+        </div>
+        {waterEntries.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {waterEntries.map((w) => (
+              <span key={w.id} className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
+                {w.amount_ml}ml
+              </span>
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* Entries */}

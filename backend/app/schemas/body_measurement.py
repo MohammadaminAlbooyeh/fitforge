@@ -13,6 +13,7 @@ class BodyMeasurementCreate(BaseModel):
     hips_cm: Optional[float] = None
     arms_cm: Optional[float] = None
     thighs_cm: Optional[float] = None
+    photo_url: Optional[str] = None
 
 
 class BodyMeasurementUpdate(BaseModel):
@@ -23,6 +24,7 @@ class BodyMeasurementUpdate(BaseModel):
     hips_cm: Optional[float] = None
     arms_cm: Optional[float] = None
     thighs_cm: Optional[float] = None
+    photo_url: Optional[str] = None
 
 
 class BodyMeasurementRead(BaseModel):
@@ -38,6 +40,7 @@ class BodyMeasurementRead(BaseModel):
     hips_cm: Optional[float] = None
     arms_cm: Optional[float] = None
     thighs_cm: Optional[float] = None
+    photo_url: Optional[str] = None
 
 
 class BodyTrend(BaseModel):

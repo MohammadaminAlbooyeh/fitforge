@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchProfile, getEntitlements, clearToken } from "@/lib/api";
+import { fetchProfile, getEntitlements, getDataExport, clearToken } from "@/lib/api";
 import { Avatar, Card, Button, Badge } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 
@@ -31,6 +31,17 @@ export default function ProfilePage() {
 
   const isPro = entitlements?.plan === "PRO";
   const goalLabel = GOAL_LABELS[user.goal ?? ""] ?? (user.goal ?? "—");
+
+  const handleExport = async () => {
+    const data = await getDataExport();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `fitforge-export-${user.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <AppShell>
@@ -63,6 +74,7 @@ export default function ProfilePage() {
         <MenuRow label="Edit profile" href="/profile/edit" />
         <MenuRow label="Goals" href="/goals" />
         <MenuRow label="Schedule" href="/schedule" />
+        <MenuRow label="Export my data" href="#" onMenuClick={handleExport} />
       </Card>
 
       <Button
@@ -88,14 +100,22 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MenuRow({ label, href }: { label: string; href: string }) {
-  return (
-    <Link href={href} className="flex items-center gap-3 py-2">
+function MenuRow({ label, href, onMenuClick }: { label: string; href: string; onMenuClick?: () => void }) {
+  const inner = (
+    <>
       <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primarysoft text-primary">
         →
       </span>
       <span className="flex-1 text-sm font-semibold text-text">{label}</span>
       <span className="text-muted">›</span>
-    </Link>
+    </>
   );
+  if (onMenuClick) {
+    return (
+      <button onClick={onMenuClick} className="flex w-full items-center gap-3 py-2 text-left">
+        {inner}
+      </button>
+    );
+  }
+  return <Link href={href} className="flex items-center gap-3 py-2">{inner}</Link>;
 }

@@ -68,6 +68,18 @@ export interface DailyNutritionSummaryContract {
   total_fat_g: number;
 }
 
+export interface WaterLogContract {
+  id: number;
+  log_date: string;
+  amount_ml: number;
+}
+
+export interface DailyWaterSummaryContract {
+  log_date: string;
+  total_ml: number;
+  cups: number;
+}
+
 export interface WorkoutSessionSetContract {
   exercise_id: number;
   weight_kg?: number | null;
@@ -228,6 +240,7 @@ export interface BodyMeasurementContract {
   waist_cm?: number | null;
   arms_cm?: number | null;
   thighs_cm?: number | null;
+  photo_url?: string | null;
   notes?: string | null;
   created_at: string;
 }
@@ -320,11 +333,36 @@ export interface WeeklyVolumeContract {
   total_volume_kg: number;
 }
 
+export interface MonthlyVolumeContract {
+  month: string;
+  workouts: number;
+  total_sets: number;
+  total_volume_kg: number;
+}
+
+export interface StrengthStandardContract {
+  exercise_id: number;
+  exercise_name: string;
+  muscle_group: string;
+  bodyweight_ratio?: number | null;
+  standard_level?: string | null;
+  bodyweight_kg?: number | null;
+  estimated_1rm?: number | null;
+}
+
+export interface RecoveryInsightContract {
+  recovery_score: number;
+  fatigue_level: string;
+  suggestion?: string | null;
+}
+
 export interface ExerciseProgressionContract {
   exercise_id: number;
   exercise_name: string;
   best_weight?: number | null;
   best_reps?: number | null;
+  estimated_1rm?: number | null;
+  previous_1rm?: number | null;
   total_sets: number;
   sessions: number;
 }
@@ -341,6 +379,9 @@ export interface BodyTrendContract {
 export interface EnhancedAnalyticsContract {
   summary: AnalyticsSummaryContract;
   weekly_volume: WeeklyVolumeContract[];
+  monthly_volume: MonthlyVolumeContract[];
+  strength_standards: StrengthStandardContract[];
+  recovery: RecoveryInsightContract;
   exercise_progression: ExerciseProgressionContract[];
   body_trend: BodyTrendContract[];
   streak_days: number;

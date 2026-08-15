@@ -42,3 +42,22 @@ class DailyNutritionSummary(BaseModel):
     total_protein_g: float
     total_carbs_g: float
     total_fat_g: float
+
+
+class WaterLogCreate(BaseModel):
+    log_date: date
+    amount_ml: float = 250
+
+
+class WaterLogRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    log_date: date
+    amount_ml: float
+
+
+class DailyWaterSummary(BaseModel):
+    log_date: date
+    total_ml: float
+    cups: float

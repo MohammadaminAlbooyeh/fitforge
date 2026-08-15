@@ -5,6 +5,8 @@ import type {
   ExerciseLibraryContract,
   NutritionLogContract,
   DailyNutritionSummaryContract,
+  WaterLogContract,
+  DailyWaterSummaryContract,
   DailyWorkoutPlanContract,
   WorkoutPlanContract,
   WorkoutLogContract,
@@ -168,6 +170,17 @@ export const getEntriesForDay = (day: string) =>
 export const deleteNutritionLog = (id: number) =>
   apiFetch<void>(`/nutrition/${id}`, { method: "DELETE" });
 
+// ---- Water ----
+
+export const createWaterLog = (input: { log_date: string; amount_ml?: number }) =>
+  apiFetch<WaterLogContract>("/nutrition/water", { method: "POST", body: JSON.stringify(input) });
+export const getWaterSummary = (day: string) =>
+  apiFetch<DailyWaterSummaryContract>(`/nutrition/water/day?day=${encodeURIComponent(day)}`);
+export const getWaterEntries = (day: string) =>
+  apiFetch<WaterLogContract[]>(`/nutrition/water/day/entries?day=${encodeURIComponent(day)}`);
+export const deleteWaterLog = (id: number) =>
+  apiFetch<void>(`/nutrition/water/${id}`, { method: "DELETE" });
+
 // ---- Plans (static Hevy) ----
 
 export const getDailyPlan = (offset = 0) =>
@@ -228,6 +241,7 @@ export type BodyMeasurementCreateInput = {
   arms_cm?: number | null;
   thighs_cm?: number | null;
   notes?: string | null;
+  photo_url?: string | null;
 };
 
 export const listBodyMeasurements = () => apiFetch<BodyMeasurementContract[]>("/body-measurements/");
@@ -253,3 +267,4 @@ export const getEntitlements = () => apiFetch<EntitlementsContract>("/entitlemen
 export const getAnalyticsSummary = () => apiFetch<AnalyticsSummaryContract>("/analytics/summary");
 export const getEnhancedAnalytics = () =>
   apiFetch<EnhancedAnalyticsContract>("/analytics/enhanced");
+export const getDataExport = () => apiFetch<Record<string, unknown>>("/analytics/export");

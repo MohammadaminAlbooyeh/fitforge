@@ -43,3 +43,4 @@ class User(Base):
 
     workouts = relationship("Workout", back_populates="user")
     nutrition_logs = relationship("NutritionLog", back_populates="user")
+    water_logs = relationship("WaterLog", back_populates="user")

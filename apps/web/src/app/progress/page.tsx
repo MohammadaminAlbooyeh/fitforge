@@ -1,8 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useAsync } from "@/lib/useAsync";
-import { getEnhancedAnalytics, listPersonalRecords, getGamificationSummary } from "@/lib/api";
+import {
+  getEnhancedAnalytics,
+  listPersonalRecords,
+  getGamificationSummary,
+  listBodyMeasurements,
+  createBodyMeasurement,
+} from "@/lib/api";
 import { Card, StatPill } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 
@@ -28,10 +35,43 @@ function WeeklyVolumeChart({ weeks }: { weeks: { week_start: string; total_sets:
   );
 }
 
+function MonthlyVolumeChart({ months }: { months: { month: string; total_sets: number }[] }) {
+  const max = Math.max(1, ...months.map((m) => m.total_sets));
+  return (
+    <div className="flex h-32 items-end gap-2">
+      {months.map((m) => {
+        const h = (m.total_sets / max) * 100;
+        const [, monthNum] = m.month.split("-");
+        return (
+          <div key={m.month} className="flex flex-1 flex-col items-center gap-1">
+            <div
+              className="w-full rounded-md grad-accent"
+              style={{ height: `${Math.max(h, 4)}%` }}
+            />
+            <span className="text-[10px] text-muted">
+              {new Date(Number(m.month.slice(0, 4)), Number(monthNum) - 1).toLocaleDateString("en-US", {
+                month: "short",
+              })}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const RECOVERY_COLORS: Record<string, string> = {
+  low: "text-success",
+  normal: "text-primary",
+  moderate: "text-accent",
+  high: "text-danger",
+};
+
 export default function ProgressPage() {
   const { data: enhanced } = useAsync(getEnhancedAnalytics, []);
   const { data: records } = useAsync(listPersonalRecords, []);
   const { data: gamification } = useAsync(getGamificationSummary, []);
+  const { data: measurements, reload } = useAsync(listBodyMeasurements, []);
 
   return (
     <AppShell>
@@ -73,12 +113,129 @@ export default function ProgressPage() {
         </Card>
       )}
 
+      {/* Recovery score */}
+      {enhanced && (
+        <Card title="Recovery">
+          <div className="flex items-center gap-4">
+            <div className="relative h-16 w-16">
+              <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-line)" strokeWidth="4" />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.9"
+                  fill="none"
+                  stroke="var(--color-primary)"
+                  strokeWidth="4"
+                  strokeDasharray={`${enhanced.recovery.recovery_score}, 100`}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-sm font-extrabold text-text">
+                {enhanced.recovery.recovery_score}
+              </span>
+            </div>
+            <div>
+              <p className={`text-sm font-bold capitalize ${RECOVERY_COLORS[enhanced.recovery.fatigue_level] ?? "text-text"}`}>
+                {enhanced.recovery.fatigue_level} fatigue
+              </p>
+              {enhanced.recovery.suggestion && (
+                <p className="mt-1 text-xs text-muted">{enhanced.recovery.suggestion}</p>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Weekly volume */}
       {enhanced && enhanced.weekly_volume.length > 0 && (
         <Card title="Weekly volume">
           <WeeklyVolumeChart weeks={enhanced.weekly_volume} />
         </Card>
       )}
+
+      {/* Monthly volume */}
+      {enhanced && enhanced.monthly_volume.length > 0 && (
+        <Card title="Monthly volume">
+          <MonthlyVolumeChart months={enhanced.monthly_volume} />
+        </Card>
+      )}
+
+      {/* Strength standards / estimated 1RM */}
+      {enhanced && enhanced.exercise_progression.length > 0 && (
+        <Card title="Estimated 1RM">
+          <div className="space-y-3">
+            {enhanced.exercise_progression
+              .filter((p) => p.estimated_1rm != null)
+              .slice(0, 8)
+              .map((p) => {
+                const delta =
+                  p.estimated_1rm != null && p.previous_1rm != null
+                    ? p.estimated_1rm - p.previous_1rm
+                    : null;
+                return (
+                  <div key={p.exercise_id} className="flex items-center justify-between">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-text">{p.exercise_name}</p>
+                      <p className="text-xs text-muted">
+                        {p.estimated_1rm} kg · best {p.best_weight} × {p.best_reps}
+                      </p>
+                    </div>
+                    {delta != null && (
+                      <span className={`text-xs font-bold ${delta >= 0 ? "text-success" : "text-danger"}`}>
+                        {delta >= 0 ? "+" : ""}
+                        {delta.toFixed(1)} kg
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+          {enhanced.strength_standards.filter((s) => s.standard_level).length > 0 && (
+            <div className="mt-4 border-t border-line pt-3">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted">
+                Strength standards vs bodyweight
+              </p>
+              <div className="space-y-2">
+                {enhanced.strength_standards
+                  .filter((s) => s.standard_level)
+                  .slice(0, 5)
+                  .map((s) => (
+                    <div key={s.exercise_id} className="flex items-center justify-between text-sm">
+                      <p className="truncate font-medium text-text">{s.exercise_name}</p>
+                      <p className="text-xs capitalize text-muted">
+                        {s.standard_level} · {s.bodyweight_ratio}× bw
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Progress photos */}
+      <Card title="Progress Photos">
+        <div className="flex gap-3 overflow-x-auto pb-1">
+          {(measurements ?? [])
+            .filter((m) => m.photo_url)
+            .map((m) => (
+              <div key={m.id} className="flex flex-col items-center gap-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={m.photo_url!}
+                  alt={`Progress ${m.date}`}
+                  className="h-28 w-28 rounded-xl object-cover"
+                />
+                <span className="text-[11px] text-muted">{m.date}</span>
+              </div>
+            ))}
+          {(!measurements || measurements.filter((m) => m.photo_url).length === 0) && (
+            <p className="py-4 text-sm text-muted">No progress photos yet. Add one below.</p>
+          )}
+        </div>
+        <ProgressPhotoForm onAdded={reload} />
+      </Card>
 
       {/* Personal records */}
       <Card title="Personal Records">
@@ -105,5 +262,47 @@ export default function ProgressPage() {
       </Card>
     </div>
     </AppShell>
+  );
+}
+
+function ProgressPhotoForm({ onAdded }: { onAdded: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFile = async (file: File | null) => {
+    if (!file) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        await createBodyMeasurement({
+          date: new Date().toISOString().slice(0, 10),
+          photo_url: String(reader.result),
+        });
+        onAdded();
+        setSaving(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to upload photo");
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mt-3 border-t border-line pt-3">
+      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-primarysoft py-2.5 text-sm font-bold text-primary">
+        {saving ? "Uploading…" : "＋ Add progress photo"}
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+          disabled={saving}
+        />
+      </label>
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+    </div>
   );
 }
