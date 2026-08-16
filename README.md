@@ -9,7 +9,6 @@ Fitness tracking app: workout planning, nutrition logging, and progress analytic
 ├── backend/         # FastAPI + SQLAlchemy + Celery API
 ├── apps/mobile/     # React Native (Expo) app
 ├── apps/web/        # Next.js (App Router + Tailwind) web app
-├── subscriptions/   # Spring Boot billing & entitlement service (port 8081)
 ├── shared/          # Shared API type contracts
 └── .github/         # CI workflows
 ```
@@ -83,31 +82,25 @@ npm run dev
 
 ## Subscriptions
 
-`subscriptions` is a Spring Boot service that resolves entitlements. The backend
-proxies to it over HTTP.
-
-```bash
-cd subscriptions
-mvn spring-boot:run
-```
+Subscription/entitlement resolution lives directly in the backend (`app/models/subscription.py`,
+`app/services/subscription_service.py`) — no separate service to run.
 
 Set in `backend/.env`:
 
 | Variable | Default |
 | --- | --- |
-| `SUBSCRIPTION_SERVICE_URL` | `http://localhost:8081` |
-| `ENTITLEMENTS_TIMEOUT_SECONDS` | `2.0` |
+| `REVENUECAT_WEBHOOK_SECRET` | (none — required for the webhook route to accept requests) |
 
-Endpoints:
+Endpoints (under `API_V1_PREFIX`, e.g. `/api/v1`):
 
-- `GET  /entitlements/{userId}` — current subscription/entitlement
-- `POST /entitlements/{userId}/purchase` — upgrade to Pro (30-day period)
-- `POST /entitlements/{userId}/cancel` — mark subscription cancelled
-- `POST /webhooks/revenuecat` — RevenueCat webhook (initial purchase/renewal/cancellation/expiration)
+- `GET  /entitlements/me` — current user's subscription/entitlement
+- `POST /subscriptions/purchase` — upgrade to Pro (30-day period)
+- `POST /subscriptions/cancel` — mark subscription cancelled
+- `POST /webhooks/revenuecat` — RevenueCat webhook (initial purchase/renewal/cancellation/expiration), HMAC-SHA256 verified via `X-RevenueCat-Signature`
 
 Pro-gated routes on the backend use the `RequiresPro` dependency (returns HTTP `402` for
 free users), e.g. `GET /api/v1/analytics/summary`. The RevenueCat SDK fires webhooks for real
-store purchases; the backend `POST /api/v1/subscriptions/purchase|cancel` routes let the app
+store purchases; the `POST /api/v1/subscriptions/purchase|cancel` routes let the app
 apply/reflect changes immediately.
 
 ## Daily workout plans
@@ -180,10 +173,7 @@ either fails the PR (if out of date) or auto-commits the update on `main`. To re
 
 ## Observability
 
-The backend and subscriptions service both export OpenTelemetry traces (OTLP/gRPC) and
-Prometheus metrics, so a request spanning both services (e.g. `POST
-/api/v1/subscriptions/purchase` calling into `subscriptions`) shows up as a single connected
-trace.
+The backend exports OpenTelemetry traces (OTLP/gRPC) and Prometheus metrics.
 
 - Backend: `/metrics` (Prometheus), traces gated behind `OTEL_ENABLED=true` +
   `OTEL_EXPORTER_OTLP_ENDPOINT` (off by default so `pytest`/local dev without Docker doesn't

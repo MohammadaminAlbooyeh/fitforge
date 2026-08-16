@@ -31,8 +31,3 @@ class ForbiddenError(FitForgeError):
 class PaymentRequiredError(FitForgeError):
     status_code = 402
     detail = "Payment required"
-
-
-class UpstreamServiceError(FitForgeError):
-    status_code = 503
-    detail = "Upstream service unavailable"

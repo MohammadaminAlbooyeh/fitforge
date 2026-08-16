@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
-from app.dependencies import CurrentUser
+from app.dependencies import CurrentUser, DbSession
 from app.schemas.entitlements import EntitlementsResponse
 from app.services.entitlement_client import get_entitlements
 
@@ -8,8 +8,8 @@ router = APIRouter()
 
 
 @router.get("/me", response_model=EntitlementsResponse)
-def get_my_entitlements(current: CurrentUser):
-    entitlements = get_entitlements(current.user_id)
+def get_my_entitlements(current: CurrentUser, db: DbSession):
+    entitlements = get_entitlements(db, current.user_id)
     return EntitlementsResponse(
         userId=entitlements.user_id,
         plan=entitlements.plan.upper(),

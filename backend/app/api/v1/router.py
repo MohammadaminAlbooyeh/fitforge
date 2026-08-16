@@ -13,6 +13,7 @@ from app.api.v1 import (
     social,
     subscriptions,
     users,
+    webhooks,
     workouts,
     workout_logs,
     workout_plans,
@@ -29,6 +30,7 @@ api_router.include_router(nutrition.router, prefix="/nutrition", tags=["nutritio
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(entitlements.router, prefix="/entitlements", tags=["entitlements"])
 api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
+api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 api_router.include_router(plans.router, prefix="/plans", tags=["plans"])
 api_router.include_router(workout_plans.router, prefix="/workout-plans", tags=["workout-plans"])

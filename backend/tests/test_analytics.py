@@ -4,7 +4,7 @@ from app.services.entitlement_client import Entitlements
 
 def _pro(monkeypatch):
     fake = Entitlements(user_id=1, plan="pro", status="ACTIVE")
-    monkeypatch.setattr(deps_entitlement, "get_entitlements", lambda user_id: fake)
+    monkeypatch.setattr(deps_entitlement, "get_entitlements", lambda db, user_id: fake)
 
 
 def test_analytics_summary_empty(monkeypatch, client, auth_headers):

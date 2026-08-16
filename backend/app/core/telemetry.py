@@ -1,10 +1,7 @@
 """Distributed tracing (OpenTelemetry -> OTLP, e.g. Jaeger) and Prometheus metrics.
 
 Opt-in via OTEL_ENABLED so local `pytest`/dev-without-docker runs don't need a
-collector reachable. When enabled, traces are exported over OTLP/gRPC
-(the subscriptions service exports the same way, so both services' spans land
-in the same trace when the backend calls it with the incoming trace context
-propagated automatically by the FastAPI/urllib3 instrumentation).
+collector reachable. When enabled, traces are exported over OTLP/gRPC.
 """
 from fastapi import FastAPI
 from opentelemetry import trace

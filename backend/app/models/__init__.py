@@ -9,6 +9,7 @@ from app.models.workout_log import WorkoutLog, LogSet, LogStatus
 from app.models.body_measurement import BodyMeasurement
 from app.models.achievement import Achievement, UserXP
 from app.models.social import Follow, Challenge, ChallengeParticipant
+from app.models.subscription import Subscription, Plan, SubscriptionStatus
 
 __all__ = [
     "Base",
@@ -38,4 +39,7 @@ __all__ = [
     "Follow",
     "Challenge",
     "ChallengeParticipant",
+    "Subscription",
+    "Plan",
+    "SubscriptionStatus",
 ]

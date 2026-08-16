@@ -94,7 +94,7 @@ export interface WorkoutSessionContract {
   sets: WorkoutSessionSetContract[];
 }
 
-// ---- fitforge-subscriptions (Java / Spring Boot) ----
+// ---- subscriptions / entitlements ----
 
 export type SubscriptionPlanContract = 'FREE' | 'PRO';
 

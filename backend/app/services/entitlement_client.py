@@ -1,8 +1,6 @@
-import httpx
-from datetime import datetime, timezone
+from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.core.exceptions import UpstreamServiceError
+from app.services import subscription_service
 
 
 class Entitlements:
@@ -25,75 +23,34 @@ class Entitlements:
         return self.plan == "pro"
 
 
-def _normalize_period_end(value) -> str | None:
-    if value is None:
-        return None
-    if isinstance(value, (int, float)):
-        return datetime.fromtimestamp(value / 1000, tz=timezone.utc).isoformat()
-    return str(value)
-
-
-def get_entitlements(user_id: int) -> Entitlements:
-    """Fetch entitlements from the subscription service.
-
-    Raises UpstreamServiceError if the service is unreachable or returns an
-    invalid response, rather than silently downgrading the user to "free" -
-    that would incorrectly deny Pro access during an outage.
-    """
-    settings = get_settings()
-    try:
-        response = httpx.get(
-            f"{settings.SUBSCRIPTION_SERVICE_URL}/entitlements/{user_id}",
-            timeout=settings.ENTITLEMENTS_TIMEOUT_SECONDS,
-            headers=_service_headers(settings),
-        )
-        response.raise_for_status()
-        data = response.json()
-    except (httpx.HTTPError, ValueError) as exc:
-        raise UpstreamServiceError("Subscription service unavailable") from exc
-
+def _to_entitlements(subscription) -> Entitlements:
     return Entitlements(
-        user_id=data.get("userId", user_id),
-        plan=data.get("plan", "free"),
-        status=data.get("status"),
-        store_product_id=data.get("storeProductId"),
-        current_period_end=_normalize_period_end(data.get("currentPeriodEnd")),
+        user_id=subscription.user_id,
+        plan=subscription.plan.value,
+        status=subscription.status.value.upper(),
+        store_product_id=subscription.store_product_id,
+        current_period_end=(
+            subscription.current_period_end.isoformat() if subscription.current_period_end else None
+        ),
     )
 
 
-def get_entitlement_plan(user_id: int) -> str:
-    return get_entitlements(user_id).plan
+def get_entitlements(db: Session, user_id: int) -> Entitlements:
+    subscription = subscription_service.get_or_create(db, user_id)
+    return _to_entitlements(subscription)
 
 
-def is_pro(user_id: int) -> bool:
-    return get_entitlements(user_id).is_pro
+def get_entitlement_plan(db: Session, user_id: int) -> str:
+    return get_entitlements(db, user_id).plan
 
 
-def purchase(user_id: int, product_id: str | None = None) -> None:
-    _call_subscription("POST", f"/entitlements/{user_id}/purchase", {"productId": product_id})
+def is_pro(db: Session, user_id: int) -> bool:
+    return get_entitlements(db, user_id).is_pro
 
 
-def cancel(user_id: int) -> None:
-    _call_subscription("POST", f"/entitlements/{user_id}/cancel")
+def purchase(db: Session, user_id: int, product_id: str | None = None) -> None:
+    subscription_service.purchase(db, user_id, product_id)
 
 
-def _call_subscription(method: str, path: str, payload: dict | None = None) -> None:
-    settings = get_settings()
-    try:
-        response = httpx.request(
-            method,
-            f"{settings.SUBSCRIPTION_SERVICE_URL}{path}",
-            json=payload,
-            timeout=settings.ENTITLEMENTS_TIMEOUT_SECONDS,
-            headers=_service_headers(settings),
-        )
-        response.raise_for_status()
-    except httpx.HTTPError:
-        raise UpstreamServiceError("Subscription service unavailable")
-
-
-def _service_headers(settings) -> dict[str, str]:
-    headers: dict[str, str] = {}
-    if settings.SERVICE_TOKEN:
-        headers["X-Service-Token"] = settings.SERVICE_TOKEN
-    return headers
+def cancel(db: Session, user_id: int) -> None:
+    subscription_service.cancel(db, user_id)

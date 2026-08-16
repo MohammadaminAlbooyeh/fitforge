@@ -1,6 +1,7 @@
-def test_get_my_entitlements_returns_503_when_subscription_service_unavailable(client, auth_headers):
+def test_get_my_entitlements_defaults_to_free(client, auth_headers):
     resp = client.get("/api/v1/entitlements/me", headers=auth_headers)
-    assert resp.status_code == 503
+    assert resp.status_code == 200
+    assert resp.json()["plan"] == "FREE"
 
 
 def test_daily_plan_requires_auth(client):
@@ -44,15 +45,15 @@ def test_pro_analytics_blocked_for_free_user(monkeypatch, client, auth_headers):
     from app.services.entitlement_client import Entitlements
 
     fake = Entitlements(user_id=1, plan="free", status="ACTIVE")
-    monkeypatch.setattr(deps_entitlement, "get_entitlements", lambda user_id: fake)
+    monkeypatch.setattr(deps_entitlement, "get_entitlements", lambda db, user_id: fake)
 
     resp = client.get("/api/v1/analytics/summary", headers=auth_headers)
     assert resp.status_code == 402
 
 
-def test_pro_analytics_returns_503_when_subscription_service_unavailable(client, auth_headers):
+def test_pro_analytics_blocked_by_default_free_plan(client, auth_headers):
     resp = client.get("/api/v1/analytics/summary", headers=auth_headers)
-    assert resp.status_code == 503
+    assert resp.status_code == 402
 
 
 def test_pro_analytics_allowed_for_pro_user(monkeypatch, client, auth_headers):
@@ -60,7 +61,7 @@ def test_pro_analytics_allowed_for_pro_user(monkeypatch, client, auth_headers):
     from app.services.entitlement_client import Entitlements
 
     fake = Entitlements(user_id=1, plan="pro", status="ACTIVE")
-    monkeypatch.setattr(deps_entitlement, "get_entitlements", lambda user_id: fake)
+    monkeypatch.setattr(deps_entitlement, "get_entitlements", lambda db, user_id: fake)
 
     resp = client.get("/api/v1/analytics/summary", headers=auth_headers)
     assert resp.status_code == 200
@@ -78,13 +79,13 @@ def test_purchase_upgrades_to_pro(monkeypatch, client, auth_headers):
 
     called = {}
 
-    def fake_purchase(uid, product_id=None):
+    def fake_purchase(db, uid, product_id=None):
         called["purchase"] = (uid, product_id)
 
-    def fake_cancel(uid):
+    def fake_cancel(db, uid):
         called["cancel"] = uid
 
-    def fake_get(uid):
+    def fake_get(db, uid):
         return Entitlements(user_id=uid, plan="pro", status="ACTIVE")
 
     monkeypatch.setattr(subscriptions.entitlement_client, "purchase", fake_purchase)
