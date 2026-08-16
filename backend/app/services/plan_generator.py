@@ -41,7 +41,7 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import ConflictError
+from app.core.exceptions import ConflictError, NotFoundError
 from app.models.exercise import DifficultyLevel, EquipmentType, MovementRole, MuscleGroup
 from app.models.user import User
 from app.models.workout_log import LogSet
@@ -274,3 +274,80 @@ def generate_plan(db: Session, user: User, days_per_week: int) -> WorkoutPlan:
     db.commit()
     db.refresh(plan)
     return plan
+
+
+def suggest_next_set(db: Session, user_id: int, exercise) -> dict:
+    """Standalone version of ``_apply_progression`` for a rest-timer / "what's
+    next" prompt after logging a set, independent of plan (re)generation."""
+    sets, reps_range, rest_seconds, target_weight_kg = _apply_progression(db, user_id, exercise)
+    last_set: LogSet | None = workout_log_repo.get_last_set(db, user_id, exercise.id)
+
+    if last_set is None:
+        reasoning = "No previous sets logged for this exercise yet — start light and find your range."
+    elif target_weight_kg is not None and last_set.weight_kg and target_weight_kg > last_set.weight_kg:
+        reasoning = (
+            f"You hit {last_set.reps} reps at {last_set.weight_kg}kg last time (top of the "
+            f"{reps_range} range) — try {target_weight_kg}kg next set."
+        )
+    else:
+        reasoning = (
+            f"You logged {last_set.reps} reps last time — repeat the same weight and aim for "
+            f"the top of the {reps_range} range before adding weight."
+        )
+
+    return {
+        "exercise_id": exercise.id,
+        "sets": sets,
+        "reps_range": reps_range,
+        "rest_seconds": rest_seconds,
+        "target_weight_kg": target_weight_kg,
+        "reasoning": reasoning,
+    }
+
+
+# Recovery scores at/below this are treated as "high fatigue" and trigger a
+# deload adjustment (mirrors app.services.analytics_service.get_recovery_insight).
+DELOAD_RECOVERY_THRESHOLD = 40
+MIN_SETS_AFTER_DELOAD = 2
+
+
+def adaptive_adjust_plan(db: Session, user: User, recovery_score: int) -> dict:
+    """Pro feature: nudge the user's *active* plan based on recent training
+    load, without a full regenerate. Only touches days that haven't been
+    logged yet this cycle (a day with at least one WorkoutLog referencing it
+    is left alone, since the user already trained it as prescribed).
+
+    - High fatigue (``recovery_score`` at/below ``DELOAD_RECOVERY_THRESHOLD``):
+      trim one set (never below ``MIN_SETS_AFTER_DELOAD``) off each untouched
+      exercise, i.e. an auto-applied deload.
+    - Otherwise: no structural change — progressive overload already happens
+      at generation time, so this call is a no-op that reports the plan as-is.
+    """
+    plan = workout_plan_repo.get_active_plan(db, user.id)
+    if plan is None:
+        raise NotFoundError("No active workout plan")
+
+    adjustments: list[dict] = []
+
+    if recovery_score <= DELOAD_RECOVERY_THRESHOLD:
+        logged_plan_day_ids = workout_plan_repo.get_logged_plan_day_ids(db, user.id, plan.id)
+        for plan_day in plan.plan_days:
+            if plan_day.id in logged_plan_day_ids:
+                continue
+            for pde in plan_day.plan_day_exercises:
+                new_sets = max(MIN_SETS_AFTER_DELOAD, pde.sets - 1)
+                if new_sets != pde.sets:
+                    adjustments.append(
+                        {
+                            "plan_day_exercise_id": pde.id,
+                            "exercise_id": pde.exercise_id,
+                            "previous_sets": pde.sets,
+                            "new_sets": new_sets,
+                            "reason": "High fatigue detected — deload applied (-1 set).",
+                        }
+                    )
+                    pde.sets = new_sets
+        db.commit()
+        db.refresh(plan)
+
+    return {"plan": plan, "adjustments": adjustments, "recovery_score": recovery_score}

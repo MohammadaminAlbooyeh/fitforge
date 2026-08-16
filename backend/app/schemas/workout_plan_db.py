@@ -48,3 +48,17 @@ class WorkoutPlanRead(BaseModel):
     start_date: date
     status: PlanStatus
     plan_days: list[PlanDayRead]
+
+
+class AdaptiveAdjustment(BaseModel):
+    plan_day_exercise_id: int
+    exercise_id: int
+    previous_sets: int
+    new_sets: int
+    reason: str
+
+
+class AdaptiveAdjustResult(BaseModel):
+    plan: WorkoutPlanRead
+    adjustments: list[AdaptiveAdjustment]
+    recovery_score: int

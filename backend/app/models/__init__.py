@@ -2,7 +2,7 @@ from app.models.base import Base
 from app.models.user import User, Gender, FitnessGoal, ExperienceLevel
 from app.models.workout import Workout, WorkoutExercise
 from app.models.exercise import Exercise, MuscleGroup, EquipmentType, DifficultyLevel
-from app.models.nutrition import NutritionLog
+from app.models.nutrition import NutritionLog, NutritionGoal
 from app.models.workout_session import WorkoutSession
 from app.models.workout_plan import WorkoutPlan, PlanDay, PlanDayExercise, SplitType, PlanStatus
 from app.models.workout_log import WorkoutLog, LogSet, LogStatus
@@ -24,6 +24,7 @@ __all__ = [
     "EquipmentType",
     "DifficultyLevel",
     "NutritionLog",
+    "NutritionGoal",
     "WorkoutSession",
     "WorkoutPlan",
     "PlanDay",

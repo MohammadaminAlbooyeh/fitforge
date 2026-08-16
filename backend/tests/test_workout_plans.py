@@ -1,12 +1,27 @@
 import pytest
 
+from app.core import deps_entitlement
+from app.repositories.user_repo import get_user_by_id
 from app.seed.exercises import seed_exercises
+from app.services.entitlement_client import Entitlements
+from app.services.plan_generator import adaptive_adjust_plan
 
 
 @pytest.fixture()
 def seeded(db_session):
     seed_exercises(db_session)
     return db_session
+
+
+def _pro(monkeypatch):
+    fake = Entitlements(user_id=1, plan="pro", status="ACTIVE")
+    monkeypatch.setattr(deps_entitlement, "get_entitlements", lambda db, user_id: fake)
+
+
+def _generate_plan(client, auth_headers, days=3):
+    return client.post(
+        "/api/v1/workout-plans/generate", json={"days_per_week": days}, headers=auth_headers
+    ).json()
 
 
 @pytest.mark.parametrize(
@@ -162,3 +177,72 @@ def test_regenerated_plan_deprioritizes_frequently_skipped_exercise(seeded, clie
         e["exercise"]["id"] for day in plan["plan_days"] for e in day["plan_day_exercises"]
     }
     assert exercise_id not in final_ids
+
+
+def test_adaptive_adjust_requires_pro(seeded, client, auth_headers):
+    _generate_plan(client, auth_headers, days=1)
+    resp = client.post("/api/v1/workout-plans/adaptive-adjust", headers=auth_headers)
+    assert resp.status_code == 402
+
+
+def test_adaptive_adjust_requires_active_plan(seeded, client, auth_headers, monkeypatch):
+    _pro(monkeypatch)
+    resp = client.post("/api/v1/workout-plans/adaptive-adjust", headers=auth_headers)
+    assert resp.status_code == 404
+
+
+def test_adaptive_adjust_deloads_untouched_days_on_high_fatigue(seeded, client, auth_headers, monkeypatch):
+    _pro(monkeypatch)
+    plan = _generate_plan(client, auth_headers, days=1)
+    pde = plan["plan_days"][0]["plan_day_exercises"][0]
+    original_sets = pde["sets"]
+
+    me = client.get("/api/v1/users/me", headers=auth_headers).json()
+    db_user = get_user_by_id(seeded, me["id"])
+
+    result = adaptive_adjust_plan(seeded, db_user, recovery_score=20)
+    assert result["recovery_score"] == 20
+    assert len(result["adjustments"]) > 0
+    adjustment = next(a for a in result["adjustments"] if a["plan_day_exercise_id"] == pde["id"])
+    assert adjustment["previous_sets"] == original_sets
+    assert adjustment["new_sets"] == max(2, original_sets - 1)
+
+    active = client.get("/api/v1/workout-plans/active", headers=auth_headers).json()
+    updated_pde = active["plan_days"][0]["plan_day_exercises"][0]
+    assert updated_pde["sets"] == max(2, original_sets - 1)
+
+
+def test_adaptive_adjust_no_op_when_recovery_is_fine(seeded, client, auth_headers, monkeypatch):
+    _pro(monkeypatch)
+    plan = _generate_plan(client, auth_headers, days=1)
+    original_sets = plan["plan_days"][0]["plan_day_exercises"][0]["sets"]
+
+    me = client.get("/api/v1/users/me", headers=auth_headers).json()
+    db_user = get_user_by_id(seeded, me["id"])
+    result = adaptive_adjust_plan(seeded, db_user, recovery_score=90)
+    assert result["adjustments"] == []
+
+    active = client.get("/api/v1/workout-plans/active", headers=auth_headers).json()
+    assert active["plan_days"][0]["plan_day_exercises"][0]["sets"] == original_sets
+
+
+def test_adaptive_adjust_skips_already_logged_days(seeded, client, auth_headers, monkeypatch):
+    _pro(monkeypatch)
+    plan = _generate_plan(client, auth_headers, days=1)
+    plan_day_id = plan["plan_days"][0]["id"]
+    pde = plan["plan_days"][0]["plan_day_exercises"][0]
+    exercise_id = pde["exercise"]["id"]
+
+    client.post(
+        "/api/v1/workout-logs/",
+        headers=auth_headers,
+        json={
+            "plan_day_id": plan_day_id,
+            "sets": [{"exercise_id": exercise_id, "weight_kg": 40, "reps": 10, "set_number": 1}],
+        },
+    )
+
+    me = client.get("/api/v1/users/me", headers=auth_headers).json()
+    db_user = get_user_by_id(seeded, me["id"])
+    result = adaptive_adjust_plan(seeded, db_user, recovery_score=20)
+    assert result["adjustments"] == []

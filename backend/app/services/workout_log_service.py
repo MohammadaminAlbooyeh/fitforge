@@ -9,6 +9,11 @@ from app.schemas.workout_log import PersonalRecordRead, WorkoutLogCreate
 
 
 def create_log(db: Session, user_id: int, data: WorkoutLogCreate) -> WorkoutLog:
+    if data.client_id is not None:
+        existing = workout_log_repo.get_by_client_id(db, user_id, data.client_id)
+        if existing is not None:
+            return existing
+
     if data.plan_day_id is not None:
         plan_day = workout_plan_repo.get_plan_day(db, data.plan_day_id, user_id)
         if plan_day is None:
@@ -46,6 +51,7 @@ def create_log(db: Session, user_id: int, data: WorkoutLogCreate) -> WorkoutLog:
         plan_day_id=data.plan_day_id,
         completed_at=data.completed_at or date.today(),
         status=data.status,
+        client_id=data.client_id,
         log_sets=log_sets,
     )
     return workout_log_repo.create(db, log)

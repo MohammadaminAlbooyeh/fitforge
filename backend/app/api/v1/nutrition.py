@@ -3,9 +3,12 @@ from datetime import date
 from fastapi import APIRouter, HTTPException, status
 
 from app.dependencies import CurrentUser, DbSession
+from app.core.exceptions import NotFoundError
 from app.schemas.nutrition import (
     DailyNutritionSummary,
     DailyWaterSummary,
+    NutritionGoalRead,
+    NutritionGoalSet,
     NutritionLogCreate,
     NutritionLogRead,
     NutritionLogUpdate,
@@ -15,6 +18,19 @@ from app.schemas.nutrition import (
 from app.services import nutrition_service
 
 router = APIRouter()
+
+
+@router.put("/goal", response_model=NutritionGoalRead)
+def set_goal(payload: NutritionGoalSet, db: DbSession, current: CurrentUser):
+    return nutrition_service.set_goal(db, current.user_id, payload)
+
+
+@router.get("/goal", response_model=NutritionGoalRead)
+def get_goal(db: DbSession, current: CurrentUser):
+    goal = nutrition_service.get_goal(db, current.user_id)
+    if goal is None:
+        raise NotFoundError("No nutrition goal set")
+    return goal
 
 
 @router.post("/", response_model=NutritionLogRead, status_code=status.HTTP_201_CREATED)

@@ -2,7 +2,7 @@ import enum
 from datetime import date
 from typing import List
 
-from sqlalchemy import Boolean, Date, Enum, Float, ForeignKey, Integer
+from sqlalchemy import Boolean, Date, Enum, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -17,12 +17,17 @@ class WorkoutLog(Base):
     """What actually happened in a session, as distinct from the plan's prescription."""
 
     __tablename__ = "workout_logs"
+    __table_args__ = (UniqueConstraint("user_id", "client_id", name="uq_workout_logs_user_client_id"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     plan_day_id: Mapped[int] = mapped_column(ForeignKey("plan_days.id"), nullable=True, index=True)
     completed_at: Mapped[date] = mapped_column(Date)
     status: Mapped[LogStatus] = mapped_column(Enum(LogStatus), default=LogStatus.completed)
+    # Client-generated id (e.g. a UUID) set by the mobile app when a log is
+    # created offline, so replaying a queued sync after reconnecting is
+    # idempotent instead of creating a duplicate log.
+    client_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     user = relationship("User")
     plan_day = relationship("PlanDay")

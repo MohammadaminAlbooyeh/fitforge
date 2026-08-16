@@ -42,6 +42,30 @@ class DailyNutritionSummary(BaseModel):
     total_protein_g: float
     total_carbs_g: float
     total_fat_g: float
+    goal_calories: Optional[float] = None
+    goal_protein_g: Optional[float] = None
+    goal_carbs_g: Optional[float] = None
+    goal_fat_g: Optional[float] = None
+    remaining_calories: Optional[float] = None
+    remaining_protein_g: Optional[float] = None
+    remaining_carbs_g: Optional[float] = None
+    remaining_fat_g: Optional[float] = None
+
+
+class NutritionGoalSet(BaseModel):
+    daily_calories: Optional[float] = None
+    protein_g: Optional[float] = None
+    carbs_g: Optional[float] = None
+    fat_g: Optional[float] = None
+
+
+class NutritionGoalRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    daily_calories: Optional[float] = None
+    protein_g: Optional[float] = None
+    carbs_g: Optional[float] = None
+    fat_g: Optional[float] = None
 
 
 class WaterLogCreate(BaseModel):

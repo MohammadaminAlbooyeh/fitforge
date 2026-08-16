@@ -1,6 +1,7 @@
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, selectinload
 
+from app.models.workout_log import WorkoutLog
 from app.models.workout_plan import PlanDay, PlanDayExercise, PlanStatus, WorkoutPlan
 
 
@@ -60,5 +61,21 @@ def get_frequently_skipped_exercise_ids(db: Session, user_id: int, min_skips: in
         .where(WorkoutPlan.user_id == user_id, PlanDayExercise.skipped.is_(True))
         .group_by(PlanDayExercise.exercise_id)
         .having(func.count(PlanDayExercise.id) >= min_skips)
+    )
+    return set(db.execute(stmt).scalars())
+
+
+def get_logged_plan_day_ids(db: Session, user_id: int, plan_id: int) -> set[int]:
+    """Plan-day ids within this plan that already have at least one
+    WorkoutLog logged against them this cycle."""
+    stmt = (
+        select(WorkoutLog.plan_day_id)
+        .join(PlanDay, WorkoutLog.plan_day_id == PlanDay.id)
+        .where(
+            WorkoutLog.user_id == user_id,
+            PlanDay.workout_plan_id == plan_id,
+            WorkoutLog.plan_day_id.is_not(None),
+        )
+        .distinct()
     )
     return set(db.execute(stmt).scalars())

@@ -20,3 +20,16 @@ class NutritionLog(Base):
     fat_g: Mapped[float] = mapped_column(Float, default=0)
 
     user = relationship("User", back_populates="nutrition_logs")
+
+
+class NutritionGoal(Base):
+    """One row per user: their daily macro/calorie targets."""
+
+    __tablename__ = "nutrition_goals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
+    daily_calories: Mapped[float] = mapped_column(Float, nullable=True)
+    protein_g: Mapped[float] = mapped_column(Float, nullable=True)
+    carbs_g: Mapped[float] = mapped_column(Float, nullable=True)
+    fat_g: Mapped[float] = mapped_column(Float, nullable=True)

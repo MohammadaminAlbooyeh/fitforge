@@ -226,6 +226,63 @@ def test_personal_records_require_auth(client):
     assert resp.status_code == 401
 
 
+def test_next_set_suggestion_no_history(seeded, client, auth_headers):
+    plan = _generate_plan(client, auth_headers, days=1)
+    exercise_id = plan["plan_days"][0]["plan_day_exercises"][0]["exercise"]["id"]
+
+    resp = client.get(
+        f"/api/v1/workout-logs/next-set-suggestion/{exercise_id}", headers=auth_headers
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["exercise_id"] == exercise_id
+    assert body["target_weight_kg"] is None
+    assert "no previous sets" in body["reasoning"].lower()
+
+
+def test_next_set_suggestion_bumps_weight_after_topping_out(seeded, client, auth_headers):
+    plan = _generate_plan(client, auth_headers, days=1)
+    pde = plan["plan_days"][0]["plan_day_exercises"][0]
+    exercise_id = pde["exercise"]["id"]
+    top_reps = int(pde["reps_range"].split("-")[1])
+
+    client.post(
+        "/api/v1/workout-logs/",
+        headers=auth_headers,
+        json={"sets": [{"exercise_id": exercise_id, "weight_kg": 50, "reps": top_reps, "set_number": 1}]},
+    )
+
+    resp = client.get(
+        f"/api/v1/workout-logs/next-set-suggestion/{exercise_id}", headers=auth_headers
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["target_weight_kg"] > 50
+
+
+def test_next_set_suggestion_unknown_exercise(client, auth_headers):
+    resp = client.get("/api/v1/workout-logs/next-set-suggestion/999999", headers=auth_headers)
+    assert resp.status_code == 404
+
+
+def test_workout_log_client_id_is_idempotent(seeded, client, auth_headers):
+    plan = _generate_plan(client, auth_headers, days=1)
+    exercise_id = plan["plan_days"][0]["plan_day_exercises"][0]["exercise"]["id"]
+    payload = {
+        "client_id": "offline-uuid-1",
+        "sets": [{"exercise_id": exercise_id, "weight_kg": 40, "reps": 10, "set_number": 1}],
+    }
+
+    first = client.post("/api/v1/workout-logs/", headers=auth_headers, json=payload)
+    second = client.post("/api/v1/workout-logs/", headers=auth_headers, json=payload)
+    assert first.status_code == 201
+    assert second.status_code == 201
+    assert first.json()["id"] == second.json()["id"]
+
+    list_resp = client.get("/api/v1/workout-logs/", headers=auth_headers)
+    assert len(list_resp.json()) == 1
+
+
 def test_update_plan_day_exercise_rejects_other_users(seeded, client, auth_headers):
     plan = _generate_plan(client, auth_headers, days=1)
     pde_id = plan["plan_days"][0]["plan_day_exercises"][0]["id"]

@@ -22,6 +22,15 @@ def create(db: Session, workout_log: WorkoutLog) -> WorkoutLog:
     return workout_log
 
 
+def get_by_client_id(db: Session, user_id: int, client_id: str) -> WorkoutLog | None:
+    stmt = (
+        select(WorkoutLog)
+        .where(WorkoutLog.user_id == user_id, WorkoutLog.client_id == client_id)
+        .options(selectinload(WorkoutLog.log_sets))
+    )
+    return db.execute(stmt).scalars().first()
+
+
 def list_personal_records(db: Session, user_id: int) -> list[LogSet]:
     stmt = (
         select(LogSet)

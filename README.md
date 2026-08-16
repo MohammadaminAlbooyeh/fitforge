@@ -154,11 +154,54 @@ kept as distinct tables so progressive-overload history can be computed from rea
   - `POST /api/v1/workout-plans/generate {days_per_week: 1-5}` — archives any existing active
     plan and generates a new one
   - `GET /api/v1/workout-plans/active` — the current plan with all days/exercises
-  - `POST /api/v1/workout-logs/` — log a completed/partial session (actual weights/reps)
+  - `POST /api/v1/workout-logs/` — log a completed/partial session (actual weights/reps). Accepts
+    an optional `client_id` (e.g. a UUID the mobile app generates when logging offline) — 
+    resubmitting the same `client_id` after reconnecting returns the original log instead of
+    creating a duplicate, so a queued-offline-log sync is safe to retry.
   - `GET /api/v1/workout-logs/` — a user's logged history
+  - `GET /api/v1/workout-logs/next-set-suggestion/{exercise_id}` — rest-timer prompt: sets/reps/
+    rest and an advisory target weight for the *next* set of that exercise, using the same
+    progressive-overload logic as plan generation (`plan_generator.suggest_next_set`), but
+    callable any time — not just at plan (re)generation.
 
 The mobile app is not yet wired to this engine (it still shows the static Hevy split on the
 Exercise screen) — that's the next step if you want it surfaced in the UI.
+
+## Adaptive plan adjustment (Pro)
+
+`POST /api/v1/workout-plans/adaptive-adjust` (Pro-gated via `RequiresPro`) nudges the *active*
+plan based on recent training load instead of waiting for the next full regenerate:
+
+- Computes a recovery score from the last 4 weeks of logged set volume
+  (`analytics_service.get_recovery_insight`).
+- If fatigue is high (recovery score ≤ 40), trims one set (never below 2) off every
+  `PlanDayExercise` in days that haven't been logged yet this cycle — an automatic deload.
+  Days already logged this cycle are left untouched.
+- Otherwise it's a no-op; day-to-day progressive overload already happens at plan-generation
+  time (see above).
+
+Returns the updated plan plus a list of what changed and why
+(`app/schemas/workout_plan_db.AdaptiveAdjustResult`). Logic lives in
+`app/services/plan_generator.adaptive_adjust_plan`.
+
+## Nutrition goals
+
+`NutritionLog`/`WaterLog` (`app/models/nutrition.py`, `app/models/water.py`) already cover manual
+food/water logging; `NutritionGoal` adds per-user daily targets:
+
+- `PUT /api/v1/nutrition/goal` — set/update daily calorie and macro targets (any field optional)
+- `GET /api/v1/nutrition/goal` — read the current targets (404 if none set)
+- `GET /api/v1/nutrition/day?day=YYYY-MM-DD` — daily summary now includes `goal_*` and
+  `remaining_*` fields (calories/protein/carbs/fat) whenever a goal is set, so the mobile app can
+  render a "X kcal remaining" style progress bar without computing it client-side.
+
+## Offline mode
+
+The mobile app itself isn't offline-first yet (that's a larger client-side effort — a local
+queue/cache, e.g. via `expo-sqlite` or `AsyncStorage`, plus a "sync on reconnect" flow), but the
+backend now supports it: `POST /api/v1/workout-logs/` accepts a client-generated `client_id`,
+making retries after reconnecting idempotent (see above) instead of creating duplicate logs when
+a queued request is replayed.
 
 ## API contracts
 

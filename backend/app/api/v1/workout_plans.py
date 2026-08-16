@@ -1,15 +1,18 @@
 from fastapi import APIRouter
 
+from app.core.deps_entitlement import RequiresPro
 from app.core.exceptions import NotFoundError
 from app.dependencies import CurrentUser, DbSession
 from app.repositories import exercise_repo, user_repo, workout_plan_repo
 from app.schemas.workout_plan_db import (
+    AdaptiveAdjustResult,
     GeneratePlanRequest,
     PlanDayExerciseRead,
     PlanDayExerciseUpdate,
     WorkoutPlanRead,
 )
-from app.services.plan_generator import generate_plan
+from app.services import analytics_service
+from app.services.plan_generator import adaptive_adjust_plan, generate_plan
 
 router = APIRouter()
 
@@ -47,3 +50,13 @@ def update_plan_day_exercise(
         pde.skipped = payload.skipped
 
     return workout_plan_repo.save_plan_day_exercise(db, pde)
+
+
+@router.post("/adaptive-adjust", response_model=AdaptiveAdjustResult)
+def adaptive_adjust(db: DbSession, current: CurrentUser, _: RequiresPro):
+    """Pro feature: adjust the active plan's un-logged days based on recent
+    training load (deload if recovery is trending low)."""
+    user = user_repo.get_user_by_id(db, current.user_id)
+    weekly_volume = analytics_service.get_weekly_volume(db, current.user_id)
+    recovery = analytics_service.get_recovery_insight(weekly_volume)
+    return adaptive_adjust_plan(db, user, recovery.recovery_score)

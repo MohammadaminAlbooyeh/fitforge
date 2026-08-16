@@ -30,6 +30,49 @@ def test_daily_summary(client, auth_headers):
     assert body["total_protein_g"] == 65
 
 
+def test_get_goal_not_set(client, auth_headers):
+    resp = client.get("/api/v1/nutrition/goal", headers=auth_headers)
+    assert resp.status_code == 404
+
+
+def test_set_and_get_goal(client, auth_headers):
+    resp = client.put(
+        "/api/v1/nutrition/goal",
+        headers=auth_headers,
+        json={"daily_calories": 2200, "protein_g": 160, "carbs_g": 220, "fat_g": 70},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["daily_calories"] == 2200
+
+    resp = client.get("/api/v1/nutrition/goal", headers=auth_headers)
+    assert resp.status_code == 200
+    assert resp.json()["protein_g"] == 160
+
+
+def test_set_goal_upserts(client, auth_headers):
+    client.put("/api/v1/nutrition/goal", headers=auth_headers, json={"daily_calories": 2000})
+    resp = client.put("/api/v1/nutrition/goal", headers=auth_headers, json={"daily_calories": 2500})
+    assert resp.status_code == 200
+    assert resp.json()["daily_calories"] == 2500
+
+
+def test_daily_summary_includes_goal_and_remaining(client, auth_headers):
+    client.put(
+        "/api/v1/nutrition/goal",
+        headers=auth_headers,
+        json={"daily_calories": 2000, "protein_g": 150},
+    )
+    _log(client, auth_headers, calories=500, protein_g=40)
+
+    resp = client.get("/api/v1/nutrition/day?day=2026-08-10", headers=auth_headers)
+    body = resp.json()
+    assert body["goal_calories"] == 2000
+    assert body["remaining_calories"] == 1500
+    assert body["goal_protein_g"] == 150
+    assert body["remaining_protein_g"] == 110
+    assert body["goal_carbs_g"] is None
+
+
 def test_entries_for_day(client, auth_headers):
     _log(client, auth_headers, meal="lunch")
     _log(client, auth_headers, food_item="Protein shake", meal="snack")

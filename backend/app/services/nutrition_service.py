@@ -4,9 +4,14 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, NotFoundError
-from app.models.nutrition import NutritionLog
+from app.models.nutrition import NutritionGoal, NutritionLog
 from app.models.water import WaterLog
-from app.schemas.nutrition import NutritionLogCreate, NutritionLogUpdate, WaterLogCreate
+from app.schemas.nutrition import (
+    NutritionGoalSet,
+    NutritionLogCreate,
+    NutritionLogUpdate,
+    WaterLogCreate,
+)
 
 
 def log_entry(db: Session, user_id: int, data: NutritionLogCreate) -> NutritionLog:
@@ -60,13 +65,48 @@ def daily_summary(db: Session, user_id: int, day: date) -> dict:
         .where(NutritionLog.user_id == user_id, NutritionLog.log_date == day)
     )
     calories, protein, carbs, fat = db.execute(stmt).one()
-    return {
+    summary = {
         "log_date": day,
         "total_calories": calories,
         "total_protein_g": protein,
         "total_carbs_g": carbs,
         "total_fat_g": fat,
     }
+
+    goal = get_goal(db, user_id)
+    if goal is not None:
+        if goal.daily_calories is not None:
+            summary["goal_calories"] = goal.daily_calories
+            summary["remaining_calories"] = goal.daily_calories - calories
+        if goal.protein_g is not None:
+            summary["goal_protein_g"] = goal.protein_g
+            summary["remaining_protein_g"] = goal.protein_g - protein
+        if goal.carbs_g is not None:
+            summary["goal_carbs_g"] = goal.carbs_g
+            summary["remaining_carbs_g"] = goal.carbs_g - carbs
+        if goal.fat_g is not None:
+            summary["goal_fat_g"] = goal.fat_g
+            summary["remaining_fat_g"] = goal.fat_g - fat
+
+    return summary
+
+
+def get_goal(db: Session, user_id: int) -> NutritionGoal | None:
+    return db.execute(
+        select(NutritionGoal).where(NutritionGoal.user_id == user_id)
+    ).scalars().first()
+
+
+def set_goal(db: Session, user_id: int, data: NutritionGoalSet) -> NutritionGoal:
+    goal = get_goal(db, user_id)
+    if goal is None:
+        goal = NutritionGoal(user_id=user_id)
+        db.add(goal)
+    for key, value in data.model_dump().items():
+        setattr(goal, key, value)
+    db.commit()
+    db.refresh(goal)
+    return goal
 
 
 def log_water(db: Session, user_id: int, data: WaterLogCreate) -> WaterLog:

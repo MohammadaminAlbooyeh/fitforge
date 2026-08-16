@@ -30,6 +30,10 @@ class WorkoutLogCreate(BaseModel):
     completed_at: Optional[date] = None
     status: LogStatus = LogStatus.completed
     sets: list[LogSetCreate] = Field(default_factory=list)
+    # Client-generated id (e.g. a UUID) for offline-queued logs; resubmitting
+    # the same client_id after reconnecting returns the existing log instead
+    # of creating a duplicate.
+    client_id: Optional[str] = Field(default=None, max_length=64)
 
 
 class WorkoutLogRead(BaseModel):
@@ -39,7 +43,17 @@ class WorkoutLogRead(BaseModel):
     plan_day_id: Optional[int] = None
     completed_at: date
     status: LogStatus
+    client_id: Optional[str] = None
     log_sets: list[LogSetRead]
+
+
+class NextSetSuggestion(BaseModel):
+    exercise_id: int
+    sets: int
+    reps_range: str
+    rest_seconds: int
+    target_weight_kg: Optional[float] = None
+    reasoning: str
 
 
 class PersonalRecordRead(BaseModel):
