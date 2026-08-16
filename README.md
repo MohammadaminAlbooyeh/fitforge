@@ -178,20 +178,18 @@ The backend exports OpenTelemetry traces (OTLP/gRPC) and Prometheus metrics.
 - Backend: `/metrics` (Prometheus), traces gated behind `OTEL_ENABLED=true` +
   `OTEL_EXPORTER_OTLP_ENDPOINT` (off by default so `pytest`/local dev without Docker doesn't
   need a collector running).
-- Subscriptions: `/actuator/prometheus`, traces gated behind `OTEL_ENABLED=true` (Spring
-  property `management.tracing.enabled`) + `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
 `docker compose up` starts Jaeger (`localhost:16686`), Prometheus (`localhost:9090`), and
 Grafana (`localhost:3000`, anonymous viewer access, Prometheus + Jaeger datasources
 pre-provisioned via `observability/grafana/provisioning`) alongside the app services, with
-`OTEL_ENABLED=true` already set for backend/subscriptions.
+`OTEL_ENABLED=true` already set for the backend.
 
 ## CI/CD
 
-CI (`backend-ci.yml`, `mobile-ci.yml`, `subscriptions-ci.yml`, `web-ci.yml`) runs
-lint/typecheck/tests on every push and PR touching each service.
+CI (`backend-ci.yml`, `mobile-ci.yml`, `web-ci.yml`) runs lint/typecheck/tests on every push and
+PR touching each service.
 
-CD (`cd-backend.yml`, `cd-subscriptions.yml`, `cd-web.yml`) builds and pushes a Docker image to
+CD (`cd-backend.yml`, `cd-web.yml`) builds and pushes a Docker image to
 GitHub Container Registry (`ghcr.io/<repo>/<service>`) on every push to `main` — this works out
 of the box with the built-in `GITHUB_TOKEN`, no extra secrets needed. The final "Deploy" step in
 each is a placeholder (`echo "TODO: deploy..."`) since there's no target infrastructure yet —
@@ -203,9 +201,9 @@ swap it for a `kubectl set image`, a Render/Fly/ECS deploy hook, etc. once one e
 ## Security scanning
 
 - **Dependabot** (`.github/dependabot.yml`) opens PRs for outdated/vulnerable dependencies
-  across pip, npm (mobile + web), Maven, Docker base images, and GitHub Actions.
-- **CodeQL** (`.github/workflows/codeql.yml`) runs static analysis (SAST) across Python,
-  Java/Kotlin, and JS/TS on every push/PR and weekly, results in the repo's Security tab.
+  across pip, npm (mobile + web), Docker base images, and GitHub Actions.
+- **CodeQL** (`.github/workflows/codeql.yml`) runs static analysis (SAST) across Python and
+  JS/TS on every push/PR and weekly, results in the repo's Security tab.
 - **Trivy** (`.github/workflows/trivy.yml`) scans dependency manifests for known CVEs on every
   push/PR and weekly, also reporting into the Security tab.
 
