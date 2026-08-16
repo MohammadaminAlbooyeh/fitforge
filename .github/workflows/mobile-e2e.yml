@@ -25,7 +25,7 @@ jobs:
       MAESTRO_NEW_USER_PASSWORD: MaestroTest123!
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node
         uses: actions/setup-node@v4
