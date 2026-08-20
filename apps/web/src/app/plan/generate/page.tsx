@@ -10,55 +10,56 @@ const DAY_OPTIONS = [1, 2, 3, 4, 5];
 
 function DumbbellIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M6 9v6M4 8v8M18 9v6M20 8v8M6 12h12"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="2.5" y="9" width="3" height="6" rx="1" fill="currentColor" />
+      <rect x="4.5" y="7.5" width="2.5" height="9" rx="0.8" fill="currentColor" />
+      <rect x="18.5" y="9" width="3" height="6" rx="1" fill="currentColor" />
+      <rect x="17" y="7.5" width="2.5" height="9" rx="0.8" fill="currentColor" />
+      <rect x="7" y="11" width="10" height="2" rx="1" fill="currentColor" />
     </svg>
   );
 }
 
 function BarbellIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M2 12h2M4 9v6M7 10v4M17 10v4M20 9v6M22 12h-2M7 12h10"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="1.5" y="10.5" width="1.8" height="3" rx="0.5" fill="currentColor" />
+      <rect x="3.5" y="9" width="2" height="6" rx="0.6" fill="currentColor" />
+      <rect x="6" y="7" width="2.2" height="10" rx="0.6" fill="currentColor" />
+      <rect x="15.8" y="7" width="2.2" height="10" rx="0.6" fill="currentColor" />
+      <rect x="18.5" y="9" width="2" height="6" rx="0.6" fill="currentColor" />
+      <rect x="20.7" y="10.5" width="1.8" height="3" rx="0.5" fill="currentColor" />
+      <rect x="8" y="11.2" width="8" height="1.6" rx="0.8" fill="currentColor" />
     </svg>
   );
 }
 
 function MachineIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M5 4v16M19 4v16M5 8h6M15 16h4"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="15" cy="8" r="2.2" stroke="currentColor" strokeWidth={2} />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="3" width="2" height="18" rx="0.6" fill="currentColor" />
+      <rect x="18" y="3" width="2" height="18" rx="0.6" fill="currentColor" />
+      <rect x="4" y="7" width="6" height="1.8" rx="0.6" fill="currentColor" />
+      <rect x="13" y="16" width="7" height="1.8" rx="0.6" fill="currentColor" />
+      <circle cx="14.5" cy="9" r="2.6" stroke="currentColor" strokeWidth={1.8} />
     </svg>
   );
 }
 
 function CableIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="5.5" r="2.2" stroke="currentColor" strokeWidth={2} />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="5" r="2.4" fill="currentColor" />
       <path
-        d="M12 7.7V15M9 20l3-5 3 5"
+        d="M12 7.4V14.5"
         stroke="currentColor"
-        strokeWidth={2}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 14.5 8.3 20M12 14.5l3.7 5.5"
+        stroke="currentColor"
+        strokeWidth={2.2}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -68,27 +69,27 @@ function CableIcon() {
 
 function KettlebellIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <path
-        d="M9.5 6a2.5 2.5 0 0 1 5 0v1.5h-5V6Z"
+        d="M9.3 6.3a2.7 2.7 0 0 1 5.4 0v1.4H9.3V6.3Z"
         stroke="currentColor"
-        strokeWidth={2}
+        strokeWidth={1.8}
         strokeLinejoin="round"
       />
-      <circle cx="12" cy="14" r="7" stroke="currentColor" strokeWidth={2} />
+      <circle cx="12" cy="14.5" r="6.5" fill="currentColor" />
     </svg>
   );
 }
 
 function BandIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <path
-        d="M4 6c4 0 4 12 8 12s4-12 8-12"
+        d="M3.5 5.5c5 0 3.5 13 8.5 13s3.5-13 8.5-13"
         stroke="currentColor"
-        strokeWidth={2}
+        strokeWidth={2.6}
         strokeLinecap="round"
-        strokeLinejoin="round"
+        fill="none"
       />
     </svg>
   );
