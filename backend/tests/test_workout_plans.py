@@ -1,10 +1,18 @@
 import pytest
 
 from app.core import deps_entitlement
+from app.repositories import exercise_repo
 from app.repositories.user_repo import get_user_by_id
 from app.seed.exercises import seed_exercises
 from app.services.entitlement_client import Entitlements
 from app.services.plan_generator import adaptive_adjust_plan
+
+
+def _no_shuffle(monkeypatch):
+    """find_for_plan randomly picks among tied-best candidates so plans vary
+    across regenerations; tests that need the *same* exercise to reappear
+    across a regenerate (to check progression math) pin that down here."""
+    monkeypatch.setattr(exercise_repo.random, "shuffle", lambda seq: None)
 
 
 @pytest.fixture()
@@ -96,7 +104,8 @@ def test_generate_plan_respects_equipment_and_experience(seeded, client, auth_he
     assert equipment_used <= {"barbell", "dumbbell", "cable", "bodyweight"}
 
 
-def test_regenerated_plan_suggests_progressive_overload(seeded, client, auth_headers):
+def test_regenerated_plan_suggests_progressive_overload(seeded, client, auth_headers, monkeypatch):
+    _no_shuffle(monkeypatch)
     plan = client.post(
         "/api/v1/workout-plans/generate", json={"days_per_week": 1}, headers=auth_headers
     ).json()
@@ -124,7 +133,8 @@ def test_regenerated_plan_suggests_progressive_overload(seeded, client, auth_hea
     assert new_pde["target_weight_kg"] > 50
 
 
-def test_regenerated_plan_repeats_weight_when_rep_target_not_hit(seeded, client, auth_headers):
+def test_regenerated_plan_repeats_weight_when_rep_target_not_hit(seeded, client, auth_headers, monkeypatch):
+    _no_shuffle(monkeypatch)
     plan = client.post(
         "/api/v1/workout-plans/generate", json={"days_per_week": 1}, headers=auth_headers
     ).json()

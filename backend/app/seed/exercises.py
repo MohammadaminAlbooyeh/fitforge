@@ -156,6 +156,22 @@ EXERCISES: list[
     # Glutes only had one machine/cable option (Cable Kickback), which forced
     # a repeat across a 2-lower-day machine+cable-only week.
     ("Cable Pull Through", MuscleGroup.glutes, [MuscleGroup.hamstrings], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pull_Through/0.jpg"),
+
+    # Quads/hamstrings had zero cable options and only one bodyweight option
+    # each - a cable-only (or bodyweight-only) week couldn't avoid repeating
+    # those two slots even across just 2-3 consecutive days.
+    ("Cable Deadlift", MuscleGroup.quads, [MuscleGroup.hamstrings, MuscleGroup.glutes], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Deadlifts/0.jpg"),
+    ("Cable Hip Adduction", MuscleGroup.quads, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Hip_Adduction/0.jpg"),
+    ("Walking Lunge", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bodyweight_Walking_Lunge/0.jpg"),
+    ("Natural Glute Ham Raise", MuscleGroup.hamstrings, [MuscleGroup.glutes], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Natural_Glute_Ham_Raise/0.jpg"),
+    # Shoulders only had one cable option (Cable Lateral Raise) - a
+    # cable-only week would repeat it every single day.
+    ("Cable Shoulder Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Shoulder_Press/0.jpg"),
+    ("Front Cable Raise", MuscleGroup.shoulders, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Cable_Raise/0.jpg"),
+    # No cable hamstring exercise exists in the source dataset at all, so a
+    # cable-only selection always falls back to bodyweight for this slot -
+    # a second bodyweight option at least stops it being the exact same one.
+    ("Split Squat", MuscleGroup.hamstrings, [MuscleGroup.glutes, MuscleGroup.quads], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Split_Squats/0.jpg"),
 ]
 
 
