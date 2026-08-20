@@ -1,7 +1,9 @@
-from sqlalchemy import case, select
+import random
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.exercise import DifficultyLevel, EquipmentType, Exercise, MuscleGroup
+from app.models.exercise import DifficultyLevel, EquipmentType, Exercise, MovementRole, MuscleGroup
 
 # Lower rank sorts first. Machines/cable are safer and more space-efficient
 # in a typical commercial gym, so plans lean on them before free weights
@@ -35,6 +37,27 @@ def list_exercises(
     return list(db.execute(stmt).scalars())
 
 
+_DIFFICULTY_ORDER = [
+    DifficultyLevel.beginner,
+    DifficultyLevel.intermediate,
+    DifficultyLevel.advanced,
+]
+_MOVEMENT_ROLE_ORDER = [MovementRole.compound, MovementRole.isolation]
+
+
+def _tier_key(exercise: Exercise, equipment: list[EquipmentType]) -> tuple[int, int, int]:
+    """Lower sorts first. Same three-part preference as before (difficulty,
+    then equipment, then compound-over-isolation), just computed in Python
+    now so ties within the best tier can be picked randomly instead of by a
+    fixed name order - see find_for_plan."""
+    equipment_rank = EQUIPMENT_PREFERENCE_RANK.get(exercise.equipment, len(EQUIPMENT_PREFERENCE_RANK))
+    return (
+        _DIFFICULTY_ORDER.index(exercise.difficulty),
+        equipment_rank,
+        _MOVEMENT_ROLE_ORDER.index(exercise.movement_role),
+    )
+
+
 def find_for_plan(
     db: Session,
     muscle_group: MuscleGroup,
@@ -43,38 +66,29 @@ def find_for_plan(
     exclude_ids: set[int],
     limit: int,
 ) -> list[Exercise]:
-    difficulty_order = [
-        DifficultyLevel.beginner,
-        DifficultyLevel.intermediate,
-        DifficultyLevel.advanced,
-    ]
-    allowed_difficulties = difficulty_order[: difficulty_order.index(max_difficulty) + 1]
+    allowed_difficulties = _DIFFICULTY_ORDER[: _DIFFICULTY_ORDER.index(max_difficulty) + 1]
 
-    equipment_rank = case(
-        {eq: rank for eq, rank in EQUIPMENT_PREFERENCE_RANK.items() if eq in equipment},
-        value=Exercise.equipment,
-        else_=len(EQUIPMENT_PREFERENCE_RANK),
-    )
-
-    stmt = (
-        select(Exercise)
-        .where(
-            Exercise.muscle_group == muscle_group,
-            Exercise.equipment.in_(equipment),
-            Exercise.difficulty.in_(allowed_difficulties),
-        )
-        # "compound" sorts before "isolation" alphabetically, so this
-        # naturally prefers compound movements first within a difficulty tier.
-        # Equipment preference (machines/cable over free weights) is applied
-        # before that, so a machine option for this muscle group wins even
-        # if a free-weight option would otherwise be picked first.
-        .order_by(Exercise.difficulty, equipment_rank, Exercise.movement_role, Exercise.name)
+    stmt = select(Exercise).where(
+        Exercise.muscle_group == muscle_group,
+        Exercise.equipment.in_(equipment),
+        Exercise.difficulty.in_(allowed_difficulties),
     )
     if exclude_ids:
         stmt = stmt.where(Exercise.id.notin_(exclude_ids))
 
-    results = list(db.execute(stmt).scalars())
-    return results[:limit]
+    candidates = list(db.execute(stmt).scalars())
+    if not candidates:
+        return []
+
+    # Preference (difficulty, then machine/cable over free weights, then
+    # compound-over-isolation) narrows candidates down to the single best
+    # tier; within that tier the pick is randomized so regenerating a plan
+    # (or a Full Body A/B/C-style split repeating the same slot) doesn't
+    # always return the exact same exercise for a muscle group.
+    best_tier = min(_tier_key(e, equipment) for e in candidates)
+    tied = [e for e in candidates if _tier_key(e, equipment) == best_tier]
+    random.shuffle(tied)
+    return tied[:limit]
 
 
 def create_exercise(db: Session, **fields) -> Exercise:

@@ -145,6 +145,17 @@ EXERCISES: list[
     ("Machine High Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_High_Row/0.jpg"),
     ("Machine Shoulder Press (Leverage)", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Shoulder_Press/0.jpg"),
     ("Machine Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.machine, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Machine_Squat/0.jpg"),
+
+    # A second round of machine additions: core, shoulders, and triceps only
+    # had one or two options each, which meant a machine-only 5-day
+    # Upper/Lower split still had to repeat a slot's exercise across two of
+    # the three upper days (or two of the two lower days).
+    ("Machine Hip Raise", MuscleGroup.core, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Hip_Raise/0.jpg"),
+    ("Reverse Machine Fly", MuscleGroup.shoulders, [MuscleGroup.back], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Machine_Flyes/0.jpg"),
+    ("Smith Machine Close-Grip Bench Press", MuscleGroup.triceps, [MuscleGroup.chest, MuscleGroup.shoulders], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Close-Grip_Bench_Press/0.jpg"),
+    # Glutes only had one machine/cable option (Cable Kickback), which forced
+    # a repeat across a 2-lower-day machine+cable-only week.
+    ("Cable Pull Through", MuscleGroup.glutes, [MuscleGroup.hamstrings], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pull_Through/0.jpg"),
 ]
 
 
