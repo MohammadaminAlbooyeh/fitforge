@@ -130,6 +130,31 @@ export default function HomePage() {
         <p className="text-lg font-bold">{ctaLabel} →</p>
       </button>
 
+      {/* Quick log shortcuts */}
+      <section className="grid grid-cols-3 gap-2">
+        <Link
+          href="/workouts"
+          className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-white py-3 text-center transition hover:border-primary"
+        >
+          <span className="text-lg">💪</span>
+          <span className="text-xs font-semibold text-text">Log workout</span>
+        </Link>
+        <Link
+          href="/nutrition"
+          className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-white py-3 text-center transition hover:border-primary"
+        >
+          <span className="text-lg">🥗</span>
+          <span className="text-xs font-semibold text-text">Log nutrition</span>
+        </Link>
+        <Link
+          href="/progress"
+          className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-white py-3 text-center transition hover:border-primary"
+        >
+          <span className="text-lg">⚖️</span>
+          <span className="text-xs font-semibold text-text">Log weigh-in</span>
+        </Link>
+      </section>
+
       {/* Recommended next step */}
       {meals.length === 0 && (
         <Card className="grad-accent text-white" >
