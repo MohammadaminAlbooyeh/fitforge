@@ -6,14 +6,19 @@ from app.models.exercise import DifficultyLevel, EquipmentType, Exercise, Muscle
 # Lower rank sorts first. Machines/cable are safer and more space-efficient
 # in a typical commercial gym, so plans lean on them before free weights
 # when both are available for the same muscle group and difficulty tier.
+# Bodyweight is ranked last on purpose: it's always implicitly available
+# (see plan_generator._resolve_equipment) as a fallback so a slot is never
+# left unfilled, not as a preference - it must never outrank equipment the
+# user actually selected, or picking e.g. "kettlebell only" would still
+# mostly return bodyweight exercises.
 EQUIPMENT_PREFERENCE_RANK = {
     EquipmentType.machine: 0,
     EquipmentType.cable: 1,
-    EquipmentType.bodyweight: 2,
-    EquipmentType.band: 3,
-    EquipmentType.dumbbell: 4,
-    EquipmentType.barbell: 5,
-    EquipmentType.kettlebell: 6,
+    EquipmentType.band: 2,
+    EquipmentType.dumbbell: 3,
+    EquipmentType.barbell: 4,
+    EquipmentType.kettlebell: 5,
+    EquipmentType.bodyweight: 6,
 }
 
 

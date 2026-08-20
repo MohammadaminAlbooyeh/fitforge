@@ -131,6 +131,20 @@ EXERCISES: list[
     ("Kettlebell Seated Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.kettlebell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Seated_Press/0.jpg"),
     ("Kettlebell Figure 8", MuscleGroup.core, [], EquipmentType.kettlebell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Figure_8/0.jpg"),
     ("Kettlebell Single-Leg Deadlift", MuscleGroup.glutes, [MuscleGroup.hamstrings], EquipmentType.kettlebell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_One-Legged_Deadlift/0.jpg"),
+
+    # Machine coverage was thin/absent for core, biceps, and triceps, and
+    # only one option each for chest/back/shoulders/quads - not enough for a
+    # standard-commercial-gym plan to vary across repeated day types
+    # (Full Body A/B/C, Upper A/B) without falling back to free weights.
+    ("Ab Crunch Machine", MuscleGroup.core, [], EquipmentType.machine, DifficultyLevel.intermediate, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg"),
+    ("Machine Bicep Curl", MuscleGroup.biceps, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Bicep_Curl/0.jpg"),
+    ("Machine Preacher Curl", MuscleGroup.biceps, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Preacher_Curls/0.jpg"),
+    ("Machine Triceps Extension", MuscleGroup.triceps, [], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Triceps_Extension/0.jpg"),
+    ("Dip Machine", MuscleGroup.triceps, [MuscleGroup.chest], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dip_Machine/0.jpg"),
+    ("Machine Incline Chest Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Incline_Chest_Press/0.jpg"),
+    ("Machine High Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_High_Row/0.jpg"),
+    ("Machine Shoulder Press (Leverage)", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Shoulder_Press/0.jpg"),
+    ("Machine Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.machine, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Machine_Squat/0.jpg"),
 ]
 
 
