@@ -104,13 +104,11 @@ export default function ProgressPage() {
 
       {/* Training summary */}
       {enhanced && (
-        <Card title="Training Summary">
-          <div className="flex justify-around">
-            <StatPill value={enhanced.summary.total_workouts} label="Workouts" color="text-primary" />
-            <StatPill value={enhanced.summary.total_sessions} label="Sessions" color="text-accent" />
-            <StatPill value={enhanced.summary.total_sets} label="Sets" color="text-success" />
-          </div>
-        </Card>
+        <div className="grid grid-cols-3 gap-3">
+          <IconStat icon="🏋️" value={enhanced.summary.total_workouts} label="Workouts" tone="primary" />
+          <IconStat icon="⏱️" value={enhanced.summary.total_sessions} label="Sessions" tone="accent" />
+          <IconStat icon="🔥" value={enhanced.summary.total_sets} label="Sets" tone="success" />
+        </div>
       )}
 
       {/* Recovery score */}
@@ -262,6 +260,34 @@ export default function ProgressPage() {
       </Card>
     </div>
     </AppShell>
+  );
+}
+
+const ICON_TONE: Record<string, string> = {
+  primary: "bg-primarysoft text-primary",
+  accent: "bg-[#fff0ea] text-accent",
+  success: "bg-[#e6faf1] text-[#1fa97a]",
+};
+
+function IconStat({
+  icon,
+  value,
+  label,
+  tone,
+}: {
+  icon: string;
+  value: string | number;
+  label: string;
+  tone: "primary" | "accent" | "success";
+}) {
+  return (
+    <div className="card flex flex-col items-center gap-1 !p-3 text-center">
+      <span className={`flex h-9 w-9 items-center justify-center rounded-full text-base ${ICON_TONE[tone]}`}>
+        {icon}
+      </span>
+      <span className="text-base font-extrabold text-text">{value}</span>
+      <span className="text-[11px] text-muted">{label}</span>
+    </div>
   );
 }
 

@@ -47,7 +47,20 @@ export default function ProfilePage() {
     <AppShell>
     <div className="space-y-4">
       <div className="flex flex-col items-center gap-1">
-        <Avatar name={user.full_name} size={72} />
+        <div className="relative">
+          <Avatar name={user.full_name} size={80} />
+          <span className="grad-accent absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-bg text-white shadow-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinejoin="round"
+              />
+              <circle cx="12" cy="13" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+            </svg>
+          </span>
+        </div>
         <p className="mt-2 text-xl font-extrabold text-text">{user.full_name ?? "Profile"}</p>
         <p className="text-[13px] text-muted">{user.email}</p>
       </div>
