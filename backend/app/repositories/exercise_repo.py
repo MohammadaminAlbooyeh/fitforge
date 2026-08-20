@@ -1,7 +1,20 @@
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.orm import Session
 
 from app.models.exercise import DifficultyLevel, EquipmentType, Exercise, MuscleGroup
+
+# Lower rank sorts first. Machines/cable are safer and more space-efficient
+# in a typical commercial gym, so plans lean on them before free weights
+# when both are available for the same muscle group and difficulty tier.
+EQUIPMENT_PREFERENCE_RANK = {
+    EquipmentType.machine: 0,
+    EquipmentType.cable: 1,
+    EquipmentType.bodyweight: 2,
+    EquipmentType.band: 3,
+    EquipmentType.dumbbell: 4,
+    EquipmentType.barbell: 5,
+    EquipmentType.kettlebell: 6,
+}
 
 
 def get_exercise(db: Session, exercise_id: int) -> Exercise | None:
@@ -32,6 +45,12 @@ def find_for_plan(
     ]
     allowed_difficulties = difficulty_order[: difficulty_order.index(max_difficulty) + 1]
 
+    equipment_rank = case(
+        {eq: rank for eq, rank in EQUIPMENT_PREFERENCE_RANK.items() if eq in equipment},
+        value=Exercise.equipment,
+        else_=len(EQUIPMENT_PREFERENCE_RANK),
+    )
+
     stmt = (
         select(Exercise)
         .where(
@@ -41,7 +60,10 @@ def find_for_plan(
         )
         # "compound" sorts before "isolation" alphabetically, so this
         # naturally prefers compound movements first within a difficulty tier.
-        .order_by(Exercise.difficulty, Exercise.movement_role, Exercise.name)
+        # Equipment preference (machines/cable over free weights) is applied
+        # before that, so a machine option for this muscle group wins even
+        # if a free-weight option would otherwise be picked first.
+        .order_by(Exercise.difficulty, equipment_rank, Exercise.movement_role, Exercise.name)
     )
     if exclude_ids:
         stmt = stmt.where(Exercise.id.notin_(exclude_ids))

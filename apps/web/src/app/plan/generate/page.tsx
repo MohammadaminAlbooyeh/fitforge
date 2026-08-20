@@ -103,6 +103,11 @@ const EQUIPMENT_OPTIONS = [
   { value: "kettlebell", label: "Kettlebell", icon: KettlebellIcon },
   { value: "band", label: "Bands", icon: BandIcon },
 ];
+
+// What a typical commercial gym has on the floor - machines and cables in
+// force, plus the usual dumbbell/barbell rack. Kettlebells and bands are
+// more of a home-gym/studio thing, so left out of this preset.
+const STANDARD_GYM_EQUIPMENT = ["dumbbell", "barbell", "machine", "cable"];
 const EXPERIENCE_OPTIONS = [
   { value: "beginner", label: "Beginner" },
   { value: "intermediate", label: "Intermediate" },
@@ -218,6 +223,13 @@ export default function GeneratePlanPage() {
             </Chip>
           ))}
         </div>
+        <button
+          type="button"
+          onClick={() => setEquipment(STANDARD_GYM_EQUIPMENT)}
+          className="mt-3 text-[13px] font-semibold text-primary underline-offset-2 hover:underline"
+        >
+          Use a standard commercial gym
+        </button>
       </Card>
 
       {error && <p className="text-sm text-danger">{error}</p>}
