@@ -120,6 +120,17 @@ EXERCISES: list[
     ("Mountain Climber", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Mountain_Climbers/0.jpg"),
     ("Sit-Up", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sit-Up/0.jpg"),
     ("Flutter Kick", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flutter_Kicks/0.jpg"),
+
+    # Kettlebell had zero entries before this - equipment-filtered plan
+    # generation silently fell back to bodyweight-only for anyone who
+    # selected it, with no kettlebell exercises ever appearing.
+    ("Kettlebell Front Squat", MuscleGroup.quads, [MuscleGroup.glutes], EquipmentType.kettlebell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Squats_With_Two_Kettlebells/0.jpg"),
+    ("Kettlebell Swing", MuscleGroup.hamstrings, [MuscleGroup.glutes, MuscleGroup.core], EquipmentType.kettlebell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Kettlebell_Swings/0.jpg"),
+    ("Kettlebell Row", MuscleGroup.back, [MuscleGroup.biceps], EquipmentType.kettlebell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Kettlebell_Row/0.jpg"),
+    ("Kettlebell Floor Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.kettlebell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Kettlebell_Floor_Press/0.jpg"),
+    ("Kettlebell Seated Press", MuscleGroup.shoulders, [MuscleGroup.triceps], EquipmentType.kettlebell, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Seated_Press/0.jpg"),
+    ("Kettlebell Figure 8", MuscleGroup.core, [], EquipmentType.kettlebell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Figure_8/0.jpg"),
+    ("Kettlebell Single-Leg Deadlift", MuscleGroup.glutes, [MuscleGroup.hamstrings], EquipmentType.kettlebell, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_One-Legged_Deadlift/0.jpg"),
 ]
 
 
