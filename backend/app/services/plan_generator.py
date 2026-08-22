@@ -19,9 +19,9 @@ Each day type maps to a fixed list of exercise "slots" (one entry per exercise,
 duplicates mean that muscle group gets more than one exercise) matching the
 target counts below:
 
-  Full Body (6): quads, hamstrings, chest, back, shoulders, core
-  Upper      (5): chest, back, shoulders, biceps, triceps
-  Lower      (5): quads, hamstrings, glutes, calves, core
+  Full Body (7): quads, hamstrings, glutes, chest, back, shoulders, core
+  Upper      (7): chest, back, shoulders, biceps, triceps, chest, back
+  Lower      (7): quads, hamstrings, glutes, calves, core, quads, hamstrings
 
 Within a day, slots are filled by querying the exercise library for that
 muscle group, filtered by the user's available equipment and capped at their
@@ -56,6 +56,7 @@ WEIGHT_PROGRESSION_FACTOR = 1.025
 FULL_BODY_SLOTS = [
     MuscleGroup.quads,
     MuscleGroup.hamstrings,
+    MuscleGroup.glutes,
     MuscleGroup.chest,
     MuscleGroup.back,
     MuscleGroup.shoulders,
@@ -67,6 +68,8 @@ UPPER_SLOTS = [
     MuscleGroup.shoulders,
     MuscleGroup.biceps,
     MuscleGroup.triceps,
+    MuscleGroup.chest,
+    MuscleGroup.back,
 ]
 LOWER_SLOTS = [
     MuscleGroup.quads,
@@ -74,6 +77,8 @@ LOWER_SLOTS = [
     MuscleGroup.glutes,
     MuscleGroup.calves,
     MuscleGroup.core,
+    MuscleGroup.quads,
+    MuscleGroup.hamstrings,
 ]
 # days_per_week -> (split_type, [(day_title, slot_list), ...])
 SPLIT_RULES: dict[int, tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]] = {
