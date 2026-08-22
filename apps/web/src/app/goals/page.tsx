@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getEnhancedAnalytics, listWorkoutLogs, fetchProfile } from "@/lib/api";
-import { Card, StatPill, Button } from "@/components/ui";
+import { Card, StatPill, Button, RingProgress } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import type { EnhancedAnalyticsContract, WorkoutLogContract } from "@shared/types/api-contracts";
 
@@ -50,25 +50,14 @@ export default function GoalsPage() {
       </Card>
 
       <Card title="This Week" className="flex flex-col items-center">
-        <div className="relative h-40 w-40">
-          <svg viewBox="0 0 36 36" className="h-40 w-40 -rotate-90">
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-line)" strokeWidth="3" />
-            <circle
-              cx="18"
-              cy="18"
-              r="15.9"
-              fill="none"
-              stroke="var(--color-primary)"
-              strokeWidth="3"
-              strokeDasharray={`${adherence}, 100`}
-              strokeLinecap="round"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-extrabold text-text">{thisWeek}</span>
-            <span className="text-xs text-muted">of {target} workouts</span>
-          </div>
-        </div>
+        <RingProgress
+          value={thisWeek}
+          max={target}
+          size={160}
+          strokeWidth={10}
+          valueLabel={String(thisWeek)}
+          label={`of ${target} workouts`}
+        />
         <div className="mt-4 flex w-full justify-around">
           <StatPill value={thisWeek} label="Completed" color="text-success" />
           <StatPill value={target} label="Target" color="text-primary" />

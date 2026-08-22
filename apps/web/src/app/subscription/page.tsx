@@ -144,7 +144,7 @@ function PlanCard({
     >
       <span
         className={`absolute right-5 top-5 flex h-6 w-6 items-center justify-center rounded-full border-2 ${
-          selected ? "border-primary bg-primarysoft text-primary" : "border-line text-transparent"
+          selected ? "border-white bg-white/20 text-white" : "border-line text-transparent"
         }`}
       >
         {selected && (
@@ -159,7 +159,7 @@ function PlanCard({
       </div>
       <p className={`mt-0.5 text-sm font-semibold ${selected ? "text-white/90" : "text-muted"}`}>{title}</p>
       {badge && selected && (
-        <span className="mt-2 inline-block rounded-full bg-primarysoft px-2.5 py-0.5 text-xs font-semibold text-primary">
+        <span className="mt-2 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white">
           {badge}
         </span>
       )}

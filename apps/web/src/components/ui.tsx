@@ -139,8 +139,17 @@ export function RingProgress({
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center text-center">
-        <span className="text-sm font-bold text-text">{valueLabel ?? value}</span>
-        {label && <span className="text-[10px] text-muted">{label}</span>}
+        <span
+          className="font-extrabold text-text"
+          style={{ fontSize: Math.max(13, size * 0.2) }}
+        >
+          {valueLabel ?? value}
+        </span>
+        {label && (
+          <span className="text-muted" style={{ fontSize: Math.max(9, size * 0.08) }}>
+            {label}
+          </span>
+        )}
       </div>
     </div>
   );
