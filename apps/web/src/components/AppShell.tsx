@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getToken, fetchProfile, clearToken, ApiError } from "@/lib/api";
 import TabBar from "./TabBar";
+import Sidebar from "./Sidebar";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -45,9 +46,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-32 pt-6">
-      {children}
-      <TabBar />
+    <div className="md:pl-64">
+      <Sidebar />
+      <div className="mx-auto max-w-3xl px-4 pb-32 pt-6 md:pb-10">
+        {children}
+      </div>
+      <div className="md:hidden">
+        <TabBar />
+      </div>
     </div>
   );
 }

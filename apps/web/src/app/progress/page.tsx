@@ -10,7 +10,7 @@ import {
   listBodyMeasurements,
   createBodyMeasurement,
 } from "@/lib/api";
-import { Card, StatPill } from "@/components/ui";
+import { Card, StatPill, RingProgress } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 
 function WeeklyVolumeChart({ weeks }: { weeks: { week_start: string; total_sets: number }[] }) {
@@ -115,24 +115,13 @@ export default function ProgressPage() {
       {enhanced && (
         <Card title="Recovery">
           <div className="flex items-center gap-4">
-            <div className="relative h-16 w-16">
-              <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
-                <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-line)" strokeWidth="4" />
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15.9"
-                  fill="none"
-                  stroke="var(--color-primary)"
-                  strokeWidth="4"
-                  strokeDasharray={`${enhanced.recovery.recovery_score}, 100`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-sm font-extrabold text-text">
-                {enhanced.recovery.recovery_score}
-              </span>
-            </div>
+            <RingProgress
+              value={enhanced.recovery.recovery_score}
+              max={100}
+              size={64}
+              strokeWidth={6}
+              valueLabel={String(enhanced.recovery.recovery_score)}
+            />
             <div>
               <p className={`text-sm font-bold capitalize ${RECOVERY_COLORS[enhanced.recovery.fatigue_level] ?? "text-text"}`}>
                 {enhanced.recovery.fatigue_level} fatigue
@@ -234,6 +223,22 @@ export default function ProgressPage() {
         </div>
         <ProgressPhotoForm onAdded={reload} />
       </Card>
+
+      {/* Achievements */}
+      {gamification && gamification.achievements.length > 0 && (
+        <Card title="Achievements">
+          <div className="grid grid-cols-3 gap-3">
+            {gamification.achievements.slice(0, 9).map((a) => (
+              <div key={a.id} className="flex flex-col items-center gap-1.5 text-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primarysoft text-2xl">
+                  {a.icon || "🏆"}
+                </span>
+                <span className="text-[11px] font-bold leading-tight text-text">{a.name}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Personal records */}
       <Card title="Personal Records">
