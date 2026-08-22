@@ -338,7 +338,7 @@ export default function NutritionPage() {
       {!showForm ? (
         <button
           onClick={() => setShowForm(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-[22px] bg-card p-4 text-primary shadow-[0_6px_20px_rgba(0,0,0,0.35)]"
+          className="flex w-full items-center justify-center gap-2 rounded-[22px] bg-card p-4 text-primary shadow-[0_6px_20px_rgba(22,22,26,0.06)]"
         >
           <span className="text-xl">＋</span>
           <span className="font-bold">Add food entry</span>

@@ -124,7 +124,7 @@ export default function ExercisesPage() {
                     href={exercise.video_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-card text-primary shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
+                    className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-card text-primary shadow-[0_4px_12px_rgba(22,22,26,0.12)]"
                     aria-label="Watch demo"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
