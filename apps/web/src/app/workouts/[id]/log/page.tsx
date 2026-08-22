@@ -145,13 +145,26 @@ export default function LogSessionPage() {
     }
   };
 
+  const totalSets = groups.reduce((s, g) => s + g.sets.length, 0);
+  const doneSets = groups.reduce((s, g) => s + g.sets.filter((set) => set.completed).length, 0);
+
   return (
     <AppShell>
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold text-text">Log session</h1>
+      <div className="rounded-[22px] grad-primary p-5 text-white shadow-[0_10px_28px_rgba(255,90,60,0.28)]">
+        <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Focus mode</p>
+        <h1 className="mt-1 text-2xl font-extrabold">Log session</h1>
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/25">
+          <div
+            className="h-1.5 rounded-full bg-white"
+            style={{ width: `${totalSets ? (doneSets / totalSets) * 100 : 0}%` }}
+          />
+        </div>
+        <p className="mt-1.5 text-xs opacity-90">{doneSets} / {totalSets} sets completed</p>
+      </div>
 
       {/* Session options */}
-      <div className="flex items-center justify-between gap-2 rounded-2xl bg-card p-4">
+      <div className="flex items-center justify-between gap-2 rounded-2xl bg-card p-4 shadow-[0_4px_16px_rgba(22,22,26,0.05)]">
         <label className="flex items-center gap-2 text-sm font-semibold text-text">
           <input
             type="checkbox"
@@ -189,7 +202,7 @@ export default function LogSessionPage() {
       {supersetMode ? (
         <div className="flex gap-3 overflow-x-auto pb-2">
           {groups.map((g, gi) => (
-            <div key={g.exerciseId} className="w-56 shrink-0 space-y-3 rounded-2xl bg-card p-4">
+            <div key={g.exerciseId} className="w-56 shrink-0 space-y-3 rounded-2xl bg-card p-4 shadow-[0_4px_16px_rgba(22,22,26,0.05)]">
               <p className="text-sm font-bold text-text">{g.label}</p>
               {g.sets.map((set, si) => (
                 <div key={si} className="space-y-1.5">
@@ -222,7 +235,7 @@ export default function LogSessionPage() {
         </div>
       ) : (
         groups.map((g, gi) => (
-          <div key={g.exerciseId} className="space-y-3 rounded-2xl bg-card p-4">
+          <div key={g.exerciseId} className="space-y-3 rounded-2xl bg-card p-4 shadow-[0_4px_16px_rgba(22,22,26,0.05)]">
             <p className="text-lg font-bold text-text">{g.label}</p>
             {g.sets.map((set, si) => (
               <div key={si} className="flex items-center gap-3">
