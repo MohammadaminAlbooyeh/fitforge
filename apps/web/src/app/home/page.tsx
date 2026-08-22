@@ -131,7 +131,7 @@ export default function HomePage() {
       </button>
 
       {/* Quick log shortcuts */}
-      <section className="grid grid-cols-3 gap-2">
+      <section className="grid grid-cols-3 gap-2 md:flex md:justify-start md:gap-10">
         <Link href="/workouts" className="flex flex-col items-center gap-2 text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-line text-lg transition hover:bg-primarysoft">
             💪
@@ -152,6 +152,8 @@ export default function HomePage() {
         </Link>
       </section>
 
+      <div className="md:grid md:grid-cols-3 md:items-start md:gap-6 md:space-y-0 space-y-6">
+      <div className="space-y-6 md:col-span-2">
       {/* Today summary */}
       <Card>
         <div className="flex items-center justify-between">
@@ -177,6 +179,8 @@ export default function HomePage() {
         </div>
       </Card>
 
+      </div>
+      <div className="space-y-6">
       {/* Goals */}
       <Card title="Goals">
         <div className="flex items-center justify-between text-sm">
@@ -192,6 +196,8 @@ export default function HomePage() {
           </span>
         </div>
       </Card>
+      </div>
+      </div>
 
       {/* Insights */}
       <Card title="Insights">

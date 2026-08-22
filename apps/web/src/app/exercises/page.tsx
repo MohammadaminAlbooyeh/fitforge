@@ -116,7 +116,7 @@ export default function ExercisesPage() {
         ) : filtered.length === 0 ? (
           <p className="py-10 text-center text-muted">No exercises match your filters.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {filtered.map((exercise) => (
               <div key={exercise.id} className="card relative flex flex-col gap-2 !p-3">
                 {exercise.video_url && (
