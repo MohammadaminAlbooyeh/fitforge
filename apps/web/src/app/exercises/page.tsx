@@ -11,6 +11,7 @@ export default function ExercisesPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [muscleGroup, setMuscleGroup] = useState("all");
+  const [equipment, setEquipment] = useState("all");
 
   useEffect(() => {
     listAllExercises()
@@ -24,14 +25,26 @@ export default function ExercisesPage() {
     [exercises]
   );
 
+  const EQUIPMENT_TYPES = ["bodyweight", "dumbbell", "barbell", "machine", "cable", "kettlebell", "band"];
+
+  const equipmentStats = useMemo(
+    () =>
+      EQUIPMENT_TYPES.map((eq) => {
+        const matches = exercises.filter((e) => e.equipment === eq);
+        return { equipment: eq, count: matches.length, sample: matches[0] };
+      }),
+    [exercises]
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return exercises.filter((e) => {
       if (muscleGroup !== "all" && e.muscle_group !== muscleGroup) return false;
+      if (equipment !== "all" && e.equipment !== equipment) return false;
       if (q && !e.name.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [exercises, query, muscleGroup]);
+  }, [exercises, query, muscleGroup, equipment]);
 
   return (
     <AppShell>
@@ -108,6 +121,72 @@ export default function ExercisesPage() {
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        <div className="card !p-4">
+          <div className="mb-3">
+            <h2 className="text-base font-bold text-text">Available equipment</h2>
+            <p className="text-[13px] text-muted">Bodyweight exercises are always included.</p>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-line">
+            <table className="w-full border-collapse text-left text-[13px]">
+              <thead>
+                <tr className="bg-line/60 text-[11px] uppercase tracking-wide text-muted">
+                  <th className="px-3 py-2 font-semibold">Equipment</th>
+                  <th className="px-3 py-2 font-semibold">Exercise</th>
+                  <th className="px-3 py-2 text-right font-semibold">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  onClick={() => setEquipment("all")}
+                  className={`cursor-pointer border-t border-line transition ${
+                    equipment === "all" ? "bg-primarysoft" : "hover:bg-line/40"
+                  }`}
+                >
+                  <td colSpan={2} className={`px-3 py-2.5 font-semibold capitalize ${equipment === "all" ? "text-primary" : "text-text"}`}>
+                    All equipment
+                  </td>
+                  <td className={`px-3 py-2.5 text-right font-bold ${equipment === "all" ? "text-primary" : "text-text"}`}>
+                    {exercises.length}
+                  </td>
+                </tr>
+                {equipmentStats.map((row) => {
+                  const active = equipment === row.equipment;
+                  return (
+                    <tr
+                      key={row.equipment}
+                      onClick={() => row.count > 0 && setEquipment(row.equipment)}
+                      className={`border-t border-line transition ${
+                        row.count === 0
+                          ? "opacity-40"
+                          : `cursor-pointer ${active ? "bg-primarysoft" : "hover:bg-line/40"}`
+                      }`}
+                    >
+                      <td className={`px-3 py-2.5 font-semibold capitalize ${active ? "text-primary" : "text-text"}`}>
+                        {row.equipment}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        {row.sample?.image_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={row.sample.image_url}
+                            alt={row.sample.name}
+                            className="h-9 w-9 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primarysoft text-sm">💪</span>
+                        )}
+                      </td>
+                      <td className={`px-3 py-2.5 text-right font-bold ${active ? "text-primary" : "text-text"}`}>
+                        {row.count}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
 
