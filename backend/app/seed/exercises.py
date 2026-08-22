@@ -31,6 +31,8 @@ EXERCISES: list[
     ("Push-Up", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push-Up_Wide/0.jpg"),
     ("Dumbbell Chest Fly", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Flyes/0.jpg"),
     ("Cable Chest Fly", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flat_Bench_Cable_Flyes/0.jpg"),
+    # Chest only had one cable option - a cable-only week repeated it every day.
+    ("Cable Crossover", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, None),
     ("Chest Dip", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Chest_Version/0.jpg"),
     ("Machine Chest Press", MuscleGroup.chest, [MuscleGroup.triceps, MuscleGroup.shoulders], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Bench_Press/0.jpg"),
     ("Pec Deck Machine", MuscleGroup.chest, [MuscleGroup.shoulders], EquipmentType.machine, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Butterfly/0.jpg"),
@@ -69,6 +71,8 @@ EXERCISES: list[
     ("Dumbbell Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bicep_Curl/0.jpg"),
     ("Hammer Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hammer_Curls/0.jpg"),
     ("Cable Curl", MuscleGroup.biceps, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Biceps_Cable_Curl/0.jpg"),
+    # Biceps only had one cable option - a cable-only week repeated it every day.
+    ("Cable Rope Hammer Curl", MuscleGroup.biceps, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, None),
     ("Preacher Curl", MuscleGroup.biceps, [], EquipmentType.barbell, DifficultyLevel.intermediate, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Preacher_Curl/0.jpg"),
     ("Concentration Curl", MuscleGroup.biceps, [], EquipmentType.dumbbell, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Concentration_Curls/0.jpg"),
 
@@ -113,6 +117,8 @@ EXERCISES: list[
     ("Plank", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/0.jpg"),
     ("Hanging Leg Raise", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.intermediate, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/0.jpg"),
     ("Cable Crunch", MuscleGroup.core, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crunch/0.jpg"),
+    # Core only had one cable option - a cable-only week repeated it every day.
+    ("Cable Woodchopper", MuscleGroup.core, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, None),
     ("Russian Twist", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Russian_Twist/0.jpg"),
     ("Bicycle Crunch", MuscleGroup.core, [], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.isolation, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Air_Bike/0.jpg"),
     ("Ab Wheel Rollout", MuscleGroup.core, [MuscleGroup.shoulders], EquipmentType.bodyweight, DifficultyLevel.advanced, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Roller/0.jpg"),
@@ -172,6 +178,10 @@ EXERCISES: list[
     # cable-only selection always falls back to bodyweight for this slot -
     # a second bodyweight option at least stops it being the exact same one.
     ("Split Squat", MuscleGroup.hamstrings, [MuscleGroup.glutes, MuscleGroup.quads], EquipmentType.bodyweight, DifficultyLevel.beginner, MovementRole.compound, "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Split_Squats/0.jpg"),
+    # Hamstrings and calves still had zero cable options each - a cable-only
+    # selection fell all the way back to bodyweight for both slots.
+    ("Cable Stiff-Leg Deadlift", MuscleGroup.hamstrings, [MuscleGroup.glutes, MuscleGroup.back], EquipmentType.cable, DifficultyLevel.intermediate, MovementRole.compound, None),
+    ("Cable Standing Calf Raise", MuscleGroup.calves, [], EquipmentType.cable, DifficultyLevel.beginner, MovementRole.isolation, None),
 ]
 
 

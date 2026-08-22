@@ -128,7 +128,7 @@ export default function PlanPage() {
               <span className="text-[11px] text-muted">Day {day.day_number}</span>
               <span
                 className={`flex h-10 items-center justify-center rounded-full px-2 text-xs font-bold ${
-                  isSelected ? "bg-primary text-white" : "bg-white text-text"
+                  isSelected ? "bg-primary text-white" : "bg-card text-text"
                 }`}
               >
                 {day.title.slice(0, 2).toUpperCase()}

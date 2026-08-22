@@ -69,13 +69,13 @@ export default function ExercisePickerModal({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search exercises…"
-            className="w-full rounded-2xl border border-line bg-white px-4 py-2.5 text-sm text-text outline-none placeholder:text-muted focus:border-primary"
+            className="w-full rounded-2xl border border-line bg-card px-4 py-2.5 text-sm text-text outline-none placeholder:text-muted focus:border-primary"
           />
           <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setMuscleGroup("all")}
               className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition ${
-                muscleGroup === "all" ? "bg-primary text-white" : "bg-white text-text"
+                muscleGroup === "all" ? "bg-primary text-white" : "bg-card text-text"
               }`}
             >
               All
@@ -85,7 +85,7 @@ export default function ExercisePickerModal({
                 key={m}
                 onClick={() => setMuscleGroup(m)}
                 className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-semibold capitalize transition ${
-                  muscleGroup === m ? "bg-primary text-white" : "bg-white text-text"
+                  muscleGroup === m ? "bg-primary text-white" : "bg-card text-text"
                 }`}
               >
                 {m}
@@ -102,7 +102,7 @@ export default function ExercisePickerModal({
               <button
                 key={exercise.id}
                 onClick={() => pick(exercise.id)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-line bg-white p-2.5 text-left transition hover:border-primary"
+                className="flex w-full items-center gap-3 rounded-2xl border border-line bg-card p-2.5 text-left transition hover:border-primary"
               >
                 <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primarysoft">
                   {exercise.image_url ? (

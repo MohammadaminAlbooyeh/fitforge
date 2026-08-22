@@ -129,7 +129,7 @@ function Chip({
       className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[13px] font-semibold transition ${
         active
           ? "border-primary bg-primary text-white"
-          : "border-line bg-white text-text"
+          : "border-line bg-card text-text"
       }`}
     >
       {children}

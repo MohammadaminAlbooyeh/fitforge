@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { listExercises } from "@/lib/api";
+import Link from "next/link";
+import { listAllExercises } from "@/lib/api";
 import type { ExerciseLibraryContract } from "@shared/types/api-contracts";
 import { AppShell } from "@/components/AppShell";
 
@@ -12,7 +13,7 @@ export default function ExercisesPage() {
   const [muscleGroup, setMuscleGroup] = useState("all");
 
   useEffect(() => {
-    listExercises({ limit: 100 })
+    listAllExercises()
       .then(setExercises)
       .catch(() => setExercises([]))
       .finally(() => setLoading(false));
@@ -44,29 +45,70 @@ export default function ExercisesPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search exercises…"
-          className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm text-text outline-none placeholder:text-muted focus:border-primary"
+          className="w-full rounded-2xl border border-line bg-card px-4 py-3 text-sm text-text outline-none placeholder:text-muted focus:border-primary"
         />
 
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          <button
-            onClick={() => setMuscleGroup("all")}
-            className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
-              muscleGroup === "all" ? "bg-primary text-white" : "bg-white text-text"
-            }`}
-          >
-            All
-          </button>
-          {muscleGroups.map((m) => (
+        <div className="card !p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-text">Target Muscle</h2>
+              <p className="text-[13px] text-muted">Select target muscle group</p>
+            </div>
+            <Link
+              href="/target-muscle"
+              className="text-[12px] font-semibold text-primary hover:underline"
+            >
+              Full screen →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
             <button
-              key={m}
-              onClick={() => setMuscleGroup(m)}
-              className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold capitalize transition ${
-                muscleGroup === m ? "bg-primary text-white" : "bg-white text-text"
+              onClick={() => setMuscleGroup("all")}
+              className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-[13px] font-semibold transition ${
+                muscleGroup === "all"
+                  ? "border-primary bg-primarysoft text-primary"
+                  : "border-line bg-transparent text-muted"
               }`}
             >
-              {m}
+              <span
+                className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                  muscleGroup === "all" ? "border-primary bg-primary text-white" : "border-line"
+                }`}
+              >
+                {muscleGroup === "all" && (
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 12l5 5L20 6" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </span>
+              All
             </button>
-          ))}
+            {muscleGroups.map((m) => {
+              const active = muscleGroup === m;
+              return (
+                <button
+                  key={m}
+                  onClick={() => setMuscleGroup(m)}
+                  className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-[13px] font-semibold capitalize transition ${
+                    active ? "border-primary bg-primarysoft text-primary" : "border-line bg-transparent text-muted"
+                  }`}
+                >
+                  <span
+                    className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                      active ? "border-primary bg-primary text-white" : "border-line"
+                    }`}
+                  >
+                    {active && (
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 12l5 5L20 6" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </span>
+                  {m}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {loading ? (
@@ -82,7 +124,7 @@ export default function ExercisesPage() {
                     href={exercise.video_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white text-primary shadow"
+                    className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-card text-primary shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
                     aria-label="Watch demo"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">

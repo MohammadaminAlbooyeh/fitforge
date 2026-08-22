@@ -141,12 +141,28 @@ export const createWorkoutSession = (workoutId: number, input: WorkoutSessionCre
 
 // ---- Exercises ----
 
-export const listExercises = (params?: { muscle_group?: string; limit?: number }) => {
+export const listExercises = (params?: { muscle_group?: string; limit?: number; offset?: number }) => {
   const qs = new URLSearchParams();
   if (params?.muscle_group) qs.set("muscle_group", params.muscle_group);
   if (params?.limit) qs.set("limit", String(params.limit));
+  if (params?.offset) qs.set("offset", String(params.offset));
   const suffix = qs.toString() ? `?${qs}` : "";
   return apiFetch<ExerciseLibraryContract[]>(`/exercises/${suffix}`);
+};
+
+// The list endpoint caps `limit` at 100 server-side; page through with
+// `offset` to fetch the full library for client-side filtering UIs.
+export const listAllExercises = async () => {
+  const pageSize = 100;
+  const all: ExerciseLibraryContract[] = [];
+  let offset = 0;
+  for (;;) {
+    const page = await listExercises({ limit: pageSize, offset });
+    all.push(...page);
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+  return all;
 };
 
 // ---- Nutrition ----

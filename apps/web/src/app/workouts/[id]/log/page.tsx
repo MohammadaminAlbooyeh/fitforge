@@ -174,7 +174,7 @@ export default function LogSessionPage() {
           <select
             value={restSeconds}
             onChange={(e) => setRestSeconds(Number(e.target.value))}
-            className="rounded-lg border border-line bg-white px-2 py-1 text-xs text-text"
+            className="rounded-lg border border-line bg-card px-2 py-1 text-xs text-text"
           >
             {PRESET_REST_SECONDS.map((s) => (
               <option key={s} value={s}>

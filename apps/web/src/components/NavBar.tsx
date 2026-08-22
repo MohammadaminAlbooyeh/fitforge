@@ -8,7 +8,7 @@ export default function NavBar() {
   const router = useRouter();
 
   return (
-    <nav className="flex items-center justify-between border-b border-black/10 px-6 py-3 dark:border-white/10">
+    <nav className="flex items-center justify-between border-b border-line bg-bg px-6 py-3">
       <div className="flex items-center gap-6">
         <span className="font-semibold">FitForge Admin</span>
         <Link href="/admin/exercises" className="text-sm hover:underline">

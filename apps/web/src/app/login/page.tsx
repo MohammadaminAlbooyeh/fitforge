@@ -50,7 +50,9 @@ export default function LoginPage() {
             ⚡
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-text">FitForge</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-text">
+              FIT<span className="text-primary">FORGE</span>
+            </h1>
             <p className="text-sm text-muted">Train smarter. Log everything.</p>
           </div>
         </div>

@@ -218,7 +218,7 @@ export default function NutritionPage() {
               <span className="text-xs text-muted">{WEEKDAYS[i]}</span>
               <span
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${
-                  isSelected ? "bg-primary text-white" : "bg-white text-text"
+                  isSelected ? "bg-primary text-white" : "bg-card text-text"
                 }`}
               >
                 {d.getDate()}
@@ -338,7 +338,7 @@ export default function NutritionPage() {
       {!showForm ? (
         <button
           onClick={() => setShowForm(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-[22px] bg-white p-4 text-primary shadow"
+          className="flex w-full items-center justify-center gap-2 rounded-[22px] bg-card p-4 text-primary shadow-[0_6px_20px_rgba(0,0,0,0.35)]"
         >
           <span className="text-xl">＋</span>
           <span className="font-bold">Add food entry</span>

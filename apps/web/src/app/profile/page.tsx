@@ -65,7 +65,7 @@ export default function ProfilePage() {
         <p className="text-[13px] text-muted">{user.email}</p>
       </div>
 
-      <div className="flex justify-between rounded-[22px] bg-white p-4 shadow">
+      <div className="flex justify-between rounded-[22px] bg-card p-4 shadow-[0_6px_20px_rgba(0,0,0,0.35)]">
         <Stat label="Weight" value={user.weight_kg ? `${user.weight_kg} kg` : "—"} />
         <Stat label="Height" value={user.height_cm ? `${user.height_cm} cm` : "—"} />
         <Stat label="Goal" value={goalLabel} />
