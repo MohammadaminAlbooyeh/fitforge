@@ -8,7 +8,7 @@ import {
   updatePlanDayExercise,
 } from "@/lib/api";
 import type { PlanDayContract, PlanDayExerciseContract } from "@shared/types/api-contracts";
-import { Card, Button, EmptyState } from "@/components/ui";
+import { Card, Button, EmptyState, RingProgress } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 
 function midpointReps(repsRange: string): number {
@@ -127,8 +127,8 @@ export default function PlanPage() {
             <button key={day.id} onClick={() => setSelectedDayId(day.id)} className="flex flex-col items-center gap-1.5">
               <span className="text-[11px] text-muted">Day {day.day_number}</span>
               <span
-                className={`flex h-10 items-center justify-center rounded-full px-2 text-xs font-bold ${
-                  isSelected ? "bg-primary text-white" : "bg-card text-text"
+                className={`flex h-10 items-center justify-center rounded-full px-2 text-xs font-bold shadow-sm ${
+                  isSelected ? "grad-primary text-white" : "bg-card text-text"
                 }`}
               >
                 {day.title.slice(0, 2).toUpperCase()}
@@ -138,21 +138,23 @@ export default function PlanPage() {
         })}
       </div>
 
-      {/* Progress */}
-      <div>
-        <p className="text-[13px] font-bold text-text">Your Progress: {doneCount}/{total}</p>
-        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line">
-          <div
-            className="h-1.5 bg-accent"
-            style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }}
-          />
+      {/* Day hero + progress */}
+      <Card className="flex items-center gap-4">
+        <RingProgress
+          value={doneCount}
+          max={total}
+          size={72}
+          strokeWidth={7}
+          valueLabel={`${doneCount}/${total}`}
+          label="Done"
+        />
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-xl font-extrabold text-text">{selectedDay.title}</h2>
+          <p className="mt-0.5 text-xs capitalize text-muted">
+            {plan.split_type.replace(/_/g, " ")} · {plan.days_per_week} days/week
+          </p>
         </div>
-      </div>
-
-      <h2 className="text-2xl font-extrabold text-text">{selectedDay.title}</h2>
-      <p className="text-xs capitalize text-muted">
-        {plan.split_type.replace(/_/g, " ")} · {plan.days_per_week} days/week
-      </p>
+      </Card>
 
       {selectedDay.plan_day_exercises.map((pde) => {
         const isDone = !!checked[String(pde.id)];

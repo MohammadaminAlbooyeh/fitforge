@@ -181,10 +181,13 @@ export default function GeneratePlanPage() {
   return (
     <AppShell>
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold text-text">Build your plan</h1>
-      <p className="text-[13px] text-muted">
-        A few questions so we can generate a split that fits your schedule and equipment.
-      </p>
+      <div className="rounded-[22px] grad-primary p-5 text-white shadow-[0_10px_28px_rgba(255,90,60,0.28)]">
+        <p className="text-xs font-semibold uppercase tracking-wide opacity-80">AI Training Coach</p>
+        <h1 className="mt-1 text-2xl font-extrabold">Let&apos;s build your plan</h1>
+        <p className="mt-1 text-sm opacity-90">
+          A few questions so we can generate a split that fits your schedule and equipment.
+        </p>
+      </div>
 
       <Card title="Days per week">
         <div className="flex flex-wrap gap-2">
