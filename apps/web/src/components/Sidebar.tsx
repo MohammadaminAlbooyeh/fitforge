@@ -14,6 +14,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: str
       { href: "/workouts", label: "Workouts", icon: "🏋️" },
       { href: "/plan", label: "Plan", icon: "📋" },
       { href: "/exercises", label: "Exercises", icon: "💪" },
+      { href: "/target-muscle", label: "Target Muscle", icon: "🎯" },
       { href: "/schedule", label: "Schedule", icon: "📅" },
     ],
   },

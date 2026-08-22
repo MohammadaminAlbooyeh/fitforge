@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { listAllExercises } from "@/lib/api";
 import type { ExerciseLibraryContract } from "@shared/types/api-contracts";
 import { AppShell } from "@/components/AppShell";
@@ -10,7 +9,6 @@ export default function ExercisesPage() {
   const [exercises, setExercises] = useState<ExerciseLibraryContract[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [muscleGroup, setMuscleGroup] = useState("all");
   const [equipment, setEquipment] = useState("all");
 
   useEffect(() => {
@@ -19,11 +17,6 @@ export default function ExercisesPage() {
       .catch(() => setExercises([]))
       .finally(() => setLoading(false));
   }, []);
-
-  const muscleGroups = useMemo(
-    () => Array.from(new Set(exercises.map((e) => e.muscle_group))).sort(),
-    [exercises]
-  );
 
   const EQUIPMENT_TYPES = ["bodyweight", "dumbbell", "barbell", "machine", "cable", "kettlebell", "band"];
 
@@ -39,12 +32,11 @@ export default function ExercisesPage() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return exercises.filter((e) => {
-      if (muscleGroup !== "all" && e.muscle_group !== muscleGroup) return false;
       if (equipment !== "all" && e.equipment !== equipment) return false;
       if (q && !e.name.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [exercises, query, muscleGroup, equipment]);
+  }, [exercises, query, equipment]);
 
   return (
     <AppShell>
@@ -60,69 +52,6 @@ export default function ExercisesPage() {
           placeholder="Search exercises…"
           className="w-full rounded-2xl border border-line bg-card px-4 py-3 text-sm text-text outline-none placeholder:text-muted focus:border-primary"
         />
-
-        <div className="card !p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-text">Target Muscle</h2>
-              <p className="text-[13px] text-muted">Select target muscle group</p>
-            </div>
-            <Link
-              href="/target-muscle"
-              className="text-[12px] font-semibold text-primary hover:underline"
-            >
-              Full screen →
-            </Link>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setMuscleGroup("all")}
-              className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-[13px] font-semibold transition ${
-                muscleGroup === "all"
-                  ? "border-primary bg-primarysoft text-primary"
-                  : "border-line bg-transparent text-muted"
-              }`}
-            >
-              <span
-                className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                  muscleGroup === "all" ? "border-primary bg-primary text-white" : "border-line"
-                }`}
-              >
-                {muscleGroup === "all" && (
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 12l5 5L20 6" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </span>
-              All
-            </button>
-            {muscleGroups.map((m) => {
-              const active = muscleGroup === m;
-              return (
-                <button
-                  key={m}
-                  onClick={() => setMuscleGroup(m)}
-                  className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-[13px] font-semibold capitalize transition ${
-                    active ? "border-primary bg-primarysoft text-primary" : "border-line bg-transparent text-muted"
-                  }`}
-                >
-                  <span
-                    className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                      active ? "border-primary bg-primary text-white" : "border-line"
-                    }`}
-                  >
-                    {active && (
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 12l5 5L20 6" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </span>
-                  {m}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         <div className="card !p-4">
           <div className="mb-3">

@@ -82,7 +82,6 @@ export function BodyDiagram({
       {regions.map((r, i) => {
         const active = selected === r.muscle;
         const shared = {
-          key: `${r.muscle}-${i}`,
           onClick: () => onSelect(r.muscle),
           role: "button" as const,
           "aria-label": r.label,
@@ -95,10 +94,11 @@ export function BodyDiagram({
           strokeWidth: 1.5,
           style: { pointerEvents: "all" as const },
         };
+        const key = `${r.muscle}-${i}`;
         return r.d ? (
-          <path {...shared} d={r.d} />
+          <path key={key} {...shared} d={r.d} />
         ) : (
-          <ellipse {...shared} cx={r.cx} cy={r.cy} rx={r.rx} ry={r.ry} />
+          <ellipse key={key} {...shared} cx={r.cx} cy={r.cy} rx={r.rx} ry={r.ry} />
         );
       })}
     </svg>
