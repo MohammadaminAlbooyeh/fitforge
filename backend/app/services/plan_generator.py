@@ -20,8 +20,15 @@ duplicates mean that muscle group gets more than one exercise) matching the
 target counts below:
 
   Full Body (7): quads, hamstrings, glutes, chest, back, shoulders, core
-  Upper      (7): chest, back, shoulders, biceps, triceps, chest, back
-  Lower      (7): quads, hamstrings, glutes, calves, core, quads, hamstrings
+  Upper      (7): chest, back, shoulders, biceps, triceps, back, shoulders
+  Lower      (7): quads, hamstrings, glutes, calves, core, quads, core
+
+  The two duplicated slots per split are deliberately picked from the
+  muscle groups with the deepest exercise pools (back/shoulders for
+  Upper, quads/core for Lower) rather than the thinnest ones (biceps,
+  hamstrings, glutes) -- doubling demand on a shallow pool is what
+  causes repeated exercises across a multi-day plan once the pool
+  runs out of beginner/equipment-filtered options.
 
 Within a day, slots are filled by querying the exercise library for that
 muscle group, filtered by the user's available equipment and capped at their
@@ -68,8 +75,8 @@ UPPER_SLOTS = [
     MuscleGroup.shoulders,
     MuscleGroup.biceps,
     MuscleGroup.triceps,
-    MuscleGroup.chest,
     MuscleGroup.back,
+    MuscleGroup.shoulders,
 ]
 LOWER_SLOTS = [
     MuscleGroup.quads,
@@ -78,7 +85,7 @@ LOWER_SLOTS = [
     MuscleGroup.calves,
     MuscleGroup.core,
     MuscleGroup.quads,
-    MuscleGroup.hamstrings,
+    MuscleGroup.core,
 ]
 # days_per_week -> (split_type, [(day_title, slot_list), ...])
 SPLIT_RULES: dict[int, tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]] = {
