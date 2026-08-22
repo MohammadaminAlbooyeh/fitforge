@@ -79,7 +79,7 @@ export default function TabBar() {
 
   return (
     <nav className="fixed inset-x-0 bottom-5 z-40 flex justify-center px-4">
-      <div className="relative flex w-full max-w-sm items-center justify-between rounded-full border border-line bg-white/95 px-4 py-3 shadow-[0_12px_30px_rgba(58,46,107,0.16)] backdrop-blur">
+      <div className="relative flex w-full max-w-sm items-center justify-between rounded-full bg-card/95 px-4 py-3 shadow-[0_12px_30px_rgba(22,22,26,0.12)] backdrop-blur">
         {tabs.map((t, i) => {
           if (t.href === "spacer") return <div key={i} className="w-12" />;
           const active = t.href === "/" ? pathname === "/" : pathname.startsWith(t.href);
@@ -100,7 +100,7 @@ export default function TabBar() {
         <Link
           href="/plan/generate"
           aria-label="Build your plan"
-          className="grad-primary absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white shadow-[0_8px_20px_rgba(94,61,224,0.45)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="grad-primary absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white shadow-[0_8px_20px_rgba(255,90,60,0.35)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" />

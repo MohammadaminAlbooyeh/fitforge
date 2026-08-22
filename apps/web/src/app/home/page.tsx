@@ -24,7 +24,7 @@ import type {
   ChallengeContract,
   LeaderboardEntryContract,
 } from "@shared/types/api-contracts";
-import { Card, Avatar, StatPill, Badge } from "@/components/ui";
+import { Card, Avatar, StatPill, Badge, RingProgress } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import ExercisePickerModal from "@/components/ExercisePickerModal";
 
@@ -87,7 +87,7 @@ export default function HomePage() {
     return <div className="py-20 text-center text-muted">Loading…</div>;
   }
 
-  const { user, plan, nutrition, meals, logs, enhanced, challenges, leaderboard } = feed;
+  const { user, plan, nutrition, logs, enhanced, challenges, leaderboard } = feed;
   const firstName = (user?.full_name ?? "there").split(" ")[0];
   const todayLogged =
     logs.length > 0 &&
@@ -122,9 +122,9 @@ export default function HomePage() {
       {/* Primary CTA */}
       <button
         onClick={() => router.push(plan && !plan.rest ? "/plan" : "/workouts")}
-        className="w-full rounded-[22px] grad-primary p-5 text-left text-white shadow-lg"
+        className="w-full rounded-[22px] grad-primary p-5 text-left text-white shadow-[0_10px_28px_rgba(255,90,60,0.28)]"
       >
-        <p className="text-sm opacity-80">
+        <p className="text-sm opacity-70">
           {plan && !plan.rest ? plan.title : "No rest day today?"}
         </p>
         <p className="text-lg font-bold">{ctaLabel} →</p>
@@ -132,36 +132,25 @@ export default function HomePage() {
 
       {/* Quick log shortcuts */}
       <section className="grid grid-cols-3 gap-2">
-        <Link
-          href="/workouts"
-          className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-white py-3 text-center transition hover:border-primary"
-        >
-          <span className="text-lg">💪</span>
-          <span className="text-xs font-semibold text-text">Log workout</span>
+        <Link href="/workouts" className="flex flex-col items-center gap-2 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-line text-lg transition hover:bg-primarysoft">
+            💪
+          </span>
+          <span className="text-xs font-semibold text-text">Workout</span>
         </Link>
-        <Link
-          href="/nutrition"
-          className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-white py-3 text-center transition hover:border-primary"
-        >
-          <span className="text-lg">🥗</span>
-          <span className="text-xs font-semibold text-text">Log nutrition</span>
+        <Link href="/nutrition" className="flex flex-col items-center gap-2 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-line text-lg transition hover:bg-primarysoft">
+            🥗
+          </span>
+          <span className="text-xs font-semibold text-text">Nutrition</span>
         </Link>
-        <Link
-          href="/progress"
-          className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-white py-3 text-center transition hover:border-primary"
-        >
-          <span className="text-lg">⚖️</span>
-          <span className="text-xs font-semibold text-text">Log weigh-in</span>
+        <Link href="/progress" className="flex flex-col items-center gap-2 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-line text-lg transition hover:bg-primarysoft">
+            ⚖️
+          </span>
+          <span className="text-xs font-semibold text-text">Weigh-in</span>
         </Link>
       </section>
-
-      {/* Recommended next step */}
-      {meals.length === 0 && (
-        <Card className="grad-accent text-white" >
-          <p className="font-semibold">Log your breakfast</p>
-          <p className="text-sm opacity-90">Add what you ate to stay on track.</p>
-        </Card>
-      )}
 
       {/* Today summary */}
       <Card>
@@ -171,8 +160,14 @@ export default function HomePage() {
             {todayLogged ? "Workout done" : "Workout pending"}
           </Badge>
         </div>
-        <div className="mt-4 flex justify-around">
-          <StatPill value={nutrition?.total_calories ?? 0} label="Calories" color="text-accent" />
+        <div className="mt-4 flex items-center justify-around">
+          <RingProgress
+            value={nutrition?.total_calories ?? 0}
+            max={Math.max(nutrition?.total_calories ?? 0, 2000)}
+            size={88}
+            valueLabel={String(nutrition?.total_calories ?? 0)}
+            label="Calories"
+          />
           <StatPill value={logs.length} label="Workouts" color="text-primary" />
           <StatPill
             value={enhanced?.weekly_volume?.reduce((s, w) => s + w.total_sets, 0) ?? 0}
@@ -250,9 +245,9 @@ export default function HomePage() {
       {/* Pick an exercise */}
       <button
         onClick={() => setPickerOpen(true)}
-        className="flex w-full items-center gap-3 rounded-2xl border border-line bg-white p-3 text-left transition hover:border-primary"
+        className="flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-left shadow-[0_4px_16px_rgba(22,22,26,0.05)] transition hover:shadow-[0_6px_20px_rgba(22,22,26,0.08)]"
       >
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primarysoft text-lg">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primarysoft text-lg">
           🏋️
         </span>
         <span className="flex-1">

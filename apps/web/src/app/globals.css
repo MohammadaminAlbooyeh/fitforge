@@ -1,25 +1,25 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-bg: #f1f1f6;
+  --color-bg: #f6f5f2;
   --color-card: #ffffff;
-  --color-primary: #7c5cfc;
-  --color-primarydark: #5e3de0;
-  --color-accent: #ff7a50;
-  --color-text: #1e1b2e;
-  --color-muted: #8b889c;
-  --color-line: #eceaf4;
-  --color-success: #3dd598;
-  --color-danger: #ff5a5f;
+  --color-primary: #ff5a3c;
+  --color-primarydark: #e14a2e;
+  --color-accent: #2b2b31;
+  --color-text: #16161a;
+  --color-muted: #8d8d97;
+  --color-line: #ece9e4;
+  --color-success: #34b27b;
+  --color-danger: #e5484d;
   --color-heart: #ff5a7a;
-  --color-primarysoft: #f0ebff;
+  --color-primarysoft: rgba(255, 90, 60, 0.1);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 :root {
-  --background: #f1f1f6;
-  --foreground: #1e1b2e;
+  --background: #f6f5f2;
+  --foreground: #16161a;
 }
 
 body {
@@ -31,12 +31,12 @@ body {
 
 @layer utilities {
   .card {
-    @apply rounded-[22px] border border-line bg-card p-5 shadow-[0_6px_20px_rgba(58,46,107,0.08)];
+    @apply rounded-[22px] bg-card p-5 shadow-[0_8px_24px_rgba(22,22,26,0.06)];
   }
   .grad-primary {
-    background-image: linear-gradient(135deg, #8a63f8, #6647e0);
+    background-image: linear-gradient(135deg, #ff7a56, #ff5a3c);
   }
   .grad-accent {
-    background-image: linear-gradient(135deg, #ff9466, #ff6b4a);
+    background-image: linear-gradient(135deg, #3a3a42, #2b2b31);
   }
 }

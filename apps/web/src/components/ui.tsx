@@ -42,9 +42,9 @@ export function Button({
   const base =
     "w-full rounded-full py-3.5 text-sm font-semibold transition disabled:opacity-50";
   const styles = {
-    primary: "grad-primary text-white",
+    primary: "grad-primary text-white shadow-[0_8px_20px_rgba(255,90,60,0.28)]",
     accent: "grad-accent text-white",
-    ghost: "bg-primarysoft text-primary",
+    ghost: "bg-line text-text",
   }[variant];
   return (
     <button
@@ -67,7 +67,7 @@ export function Input({
       {label && <span className="text-sm font-medium text-text">{label}</span>}
       <input
         {...props}
-        className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm text-text outline-none transition focus:border-primary"
+        className="w-full rounded-2xl border border-line bg-card px-4 py-3 text-sm text-text shadow-[0_2px_8px_rgba(22,22,26,0.04)] outline-none transition focus:border-primary"
       />
     </label>
   );
@@ -87,6 +87,61 @@ export function Avatar({ name, size = 48 }: { name: string; size?: number }) {
       style={{ width: size, height: size, fontSize: size * 0.36 }}
     >
       {initials || "?"}
+    </div>
+  );
+}
+
+export function RingProgress({
+  value,
+  max,
+  size = 96,
+  strokeWidth = 10,
+  color = "var(--color-primary)",
+  trackColor = "var(--color-line)",
+  label,
+  valueLabel,
+}: {
+  value: number;
+  max: number;
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+  trackColor?: string;
+  label?: string;
+  valueLabel?: string;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
+  const offset = circumference * (1 - pct);
+  return (
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={trackColor}
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="transition-[stroke-dashoffset] duration-500 ease-out"
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center justify-center text-center">
+        <span className="text-sm font-bold text-text">{valueLabel ?? value}</span>
+        {label && <span className="text-[10px] text-muted">{label}</span>}
+      </div>
     </div>
   );
 }
@@ -136,9 +191,9 @@ export function Badge({ children, color = "primarysoft" }: { children: ReactNode
         color === "primarysoft"
           ? "bg-primarysoft text-primary"
           : color === "accent"
-            ? "bg-[#fff0ea] text-accent"
+            ? "bg-[rgba(43,43,49,0.08)] text-accent"
             : color === "success"
-              ? "bg-[#e6faf1] text-[#1fa97a]"
+              ? "bg-[rgba(52,178,123,0.14)] text-success"
               : "bg-line text-muted"
       }`}
     >
