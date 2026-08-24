@@ -5,11 +5,14 @@ import {
   getDailySummary,
   getEntriesForDay,
   createNutritionLog,
+  updateNutritionLog,
   deleteNutritionLog,
   getWaterSummary,
   getWaterEntries,
   createWaterLog,
   deleteWaterLog,
+  getNutritionGoal,
+  setNutritionGoal,
 } from "@/lib/api";
 import { Card, Button, Input, Badge } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
@@ -18,6 +21,7 @@ import type {
   DailyWaterSummaryContract,
   NutritionLogContract,
   WaterLogContract,
+  NutritionGoalContract,
 } from "@shared/types/api-contracts";
 
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
@@ -126,6 +130,9 @@ export default function NutritionPage() {
   const [loading, setLoading] = useState(true);
   const [water, setWater] = useState<DailyWaterSummaryContract | null>(null);
   const [waterEntries, setWaterEntries] = useState<WaterLogContract[]>([]);
+  const [goal, setGoal] = useState<NutritionGoalContract | null>(null);
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
 
   // add form
   const [showForm, setShowForm] = useState(false);
@@ -144,16 +151,18 @@ export default function NutritionPage() {
     setLoading(true);
     try {
       const day = toISODate(selected);
-      const [s, e, w, we] = await Promise.all([
+      const [s, e, w, we, g] = await Promise.all([
         getDailySummary(day),
         getEntriesForDay(day),
         getWaterSummary(day),
         getWaterEntries(day),
+        getNutritionGoal(),
       ]);
       setSummary(s);
       setEntries(e);
       setWater(w);
       setWaterEntries(we);
+      setGoal(g);
     } finally {
       setLoading(false);
     }
@@ -300,6 +309,32 @@ export default function NutritionPage() {
         )}
       </Card>
 
+      {/* Nutrition Goal */}
+      <Card title="Daily Goal">
+        {goal && !editingGoal ? (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <GoalStat label="Calories" value={goal.daily_calories} unit="kcal" />
+              <GoalStat label="Protein" value={goal.protein_g} unit="g" />
+              <GoalStat label="Carbs" value={goal.carbs_g} unit="g" />
+              <GoalStat label="Fat" value={goal.fat_g} unit="g" />
+            </div>
+            <Button variant="ghost" className="mt-3" onClick={() => setEditingGoal(true)}>
+              Edit goal
+            </Button>
+          </>
+        ) : (
+          <GoalForm
+            initial={goal}
+            onSaved={async () => {
+              setEditingGoal(false);
+              await load();
+            }}
+            onCancel={goal ? () => setEditingGoal(false) : undefined}
+          />
+        )}
+      </Card>
+
       {/* Entries */}
       {loading ? (
         <p className="text-center text-muted">Loading…</p>
@@ -314,22 +349,39 @@ export default function NutritionPage() {
                 {Math.round(items.reduce((sum, i) => sum + i.calories, 0))} cal
               </p>
             </div>
-            {items.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 py-1.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primarysoft text-primary">🍽</span>
-                <span className="flex-1 text-[13px] font-semibold text-text">{item.food_item}</span>
-                <span className="text-xs text-muted">{Math.round(item.calories)}</span>
-                <button
-                  onClick={async () => {
-                    await deleteNutritionLog(item.id);
-                    load();
+            {items.map((item) =>
+              editingEntryId === item.id ? (
+                <EntryEditForm
+                  key={item.id}
+                  entry={item}
+                  onSaved={async () => {
+                    setEditingEntryId(null);
+                    await load();
                   }}
-                  className="text-xs text-danger"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+                  onCancel={() => setEditingEntryId(null)}
+                />
+              ) : (
+                <div key={item.id} className="flex items-center gap-3 py-1.5">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primarysoft text-primary">🍽</span>
+                  <span className="flex-1 text-[13px] font-semibold text-text">{item.food_item}</span>
+                  <span className="text-xs text-muted">{Math.round(item.calories)}</span>
+                  <button onClick={() => setEditingEntryId(item.id)} className="text-xs font-bold text-primary">
+                    Edit
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (confirm("Delete this entry?")) {
+                        await deleteNutritionLog(item.id);
+                        load();
+                      }
+                    }}
+                    className="text-xs text-danger"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )
+            )}
           </Card>
         ))
       )}
@@ -368,5 +420,131 @@ export default function NutritionPage() {
       )}
     </div>
     </AppShell>
+  );
+}
+
+function GoalStat({ label, value, unit }: { label: string; value: number | null | undefined; unit: string }) {
+  return (
+    <div className="rounded-xl bg-primarysoft p-3 text-center">
+      <p className="text-[11px] font-semibold text-primary">{label}</p>
+      <p className="text-lg font-extrabold text-text">{value ?? "—"}</p>
+      <p className="text-[11px] text-muted">{unit}</p>
+    </div>
+  );
+}
+
+function GoalForm({
+  onSaved,
+  initial,
+  onCancel,
+}: {
+  onSaved: () => void;
+  initial?: NutritionGoalContract | null;
+  onCancel?: () => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [calories, setCalories] = useState(initial?.daily_calories != null ? String(initial.daily_calories) : "");
+  const [protein, setProtein] = useState(initial?.protein_g != null ? String(initial.protein_g) : "");
+  const [carbs, setCarbs] = useState(initial?.carbs_g != null ? String(initial.carbs_g) : "");
+  const [fat, setFat] = useState(initial?.fat_g != null ? String(initial.fat_g) : "");
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      await setNutritionGoal({
+        daily_calories: calories ? Number(calories) : null,
+        protein_g: protein ? Number(protein) : null,
+        carbs_g: carbs ? Number(carbs) : null,
+        fat_g: fat ? Number(fat) : null,
+      });
+      onSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save goal");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <Input label="Calories" type="number" placeholder="2000" value={calories} onChange={(e) => setCalories(e.target.value)} />
+        <Input label="Protein (g)" type="number" placeholder="150" value={protein} onChange={(e) => setProtein(e.target.value)} />
+        <Input label="Carbs (g)" type="number" placeholder="250" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
+        <Input label="Fat (g)" type="number" placeholder="70" value={fat} onChange={(e) => setFat(e.target.value)} />
+      </div>
+      {error && <p className="text-sm text-danger">{error}</p>}
+      <Button onClick={handleSave} disabled={(!calories && !protein && !carbs && !fat) || saving}>
+        {saving ? "Saving…" : "Save goal"}
+      </Button>
+      {onCancel && (
+        <Button variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function EntryEditForm({
+  entry,
+  onSaved,
+  onCancel,
+}: {
+  entry: NutritionLogContract;
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  const [meal, setMeal] = useState(entry.meal ?? "");
+  const [food, setFood] = useState(entry.food_item);
+  const [calories, setCalories] = useState(String(entry.calories ?? ""));
+  const [protein, setProtein] = useState(String(entry.protein_g ?? ""));
+  const [carbs, setCarbs] = useState(String(entry.carbs_g ?? ""));
+  const [fat, setFat] = useState(String(entry.fat_g ?? ""));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      await updateNutritionLog(entry.id, {
+        meal: meal || null,
+        food_item: food,
+        calories: calories ? Number(calories) : undefined,
+        protein_g: protein ? Number(protein) : undefined,
+        carbs_g: carbs ? Number(carbs) : undefined,
+        fat_g: fat ? Number(fat) : undefined,
+      });
+      onSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update entry");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2 rounded-xl bg-primarysoft p-3">
+      <Input label="Meal" value={meal} onChange={(e) => setMeal(e.target.value)} />
+      <Input label="Food item" value={food} onChange={(e) => setFood(e.target.value)} />
+      <div className="grid grid-cols-2 gap-2">
+        <Input label="Calories" type="number" value={calories} onChange={(e) => setCalories(e.target.value)} />
+        <Input label="Protein (g)" type="number" value={protein} onChange={(e) => setProtein(e.target.value)} />
+        <Input label="Carbs (g)" type="number" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
+        <Input label="Fat (g)" type="number" value={fat} onChange={(e) => setFat(e.target.value)} />
+      </div>
+      {error && <p className="text-xs text-danger">{error}</p>}
+      <div className="flex gap-2">
+        <Button onClick={handleSave} disabled={!food.trim() || saving} className="!w-auto px-4">
+          {saving ? "Saving…" : "Save"}
+        </Button>
+        <Button variant="ghost" onClick={onCancel} className="!w-auto px-4">
+          Cancel
+        </Button>
+      </div>
+    </div>
   );
 }

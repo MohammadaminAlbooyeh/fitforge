@@ -11,7 +11,7 @@ import { useHealthSync } from '@/hooks/useHealthSync';
 import type {
   AnalyticsSummary,
   Challenge,
-  DailyWorkoutPlan,
+  PlanDay,
   DailyNutritionSummary,
   EnhancedAnalytics,
   LeaderboardEntry,
@@ -21,7 +21,7 @@ import type {
 
 export type HomeFeed = {
   user: ReturnType<typeof useAuth>['user'];
-  plan: DailyWorkoutPlan | null;
+  plan: PlanDay | null;
   nutrition: DailyNutritionSummary | null;
   meals: NutritionLog[];
   logs: WorkoutLog[];
@@ -43,7 +43,7 @@ export function useHomeFeed(): HomeFeed {
     refresh: refreshHealth,
   } = useHealthSync();
 
-  const [plan, setPlan] = useState<DailyWorkoutPlan | null>(null);
+  const [plan, setPlan] = useState<PlanDay | null>(null);
   const [nutrition, setNutrition] = useState<DailyNutritionSummary | null>(null);
   const [meals, setMeals] = useState<NutritionLog[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);

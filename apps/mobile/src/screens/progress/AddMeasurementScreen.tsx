@@ -1,30 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { api } from '@/api/client';
+import { updateBodyMeasurement } from '@/api/bodyMeasurements';
+import type { BodyMeasurement } from '@/api/types';
 import { theme } from '@/constants/theme';
 
-export function AddMeasurementScreen({ navigation }: any) {
+export function AddMeasurementScreen({ navigation, route }: any) {
+  const existing = route.params?.measurement as BodyMeasurement | undefined;
   const today = new Date().toISOString().split('T')[0];
-  const [date, setDate] = useState(today);
-  const [weightKg, setWeightKg] = useState('');
-  const [bodyFatPct, setBodyFatPct] = useState('');
-  const [chestCm, setChestCm] = useState('');
-  const [waistCm, setWaistCm] = useState('');
-  const [armsCm, setArmsCm] = useState('');
-  const [thighsCm, setThighsCm] = useState('');
-  const [notes, setNotes] = useState('');
+  const [date, setDate] = useState(existing?.date ?? today);
+  const [weightKg, setWeightKg] = useState(existing?.weight_kg?.toString() ?? '');
+  const [bodyFatPct, setBodyFatPct] = useState(existing?.body_fat_pct?.toString() ?? '');
+  const [chestCm, setChestCm] = useState(existing?.chest_cm?.toString() ?? '');
+  const [waistCm, setWaistCm] = useState(existing?.waist_cm?.toString() ?? '');
+  const [armsCm, setArmsCm] = useState(existing?.arms_cm?.toString() ?? '');
+  const [thighsCm, setThighsCm] = useState(existing?.thighs_cm?.toString() ?? '');
+  const [notes, setNotes] = useState(existing?.notes ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (existing) {
+      navigation.setOptions({ title: 'Edit Measurement' });
+    }
+  }, [existing, navigation]);
 
   const handleSave = async () => {
     setSaving(true);
     setError(null);
     try {
-      await api.post('/body-measurements', {
+      const payload = {
         date,
         weight_kg: weightKg ? parseFloat(weightKg) : null,
         body_fat_pct: bodyFatPct ? parseFloat(bodyFatPct) : null,
@@ -33,7 +42,12 @@ export function AddMeasurementScreen({ navigation }: any) {
         arms_cm: armsCm ? parseFloat(armsCm) : null,
         thighs_cm: thighsCm ? parseFloat(thighsCm) : null,
         notes: notes || null,
-      });
+      };
+      if (existing) {
+        await updateBodyMeasurement(existing.id, payload);
+      } else {
+        await api.post('/body-measurements', payload);
+      }
       navigation.goBack();
     } catch (e: any) {
       setError(e.response?.data?.detail ?? 'Failed to save measurement');
@@ -45,7 +59,7 @@ export function AddMeasurementScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Add Measurement</Text>
+        <Text style={styles.title}>{existing ? 'Edit Measurement' : 'Add Measurement'}</Text>
 
         <Input placeholder="Date (YYYY-MM-DD)" value={date} onChangeText={setDate} />
 

@@ -6,6 +6,7 @@ import {
   getActiveWorkoutPlan,
   createWorkoutLog,
   updatePlanDayExercise,
+  adaptiveAdjustPlan,
 } from "@/lib/api";
 import type { PlanDayContract, PlanDayExerciseContract } from "@shared/types/api-contracts";
 import { Card, Button, EmptyState, RingProgress } from "@/components/ui";
@@ -22,6 +23,7 @@ export default function PlanPage() {
   const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [logging, setLogging] = useState(false);
+  const [adjusting, setAdjusting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -112,6 +114,20 @@ export default function PlanPage() {
     }
     await updatePlanDayExercise(pde.id, { exercise_id: alternativeId });
     load();
+  };
+
+  const handleAdjust = async () => {
+    setAdjusting(true);
+    setMessage(null);
+    try {
+      await adaptiveAdjustPlan();
+      await load();
+      setMessage("Plan adjusted based on your recovery.");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not adjust plan");
+    } finally {
+      setAdjusting(false);
+    }
   };
 
   return (
@@ -233,6 +249,9 @@ export default function PlanPage() {
 
       <Button onClick={handleLogSession} disabled={logging} variant="accent">
         {logging ? "Logging…" : "Log this session"}
+      </Button>
+      <Button onClick={handleAdjust} disabled={adjusting} variant="ghost">
+        {adjusting ? "Adjusting…" : "Adjust plan"}
       </Button>
       <Link href="/plan/generate">
         <Button variant="ghost">Rebuild plan</Button>

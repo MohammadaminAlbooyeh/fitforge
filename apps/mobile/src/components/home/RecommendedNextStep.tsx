@@ -4,11 +4,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from '@/constants/theme';
-import type { DailyWorkoutPlan, NutritionLog, WorkoutLog } from '@/api/types';
+import type { PlanDay, NutritionLog, WorkoutLog } from '@/api/types';
 import { toISODate } from '@/utils/formatters';
 
 type Props = {
-  plan: DailyWorkoutPlan | null;
+  plan: PlanDay | null;
   logs: WorkoutLog[];
   meals: NutritionLog[];
   onPlan: () => void;
@@ -29,7 +29,6 @@ function todayWorkoutDone(logs: WorkoutLog[]): boolean {
 }
 
 function suggest({ plan, logs, meals, onPlan, onMeal, onWorkout }: Props): Suggestion {
-  // Nothing eaten yet today → logging wins.
   if (meals.length === 0) {
     return {
       icon: 'cafe-outline',
@@ -39,17 +38,17 @@ function suggest({ plan, logs, meals, onPlan, onMeal, onWorkout }: Props): Sugge
     };
   }
 
-  // Has an active plan (not a rest day) and hasn’t trained today.
-  if (plan && !plan.rest && !todayWorkoutDone(logs)) {
+  const isRest = !plan || plan.plan_day_exercises.length === 0;
+  if (plan && !isRest && !todayWorkoutDone(logs)) {
+    const exerciseCount = plan.plan_day_exercises.length;
     return {
       icon: 'barbell-outline',
-      title: 'Check today’s plan',
-      detail: `${plan.title} · ${plan.focus} · ${plan.duration_minutes} min`,
+      title: 'Check today\'s plan',
+      detail: `${plan.title} · ${exerciseCount} exercises`,
       action: onPlan,
     };
   }
 
-  // Has been good today → encourage a little extra.
   return {
     icon: 'timer-outline',
     title: '10 min cardio',

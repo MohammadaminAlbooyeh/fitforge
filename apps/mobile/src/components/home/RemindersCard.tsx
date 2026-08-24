@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/common/Card';
 import { theme } from '@/constants/theme';
-import type { DailyWorkoutPlan, NutritionLog, WorkoutLog } from '@/api/types';
+import type { PlanDay, NutritionLog, WorkoutLog } from '@/api/types';
 import { toISODate } from '@/utils/formatters';
 
 type Reminder = {
@@ -14,7 +14,7 @@ type Reminder = {
 };
 
 type Props = {
-  plan: DailyWorkoutPlan | null;
+  plan: PlanDay | null;
   logs: WorkoutLog[];
   meals: NutritionLog[];
 };
@@ -26,14 +26,15 @@ const TONES = {
   danger: theme.colors.danger,
 };
 
-function workoutReminder(plan: DailyWorkoutPlan | null, logs: WorkoutLog[]): Reminder | null {
-  if (!plan || plan.rest) return null;
+function workoutReminder(plan: PlanDay | null, logs: WorkoutLog[]): Reminder | null {
+  const isRest = !plan || plan.plan_day_exercises.length === 0;
+  if (isRest) return null;
   const today = toISODate(new Date());
   const done = logs.some((l) => toISODate(new Date(l.completed_at)) === today);
   if (done) return null;
   return {
     icon: 'barbell-outline',
-    text: `Don’t forget: ${plan.title} is on today’s plan.`,
+    text: `Don't forget: ${plan.title} is on today's plan.`,
     tone: TONES.primary,
   };
 }
@@ -45,13 +46,14 @@ function mealReminder(meals: NutritionLog[]): Reminder | null {
   return null;
 }
 
-function streakReminder(logs: WorkoutLog[], plan: DailyWorkoutPlan | null): Reminder | null {
+function streakReminder(logs: WorkoutLog[], plan: PlanDay | null): Reminder | null {
   const today = toISODate(new Date());
   const done = logs.some((l) => toISODate(new Date(l.completed_at)) === today);
-  if (done && !plan?.rest) {
+  const isRest = !plan || plan.plan_day_exercises.length === 0;
+  if (done && !isRest) {
     return {
       icon: 'checkmark-circle-outline',
-      text: 'Workout done — you’re all caught up today.',
+      text: 'Workout done — you\'re all caught up today.',
       tone: TONES.success,
     };
   }

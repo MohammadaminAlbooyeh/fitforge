@@ -49,5 +49,15 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
 
       - name: Deploy
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
         run: |
-          echo "TODO: deploy ${{ env.IMAGE_NAME }}:${{ github.sha }} to the target environment."
+          if [ -n "$DEPLOY_HOOK_URL" ]; then
+            curl -f -X POST "$DEPLOY_HOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "{\"service\":\"web\",\"image\":\"${{ env.IMAGE_NAME }}:${{ github.sha }}\",\"ref\":\"${{ github.sha }}\"}"
+          else
+            echo "DEPLOY_HOOK_URL secret not set — skipping deploy."
+            echo "To enable deployment, add a DEPLOY_HOOK_URL repo secret pointing at your"
+            echo "Vercel/Render/Fly deploy hook (it will receive the new image tag to pull)."
+          fi

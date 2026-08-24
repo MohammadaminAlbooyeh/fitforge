@@ -6,18 +6,22 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { api } from '@/api/client';
-import type { BodyMeasurement } from '@/api/types';
+
 import { Card } from '@/components/common/Card';
 import { EmptyState } from '@/components/common/EmptyState';
 import { theme } from '@/constants/theme';
+import { api } from '@/api/client';
+import type { BodyMeasurement } from '@/api/types';
+import { deleteBodyMeasurement } from '@/api/bodyMeasurements';
 
 export function BodyMeasurementsScreen({ navigation }: any) {
   const [data, setData] = useState<BodyMeasurement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -33,10 +37,40 @@ export function BodyMeasurementsScreen({ navigation }: any) {
     return unsub;
   }, [load, navigation]);
 
+  const handleDelete = async (item: BodyMeasurement) => {
+    Alert.alert('Delete measurement', 'Are you sure?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          setDeletingId(item.id);
+          try {
+            await deleteBodyMeasurement(item.id);
+            setData((prev) => prev.filter((m) => m.id !== item.id));
+          } catch {}
+          setDeletingId(null);
+        },
+      },
+    ]);
+  };
+
+  const handleEdit = (item: BodyMeasurement) => {
+    navigation.navigate('AddMeasurement', { measurement: item });
+  };
+
   const renderItem = ({ item }: { item: BodyMeasurement }) => (
     <Card style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.date}>{item.date}</Text>
+        <View style={styles.cardActions}>
+          <TouchableOpacity onPress={() => handleEdit(item)} style={styles.iconBtn}>
+            <Ionicons name="pencil-outline" size={18} color={theme.colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDelete(item)} style={styles.iconBtn} disabled={deletingId === item.id}>
+            <Ionicons name="trash-outline" size={18} color={theme.colors.danger} />
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.metricsRow}>
         {item.weight_kg != null && (
@@ -129,7 +163,9 @@ const styles = StyleSheet.create({
   addBtnText: { color: '#FFF', fontSize: 13, fontWeight: '600' },
   list: { padding: theme.spacing.md, gap: theme.spacing.md },
   card: { gap: theme.spacing.sm },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cardActions: { flexDirection: 'row', gap: theme.spacing.sm },
+  iconBtn: { padding: 4 },
   date: { color: theme.colors.muted, fontSize: 13 },
   metricsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.lg },
   metric: { alignItems: 'center' },

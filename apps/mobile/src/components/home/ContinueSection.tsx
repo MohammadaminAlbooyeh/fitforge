@@ -4,11 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/common/Card';
 import { theme } from '@/constants/theme';
-import type { DailyWorkoutPlan, NutritionLog, WorkoutLog } from '@/api/types';
+import type { PlanDay, NutritionLog, WorkoutLog } from '@/api/types';
 import { formatDate } from '@/utils/formatters';
 
 type Props = {
-  plan: DailyWorkoutPlan | null;
+  plan: PlanDay | null;
   logs: WorkoutLog[];
   meals: NutritionLog[];
   onPlan: () => void;
@@ -52,7 +52,7 @@ export function ContinueSection({ plan, logs, meals, onPlan, onWorkout, onMeal }
         <Row
           icon="calendar-outline"
           label="Plan"
-          value={plan.rest ? 'Rest day' : `${plan.title} · ${plan.focus}`}
+          value={plan.plan_day_exercises.length === 0 ? 'Rest day' : plan.title}
           onPress={onPlan}
         />
       ) : null}

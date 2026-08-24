@@ -36,6 +36,10 @@ import type {
   ActivityFeedItemContract,
   DailyWorkoutPlanContract,
   PlanExerciseContract,
+  NextSetSuggestionContract,
+  AdaptiveAdjustResultContract,
+  AdaptiveAdjustmentContract,
+  NutritionGoalContract,
 } from '../../../../shared/types/api-contracts';
 
 export type User = UserContract;
@@ -75,6 +79,10 @@ export type EnhancedAnalytics = EnhancedAnalyticsContract;
 export type AnalyticsSummary = AnalyticsSummaryContract;
 export type PlanExercise = PlanExerciseContract;
 export type DailyWorkoutPlan = DailyWorkoutPlanContract;
+export type NextSetSuggestion = NextSetSuggestionContract;
+export type AdaptiveAdjustResult = AdaptiveAdjustResultContract;
+export type AdaptiveAdjustment = AdaptiveAdjustmentContract;
+export type NutritionGoal = NutritionGoalContract;
 
 export type AuthResponse = {
   access_token: string;

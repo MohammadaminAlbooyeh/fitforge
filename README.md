@@ -164,8 +164,8 @@ kept as distinct tables so progressive-overload history can be computed from rea
     progressive-overload logic as plan generation (`plan_generator.suggest_next_set`), but
     callable any time — not just at plan (re)generation.
 
-The mobile app is not yet wired to this engine (it still shows the static Hevy split on the
-Exercise screen) — that's the next step if you want it surfaced in the UI.
+The mobile app is wired to this engine: the home feed, schedule, and exercise screens now
+fetch from `/workout-plans/active` instead of the static Hevy split.
 
 ## Adaptive plan adjustment (Pro)
 
@@ -234,9 +234,9 @@ PR touching each service.
 
 CD (`cd-backend.yml`, `cd-web.yml`) builds and pushes a Docker image to
 GitHub Container Registry (`ghcr.io/<repo>/<service>`) on every push to `main` — this works out
-of the box with the built-in `GITHUB_TOKEN`, no extra secrets needed. The final "Deploy" step in
-each is a placeholder (`echo "TODO: deploy..."`) since there's no target infrastructure yet —
-swap it for a `kubectl set image`, a Render/Fly/ECS deploy hook, etc. once one exists.
+of the box with the built-in `GITHUB_TOKEN`, no extra secrets needed. The final "Deploy" step
+triggers a deploy hook (`${{ secrets.DEPLOY_HOOK_URL }}`) if configured — add a Render/Fly/ECS
+deploy hook URL as a repo secret and it will receive the new image tag to pull.
 
 `cd-mobile.yml` builds (and optionally submits) the mobile app via EAS; it's manually triggered
 (`workflow_dispatch`) and needs an `EXPO_TOKEN` repo secret.

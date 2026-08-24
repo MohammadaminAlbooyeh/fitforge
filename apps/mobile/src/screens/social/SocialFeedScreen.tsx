@@ -98,7 +98,7 @@ export function SocialFeedScreen() {
         <Text style={styles.lbName}>{item.full_name}</Text>
         <Text style={styles.lbMeta}>Level {item.level} · {item.streak_days}d streak</Text>
       </View>
-      <Text style={styles.lbXp}>{item.xp} XP</Text>
+      <Text style={styles.lbXp}>{item.total_xp} XP</Text>
     </Card>
   );
 
@@ -107,7 +107,7 @@ export function SocialFeedScreen() {
       <Text style={styles.challengeTitle}>{item.title}</Text>
       {item.description ? <Text style={styles.challengeDesc}>{item.description}</Text> : null}
       <Text style={styles.challengeMeta}>
-        {item.goal_count} workouts · {item.challenge_type}
+        {item.target_workouts} workouts · {item.status}
       </Text>
       <Text style={styles.challengeDate}>
         {item.start_date} — {item.end_date}
@@ -123,7 +123,7 @@ export function SocialFeedScreen() {
       </View>
       <TouchableOpacity
         style={styles.followBtn}
-        onPress={() => api.post('/social/follow', { user_id: item.user_id }).then(() => {})}
+        onPress={() => api.post('/social/follow', { user_id: item.id }).then(() => {})}
       >
         <Ionicons name={item.is_following ? 'checkmark-circle' : 'person-add-outline'} size={20} color={theme.colors.primary} />
       </TouchableOpacity>
@@ -191,7 +191,7 @@ export function SocialFeedScreen() {
         <FlatList
           data={searchResults}
           renderItem={renderSearchItem}
-          keyExtractor={(item) => String(item.user_id)}
+          keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.list}
         />
       )}

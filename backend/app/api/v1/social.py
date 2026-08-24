@@ -69,14 +69,13 @@ def list_my_challenges(db: DbSession, current: CurrentUser):
         me = [p for p in participants if p.user_id == current.user_id]
         result.append(ChallengeRead(
             id=c.id,
+            creator_id=c.creator_id,
             title=c.title,
             description=c.description,
-            challenge_type=c.challenge_type,
-            start_date=c.start_date.isoformat(),
-            end_date=c.end_date.isoformat(),
-            goal_count=c.goal_count,
-            created_by=c.created_by,
-            created_at=c.created_at.isoformat() if c.created_at else "",
+            target_workouts=c.target_workouts,
+            start_date=c.start_date,
+            end_date=c.end_date,
+            status=c.status,
             participants=[
                 ChallengeParticipantRead(user_id=p.user_id, full_name="", workouts_completed=p.workouts_completed)
                 for p in participants

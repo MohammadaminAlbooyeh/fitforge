@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -7,10 +7,11 @@ import { Avatar } from '@/components/common/Avatar';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useWorkoutPlan } from '@/hooks/useWorkoutPlan';
-import { createWorkoutLog } from '@/api/workoutLogs';
-import { updatePlanDayExercise } from '@/api/workoutPlans';
-import { PlanDayExercise } from '@/api/types';
+import { createWorkoutLog, nextSetSuggestion } from '@/api/workoutLogs';
+import { adaptiveAdjustPlan, updatePlanDayExercise } from '@/api/workoutPlans';
+import { NextSetSuggestion, PlanDayExercise } from '@/api/types';
 import { theme } from '@/constants/theme';
 import { getMuscleGroupVisual } from '@/utils/muscleGroupIcon';
 
@@ -22,11 +23,14 @@ function midpointReps(repsRange: string): number {
 
 export function DailyPlanScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { isPro } = useSubscription();
   const { plan, loading, error, reload } = useWorkoutPlan();
   const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [logging, setLogging] = useState(false);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [adjusting, setAdjusting] = useState(false);
+  const [suggestions, setSuggestions] = useState<Record<number, NextSetSuggestion>>({});
 
   useFocusEffect(
     React.useCallback(() => {
@@ -42,6 +46,22 @@ export function DailyPlanScreen({ navigation }: any) {
   const activeExercises = selectedDay?.plan_day_exercises.filter((pde) => !pde.skipped) ?? [];
   const doneCount = activeExercises.filter((pde) => checked[String(pde.id)]).length;
   const total = activeExercises.length;
+
+  useEffect(() => {
+    let cancelled = false;
+    setSuggestions({});
+    activeExercises.forEach((pde) => {
+      nextSetSuggestion(pde.exercise.id)
+        .then((suggestion) => {
+          if (!cancelled) setSuggestions((prev) => ({ ...prev, [pde.id]: suggestion }));
+        })
+        .catch(() => {});
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDay?.id]);
 
   const handleLogSession = async () => {
     if (!selectedDay) return;
@@ -74,6 +94,23 @@ export function DailyPlanScreen({ navigation }: any) {
       Alert.alert('Could not log session', e?.message ?? 'Something went wrong.');
     } finally {
       setLogging(false);
+    }
+  };
+
+  const handleAdjust = async () => {
+    setAdjusting(true);
+    try {
+      await adaptiveAdjustPlan();
+      await reload();
+      Alert.alert('Plan adjusted', 'We tweaked your plan based on your recovery.');
+    } catch (e: any) {
+      if (e?.response?.status === 403) {
+        Alert.alert('Pro feature', 'Upgrade to Pro to unlock adaptive plan adjustments.');
+      } else {
+        Alert.alert('Could not adjust plan', e?.message ?? 'Something went wrong.');
+      }
+    } finally {
+      setAdjusting(false);
     }
   };
 
@@ -207,6 +244,15 @@ export function DailyPlanScreen({ navigation }: any) {
                     <Text style={[styles.exerciseSub, { color: visual.color }]}>
                       {visual.label} · {pde.exercise.equipment}
                     </Text>
+                    {suggestions[pde.id] && !pde.skipped ? (
+                      <Text style={styles.suggestionText}>
+                        Suggested: {suggestions[pde.id].sets}×{suggestions[pde.id].reps_range}
+                        {suggestions[pde.id].target_weight_kg
+                          ? ` @ ${suggestions[pde.id].target_weight_kg}kg`
+                          : ''}{' '}
+                        · rest {suggestions[pde.id].rest_seconds}s
+                      </Text>
+                    ) : null}
                   </View>
                 </View>
                 {pde.exercise.image_url && !pde.skipped ? (
@@ -233,6 +279,15 @@ export function DailyPlanScreen({ navigation }: any) {
           })}
 
           <Button title="Log this session" onPress={handleLogSession} loading={logging} variant="accent" />
+          {isPro ? (
+            <Button title="Adjust plan" variant="ghost" onPress={handleAdjust} loading={adjusting} />
+          ) : (
+            <Button
+              title="Adjust plan (Pro)"
+              variant="ghost"
+              onPress={() => navigation.getParent()?.navigate('Paywall') ?? navigation.navigate('Paywall')}
+            />
+          )}
           <Button title="Rebuild plan" variant="ghost" onPress={() => navigation.navigate('GeneratePlan')} />
         </>
       )}
@@ -306,5 +361,6 @@ const styles = StyleSheet.create({
   exerciseName: { color: theme.colors.text, fontSize: 14, fontWeight: '700' },
   exerciseMeta: { color: theme.colors.muted, fontSize: 12 },
   exerciseSub: { color: theme.colors.muted, fontSize: 11, textTransform: 'capitalize' },
+  suggestionText: { color: theme.colors.primary, fontSize: 11, fontWeight: '600', marginTop: 2 },
   muted: { color: theme.colors.muted, textAlign: 'center' },
 });

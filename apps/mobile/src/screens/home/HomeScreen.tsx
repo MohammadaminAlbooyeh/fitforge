@@ -34,14 +34,16 @@ export function HomeScreen({ navigation }: any) {
   const goNutrition = () => navigation.navigate('Nutrition');
   const goCommunity = () => navigation.getParent()?.navigate('SocialFeed');
 
+  const hasActivePlan = plan && plan.plan_day_exercises.length > 0;
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <HeroSection
         firstName={firstName}
         goal={user?.goal}
         streakDays={enhanced?.streak_days}
-        ctaLabel={plan && !plan.rest ? 'Start today’s workout' : 'Explore workouts'}
-        onPrimaryCTA={plan && !plan.rest ? goDailyPlan : goWorkouts}
+        ctaLabel={hasActivePlan ? 'Start today\'s workout' : 'Explore workouts'}
+        onPrimaryCTA={hasActivePlan ? goDailyPlan : goWorkouts}
       />
 
       <RecommendedNextStep

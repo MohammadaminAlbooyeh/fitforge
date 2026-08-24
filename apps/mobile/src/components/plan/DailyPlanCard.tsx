@@ -4,11 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/common/Card';
 import { getDailyPlan } from '@/api/plans';
-import { DailyWorkoutPlan } from '@/api/types';
+import { PlanDay } from '@/api/types';
 import { theme } from '@/constants/theme';
 
+const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
 export function DailyPlanCard({ onPress }: { onPress: () => void }) {
-  const [plan, setPlan] = useState<DailyWorkoutPlan | null>(null);
+  const [plan, setPlan] = useState<PlanDay | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,7 +18,6 @@ export function DailyPlanCard({ onPress }: { onPress: () => void }) {
       try {
         setPlan(await getDailyPlan());
       } catch {
-        // daily plan is optional; home still renders without it
       } finally {
         setLoading(false);
       }
@@ -35,7 +36,9 @@ export function DailyPlanCard({ onPress }: { onPress: () => void }) {
     return null;
   }
 
-  const exercises = plan.exercises ?? [];
+  const exercises = plan.plan_day_exercises ?? [];
+  const weekday = plan.weekday !== null && plan.weekday !== undefined ? WEEKDAY_NAMES[plan.weekday] : 'Today';
+  const isRest = exercises.length === 0;
 
   return (
     <Card onPress={onPress}>
@@ -44,14 +47,14 @@ export function DailyPlanCard({ onPress }: { onPress: () => void }) {
           <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.weekday}>{plan.weekday}</Text>
+          <Text style={styles.weekday}>{weekday}</Text>
           <Text style={styles.title}>
-            {plan.rest ? 'Rest Day' : `${plan.title} · ${plan.focus}`}
+            {isRest ? 'Rest Day' : `${plan.title}`}
           </Text>
           <Text style={styles.meta}>
-            {plan.rest
+            {isRest
               ? 'Recovery day — take it easy.'
-              : `${exercises.length} exercises · ${plan.duration_minutes} min`}
+              : `${exercises.length} exercises`}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={theme.colors.muted} />

@@ -19,6 +19,10 @@ import type {
   ChallengeContract,
   ActivityFeedItemContract,
   EntitlementsContract,
+  NextSetSuggestionContract,
+  AdaptiveAdjustResultContract,
+  NutritionGoalContract,
+  UserPublicProfileContract,
 } from "@shared/types/api-contracts";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
@@ -183,6 +187,11 @@ export const getDailySummary = (day: string) =>
   apiFetch<DailyNutritionSummaryContract>(`/nutrition/day?day=${encodeURIComponent(day)}`);
 export const getEntriesForDay = (day: string) =>
   apiFetch<NutritionLogContract[]>(`/nutrition/day/entries?day=${encodeURIComponent(day)}`);
+export const updateNutritionLog = (id: number, input: Partial<NutritionLogCreateInput>) =>
+  apiFetch<NutritionLogContract>(`/nutrition/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
 export const deleteNutritionLog = (id: number) =>
   apiFetch<void>(`/nutrition/${id}`, { method: "DELETE" });
 
@@ -231,6 +240,11 @@ export const updatePlanDayExercise = (
     body: JSON.stringify(input),
   });
 
+export const adaptiveAdjustPlan = () =>
+  apiFetch<AdaptiveAdjustResultContract>("/workout-plans/adaptive-adjust", {
+    method: "POST",
+  });
+
 // ---- Workout logs ----
 
 export type WorkoutLogCreateInput = {
@@ -245,6 +259,8 @@ export const createWorkoutLog = (input: WorkoutLogCreateInput) =>
 export const listWorkoutLogs = () => apiFetch<WorkoutLogContract[]>("/workout-logs/");
 export const listPersonalRecords = () =>
   apiFetch<PersonalRecordContract[]>("/workout-logs/personal-records");
+export const nextSetSuggestion = (exerciseId: number) =>
+  apiFetch<NextSetSuggestionContract>(`/workout-logs/next-set-suggestion/${exerciseId}`);
 
 // ---- Body measurements ----
 
@@ -266,6 +282,36 @@ export const createBodyMeasurement = (input: BodyMeasurementCreateInput) =>
     method: "POST",
     body: JSON.stringify(input),
   });
+export const updateBodyMeasurement = (id: number, input: BodyMeasurementCreateInput) =>
+  apiFetch<BodyMeasurementContract>(`/body-measurements/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+export const deleteBodyMeasurement = (id: number) =>
+  apiFetch<void>(`/body-measurements/${id}`, { method: "DELETE" });
+
+// ---- Nutrition goals ----
+
+export type NutritionGoalInput = {
+  daily_calories?: number | null;
+  protein_g?: number | null;
+  carbs_g?: number | null;
+  fat_g?: number | null;
+};
+
+export const getNutritionGoal = async (): Promise<NutritionGoalContract | null> => {
+  try {
+    return await apiFetch<NutritionGoalContract>("/nutrition/goal");
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) return null;
+    throw e;
+  }
+};
+export const setNutritionGoal = (input: NutritionGoalInput) =>
+  apiFetch<NutritionGoalContract>("/nutrition/goal", {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
 
 // ---- Gamification / social ----
 
@@ -277,6 +323,23 @@ export const getChallenges = () => apiFetch<ChallengeContract[]>("/social/challe
 export const getActivityFeed = (limit = 30) =>
   apiFetch<ActivityFeedItemContract[]>(`/social/feed?limit=${limit}`);
 export const getEntitlements = () => apiFetch<EntitlementsContract>("/entitlements/me");
+
+export const followUser = (userId: number) =>
+  apiFetch<{ ok: boolean }>("/social/follow", {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId }),
+  });
+export const unfollowUser = (userId: number) =>
+  apiFetch<{ ok: boolean }>(`/social/follow/${userId}`, { method: "DELETE" });
+export const getFollowers = () => apiFetch<UserPublicProfileContract[]>("/social/followers");
+export const getFollowing = () => apiFetch<UserPublicProfileContract[]>("/social/following");
+export const searchUsers = (q: string) =>
+  apiFetch<UserPublicProfileContract[]>(`/social/search?q=${encodeURIComponent(q)}`);
+export const getUserProfile = (userId: number) =>
+  apiFetch<UserPublicProfileContract>(`/social/profile/${userId}`);
+export const getChallenge = (id: number) => apiFetch<ChallengeContract>(`/social/challenges/${id}`);
+export const joinChallenge = (id: number) =>
+  apiFetch<{ ok: boolean }>(`/social/challenges/${id}/join`, { method: "POST" });
 
 // ---- Analytics ----
 

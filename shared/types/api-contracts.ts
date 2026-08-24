@@ -229,6 +229,36 @@ export interface PersonalRecordContract {
   completed_at: string;
 }
 
+export interface NextSetSuggestionContract {
+  exercise_id: number;
+  sets: number;
+  reps_range: string;
+  rest_seconds: number;
+  target_weight_kg?: number | null;
+  reasoning: string;
+}
+
+export interface AdaptiveAdjustmentContract {
+  plan_day_exercise_id: number;
+  exercise_id: number;
+  previous_sets: number;
+  new_sets: number;
+  reason: string;
+}
+
+export interface AdaptiveAdjustResultContract {
+  plan: WorkoutPlanContract;
+  adjustments: AdaptiveAdjustmentContract[];
+  recovery_score: number;
+}
+
+export interface NutritionGoalContract {
+  daily_calories?: number | null;
+  protein_g?: number | null;
+  carbs_g?: number | null;
+  fat_g?: number | null;
+}
+
 // ---- Body measurements ----
 
 export interface BodyMeasurementContract {
@@ -277,36 +307,36 @@ export interface GamificationSummaryContract {
 // ---- Social ----
 
 export interface UserPublicProfileContract {
-  user_id: number;
+  id: number;
   full_name: string;
-  avatar_url: string | null;
-  streak_days: number;
+  total_xp: number;
   level: number;
-  workout_count: number;
+  streak_days: number;
+  followers_count: number;
+  following_count: number;
   is_following: boolean;
 }
 
 export interface LeaderboardEntryContract {
+  rank: number;
   user_id: number;
   full_name: string;
-  avatar_url: string | null;
-  xp: number;
+  total_xp: number;
   level: number;
   streak_days: number;
 }
 
 export interface ChallengeContract {
   id: number;
+  creator_id: number;
   title: string;
   description: string | null;
-  challenge_type: string;
+  target_workouts: number;
   start_date: string;
   end_date: string;
-  goal_count: number;
-  created_by: number;
-  created_at: string;
-  participants?: ChallengeParticipantContract[];
-  my_workouts_completed?: number;
+  status: string;
+  participants: ChallengeParticipantContract[];
+  my_workouts_completed: number;
 }
 
 export interface ChallengeParticipantContract {

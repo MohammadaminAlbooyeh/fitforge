@@ -1,14 +1,22 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { Avatar } from '@/components/common/Avatar';
+import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
+import { Input } from '@/components/common/Input';
 import { MacroDonut } from '@/components/common/MacroDonut';
 import { useAuth } from '@/hooks/useAuth';
-import { getDailySummary, getEntriesForDay } from '@/api/nutrition';
-import { DailyNutritionSummary, NutritionLog } from '@/api/types';
+import {
+  deleteNutritionLog,
+  getDailySummary,
+  getEntriesForDay,
+  getNutritionGoal,
+  setNutritionGoal,
+} from '@/api/nutrition';
+import { DailyNutritionSummary, NutritionGoal, NutritionLog } from '@/api/types';
 import { toISODate } from '@/utils/formatters';
 import { theme } from '@/constants/theme';
 
@@ -31,6 +39,13 @@ export function NutritionLogScreen({ navigation }: any) {
   const [summary, setSummary] = useState<DailyNutritionSummary | null>(null);
   const [entries, setEntries] = useState<NutritionLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [goal, setGoal] = useState<NutritionGoal | null>(null);
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalCalories, setGoalCalories] = useState('');
+  const [goalProtein, setGoalProtein] = useState('');
+  const [goalCarbs, setGoalCarbs] = useState('');
+  const [goalFat, setGoalFat] = useState('');
+  const [savingGoal, setSavingGoal] = useState(false);
 
   const week = buildWeek(selected);
 
@@ -38,9 +53,10 @@ export function NutritionLogScreen({ navigation }: any) {
     setLoading(true);
     try {
       const day = toISODate(selected);
-      const [s, e] = await Promise.all([getDailySummary(day), getEntriesForDay(day)]);
+      const [s, e, g] = await Promise.all([getDailySummary(day), getEntriesForDay(day), getNutritionGoal()]);
       setSummary(s);
       setEntries(e);
+      setGoal(g);
     } finally {
       setLoading(false);
     }
@@ -62,6 +78,50 @@ export function NutritionLogScreen({ navigation }: any) {
     acc[key].push(entry);
     return acc;
   }, {});
+
+  const handleDeleteEntry = (entry: NutritionLog) => {
+    Alert.alert('Delete entry', `Remove "${entry.food_item}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteNutritionLog(entry.id);
+            await load();
+          } catch {
+            Alert.alert('Could not delete entry');
+          }
+        },
+      },
+    ]);
+  };
+
+  const startEditGoal = () => {
+    setGoalCalories(goal?.daily_calories != null ? String(goal.daily_calories) : '');
+    setGoalProtein(goal?.protein_g != null ? String(goal.protein_g) : '');
+    setGoalCarbs(goal?.carbs_g != null ? String(goal.carbs_g) : '');
+    setGoalFat(goal?.fat_g != null ? String(goal.fat_g) : '');
+    setEditingGoal(true);
+  };
+
+  const handleSaveGoal = async () => {
+    setSavingGoal(true);
+    try {
+      await setNutritionGoal({
+        daily_calories: goalCalories ? Number(goalCalories) : null,
+        protein_g: goalProtein ? Number(goalProtein) : null,
+        carbs_g: goalCarbs ? Number(goalCarbs) : null,
+        fat_g: goalFat ? Number(goalFat) : null,
+      });
+      setEditingGoal(false);
+      await load();
+    } catch {
+      Alert.alert('Could not save goal');
+    } finally {
+      setSavingGoal(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -133,6 +193,15 @@ export function NutritionLogScreen({ navigation }: any) {
                 </View>
                 <Text style={styles.foodName}>{item.food_item}</Text>
                 <Text style={styles.foodCalories}>{Math.round(item.calories)}</Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('NutritionEntry', { entry: item })}
+                  style={styles.rowIconBtn}
+                >
+                  <Ionicons name="pencil-outline" size={16} color={theme.colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDeleteEntry(item)} style={styles.rowIconBtn}>
+                  <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
+                </TouchableOpacity>
               </View>
             ))}
           </Card>
@@ -143,6 +212,71 @@ export function NutritionLogScreen({ navigation }: any) {
         <Ionicons name="add-circle-outline" size={20} color={theme.colors.primary} />
         <Text style={styles.addLabel}>Add food entry</Text>
       </Card>
+
+      {editingGoal ? (
+        <Card title="Edit Daily Goal">
+          <View style={styles.goalFormRow}>
+            <Input
+              style={styles.half}
+              placeholder="Calories"
+              keyboardType="numeric"
+              value={goalCalories}
+              onChangeText={setGoalCalories}
+            />
+            <Input
+              style={styles.half}
+              placeholder="Protein (g)"
+              keyboardType="numeric"
+              value={goalProtein}
+              onChangeText={setGoalProtein}
+            />
+          </View>
+          <View style={styles.goalFormRow}>
+            <Input
+              style={styles.half}
+              placeholder="Carbs (g)"
+              keyboardType="numeric"
+              value={goalCarbs}
+              onChangeText={setGoalCarbs}
+            />
+            <Input
+              style={styles.half}
+              placeholder="Fat (g)"
+              keyboardType="numeric"
+              value={goalFat}
+              onChangeText={setGoalFat}
+            />
+          </View>
+          <Button title="Save goal" onPress={handleSaveGoal} loading={savingGoal} />
+          <Button title="Cancel" variant="ghost" onPress={() => setEditingGoal(false)} />
+        </Card>
+      ) : (
+        <Card title="Daily Goal">
+          {goal ? (
+            <>
+              <View style={styles.goalRow}>
+                <Text style={styles.goalLabel}>Calories</Text>
+                <Text style={styles.goalValue}>{goal.daily_calories ?? '—'}</Text>
+              </View>
+              <View style={styles.goalRow}>
+                <Text style={styles.goalLabel}>Protein</Text>
+                <Text style={styles.goalValue}>{goal.protein_g ?? '—'}g</Text>
+              </View>
+              <View style={styles.goalRow}>
+                <Text style={styles.goalLabel}>Carbs</Text>
+                <Text style={styles.goalValue}>{goal.carbs_g ?? '—'}g</Text>
+              </View>
+              <View style={styles.goalRow}>
+                <Text style={styles.goalLabel}>Fat</Text>
+                <Text style={styles.goalValue}>{goal.fat_g ?? '—'}g</Text>
+              </View>
+            </>
+          ) : (
+            <Text style={styles.muted}>No goal set yet.</Text>
+          )}
+          <Button title={goal ? 'Edit goal' : 'Set goal'} variant="ghost" onPress={startEditGoal} />
+        </Card>
+      )}
     </ScrollView>
   );
 }
@@ -211,4 +345,10 @@ const styles = StyleSheet.create({
   addCard: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm, justifyContent: 'center' },
   addLabel: { color: theme.colors.primary, fontWeight: '700' },
   muted: { color: theme.colors.muted, textAlign: 'center', marginTop: theme.spacing.md },
+  goalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
+  goalLabel: { color: theme.colors.text, fontSize: 13, fontWeight: '600' },
+  goalValue: { color: theme.colors.muted, fontSize: 13 },
+  goalFormRow: { flexDirection: 'row', gap: theme.spacing.sm },
+  half: { flex: 1 },
+  rowIconBtn: { padding: 4 },
 });

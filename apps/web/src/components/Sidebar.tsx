@@ -30,6 +30,13 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: str
     items: [{ href: "/nutrition", label: "Nutrition", icon: "🥗" }],
   },
   {
+    label: "Community",
+    items: [
+      { href: "/social", label: "Social", icon: "👥" },
+      { href: "/achievements", label: "Achievements", icon: "🏅" },
+    ],
+  },
+  {
     label: "Account",
     items: [
       { href: "/profile", label: "Profile", icon: "👤" },

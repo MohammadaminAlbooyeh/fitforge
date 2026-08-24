@@ -59,7 +59,7 @@ export function CommunityCard({ challenges, leaderboard, onOpen }: Props) {
                   <Text style={styles.rankText}>{i + 1}</Text>
                 </View>
                 <Text style={styles.lbName} numberOfLines={1}>{e.full_name}</Text>
-                <Text style={styles.lbXp}>{e.xp} XP</Text>
+                <Text style={styles.lbXp}>{e.total_xp} XP</Text>
               </View>
             ))}
           </View>

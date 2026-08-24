@@ -9,6 +9,8 @@ import {
   getGamificationSummary,
   listBodyMeasurements,
   createBodyMeasurement,
+  updateBodyMeasurement,
+  deleteBodyMeasurement,
 } from "@/lib/api";
 import { Card, StatPill, RingProgress } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
@@ -200,6 +202,56 @@ export default function ProgressPage() {
           )}
         </Card>
       )}
+
+      {/* Body measurements */}
+      <Card title="Body Measurements">
+        {!measurements || measurements.length === 0 ? (
+          <p className="py-4 text-sm text-muted">No measurements yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {measurements.slice(0, 10).map((m) => (
+              <div key={m.id} className="flex items-center justify-between rounded-lg bg-primarysoft p-3">
+                <div>
+                  <p className="text-sm font-semibold text-text">{m.date}</p>
+                  <p className="text-xs text-muted">
+                    {m.weight_kg ? `${m.weight_kg} kg` : ""}
+                    {m.body_fat_pct ? ` · ${m.body_fat_pct}% fat` : ""}
+                    {m.chest_cm ? ` · ${m.chest_cm} cm chest` : ""}
+                    {m.waist_cm ? ` · ${m.waist_cm} cm waist` : ""}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      const newWeight = prompt("Weight (kg):", String(m.weight_kg ?? ""));
+                      if (newWeight === null) return;
+                      await updateBodyMeasurement(m.id, {
+                        date: m.date,
+                        weight_kg: newWeight ? Number(newWeight) : null,
+                      });
+                      reload();
+                    }}
+                    className="rounded-full bg-primarysoft px-3 py-1.5 text-xs font-bold text-primary"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (confirm("Delete this measurement?")) {
+                        await deleteBodyMeasurement(m.id);
+                        reload();
+                      }
+                    }}
+                    className="rounded-full bg-primarysoft px-3 py-1.5 text-xs font-bold text-danger"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
 
       {/* Progress photos */}
       <Card title="Progress Photos">

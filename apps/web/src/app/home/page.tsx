@@ -223,7 +223,7 @@ export default function HomePage() {
             <Link href="/progress" className="block rounded-2xl bg-primarysoft p-3">
               <p className="font-semibold text-primary">{challenges[0].title}</p>
               <p className="text-xs text-muted">
-                {challenges[0].my_workouts_completed ?? 0}/{challenges[0].goal_count} workouts
+                {challenges[0].my_workouts_completed ?? 0}/{challenges[0].target_workouts} workouts
               </p>
             </Link>
           )}
@@ -235,7 +235,7 @@ export default function HomePage() {
               <span className="text-sm font-semibold text-text">
                 {i + 1}. {e.full_name}
               </span>
-              <span className="text-sm text-muted">{e.xp} XP</span>
+              <span className="text-sm text-muted">{e.total_xp} XP</span>
             </div>
           ))}
         </Card>

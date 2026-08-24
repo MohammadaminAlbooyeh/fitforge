@@ -1,5 +1,10 @@
 import { api } from './client';
-import { DailyNutritionSummary, NutritionLog, NutritionLogCreateInput } from './types';
+import {
+  DailyNutritionSummary,
+  NutritionGoal,
+  NutritionLog,
+  NutritionLogCreateInput,
+} from './types';
 
 export async function createNutritionLog(input: NutritionLogCreateInput): Promise<NutritionLog> {
   const { data } = await api.post<NutritionLog>('/nutrition/', input);
@@ -35,4 +40,21 @@ export async function updateNutritionLog(
 
 export async function deleteNutritionLog(id: number): Promise<void> {
   await api.delete(`/nutrition/${id}`);
+}
+
+export async function getNutritionGoal(): Promise<NutritionGoal | null> {
+  try {
+    const { data } = await api.get<NutritionGoal>('/nutrition/goal');
+    return data;
+  } catch (e: any) {
+    if (e?.response?.status === 404) {
+      return null;
+    }
+    throw e;
+  }
+}
+
+export async function setNutritionGoal(input: Partial<NutritionGoal>): Promise<NutritionGoal> {
+  const { data } = await api.put<NutritionGoal>('/nutrition/goal', input);
+  return data;
 }

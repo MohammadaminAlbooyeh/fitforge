@@ -6,13 +6,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Card } from '@/components/common/Card';
 import { getWeeklyPlan } from '@/api/plans';
 import { listWorkoutLogs } from '@/api/workoutLogs';
-import type { DailyWorkoutPlan, WorkoutLog } from '@/api/types';
+import type { PlanDay, WorkoutLog } from '@/api/types';
 import { theme } from '@/constants/theme';
 
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export function ScheduleScreen({ navigation }: any) {
-  const [week, setWeek] = useState<DailyWorkoutPlan[]>([]);
+  const [week, setWeek] = useState<PlanDay[]>([]);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +38,7 @@ export function ScheduleScreen({ navigation }: any) {
         <View style={{ width: 22 }} />
       </View>
 
-      <Text style={styles.subtitle}>This week’s plan</Text>
+      <Text style={styles.subtitle}>This week's plan</Text>
 
       {loading ? (
         <Text style={styles.muted}>Loading…</Text>
@@ -46,31 +46,34 @@ export function ScheduleScreen({ navigation }: any) {
         <Text style={styles.muted}>No weekly plan yet. Generate one first.</Text>
       ) : (
         week.map((day, i) => {
-          const isToday = day.weekday === WEEKDAYS[(new Date().getDay() + 6) % 7];
-          const done = doneDates.has(today) && isToday && !day.rest;
+          const weekdayName = day.weekday !== null && day.weekday !== undefined ? WEEKDAY_NAMES[day.weekday] : `Day ${day.day_number}`;
+          const isToday = weekdayName === WEEKDAY_NAMES[(new Date().getDay() + 6) % 7];
+          const exerciseCount = day.plan_day_exercises?.length ?? 0;
+          const isRest = exerciseCount === 0;
+          const done = doneDates.has(today) && isToday && !isRest;
           return (
-            <Card key={i} style={[styles.dayCard, isToday && styles.dayCardToday]}>
+            <Card key={day.id ?? i} style={[styles.dayCard, isToday && styles.dayCardToday]}>
               <View style={styles.dayRow}>
-                <View style={[styles.dayDot, done && styles.dayDotDone, day.rest && styles.dayDotRest]}>
+                <View style={[styles.dayDot, done && styles.dayDotDone, isRest && styles.dayDotRest]}>
                   {done ? (
                     <Ionicons name="checkmark" size={12} color="#FFFFFF" />
-                  ) : day.rest ? (
+                  ) : isRest ? (
                     <Ionicons name="bed-outline" size={12} color={theme.colors.muted} />
                   ) : null}
                 </View>
                 <View style={{ flex: 1 }}>
                   <View style={styles.dayTitleRow}>
-                    <Text style={styles.dayName}>{day.weekday}</Text>
+                    <Text style={styles.dayName}>{weekdayName}</Text>
                     {isToday && <Text style={styles.todayBadge}>Today</Text>}
                   </View>
                   <Text style={styles.dayPlan}>
-                    {day.rest ? 'Rest day' : `${day.title} · ${day.focus}`}
+                    {isRest ? 'Rest day' : `${day.title}`}
                   </Text>
                   <Text style={styles.dayMeta}>
-                    {day.rest ? 'Recovery — take it easy.' : `${day.duration_minutes} min · ${day.exercises?.length ?? 0} exercises`}
+                    {isRest ? 'Recovery — take it easy.' : `${exerciseCount} exercises`}
                   </Text>
                 </View>
-                {!day.rest && (
+                {!isRest && (
                   <Ionicons
                     name="chevron-forward"
                     size={18}
