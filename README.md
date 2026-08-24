@@ -70,9 +70,11 @@ emulator in CI; it's `workflow_dispatch`-only until `EXPO_TOKEN`, `MAESTRO_TEST_
 `expo-health-kit`. It requires a development build (not Expo Go) and the
 `expo-health-kit` config plugin already declared in `app.config.ts`.
 
-## Web (admin)
+## Web
 
-Next.js app for internal/admin use (managing exercises, subscriptions, etc.).
+Next.js app that mirrors the mobile app's user-facing features (home, plan, nutrition,
+progress, social, achievements) plus an `/admin` section for managing exercises and
+subscriptions.
 
 ```bash
 cd apps/web
@@ -162,10 +164,13 @@ kept as distinct tables so progressive-overload history can be computed from rea
   - `GET /api/v1/workout-logs/next-set-suggestion/{exercise_id}` — rest-timer prompt: sets/reps/
     rest and an advisory target weight for the *next* set of that exercise, using the same
     progressive-overload logic as plan generation (`plan_generator.suggest_next_set`), but
-    callable any time — not just at plan (re)generation.
+    callable any time — not just at plan (re)generation. Surfaced on both web (plan page) and
+    mobile (`DailyPlanScreen`) as a "Suggested" line per exercise.
+  - `PATCH /api/v1/workout-plans/plan-day-exercises/{id}` — edit a single exercise's sets/reps
+    on the active plan.
 
-The mobile app is wired to this engine: the home feed, schedule, and exercise screens now
-fetch from `/workout-plans/active` instead of the static Hevy split.
+The mobile app is wired to this engine: the home feed, schedule, and plan screens fetch from
+`/workout-plans/active` instead of the static Hevy split.
 
 ## Adaptive plan adjustment (Pro)
 
@@ -182,7 +187,27 @@ plan based on recent training load instead of waiting for the next full regenera
 
 Returns the updated plan plus a list of what changed and why
 (`app/schemas/workout_plan_db.AdaptiveAdjustResult`). Logic lives in
-`app/services/plan_generator.adaptive_adjust_plan`.
+`app/services/plan_generator.adaptive_adjust_plan`. Exposed as an "Adjust plan" action on both
+web and mobile; non-Pro users are routed to the paywall instead of the request going through.
+
+## Social & gamification
+
+Follow other users, compare progress on a leaderboard, run challenges, and earn XP/achievements
+(`app/api/v1/social.py`, `app/api/v1/achievements.py`, `app/services/social_service.py`):
+
+- `POST/DELETE /api/v1/social/follow[/{user_id}]`, `GET /api/v1/social/followers|following`,
+  `GET /api/v1/social/search?q=` — follow graph and user lookup
+- `GET /api/v1/social/profile/{user_id}` — a followed/searched user's public profile
+- `POST /api/v1/social/challenges`, `POST /api/v1/social/challenges/{id}/join`,
+  `GET /api/v1/social/challenges[/{id}]` — create/join/list community challenges
+- `GET /api/v1/social/leaderboard`, `GET /api/v1/social/feed` — XP ranking and a feed of recent
+  workouts from people you follow
+- `GET /api/v1/gamification/summary` — current XP/level, progress to next level, and unlocked
+  achievements
+
+Both mobile (`SocialFeedScreen`, `AchievementsScreen`) and web (`/social`, `/achievements`) have
+full UI for this now — feed, leaderboard, challenges (with join), user search/follow, and an
+achievements grid.
 
 ## Nutrition goals
 
@@ -194,6 +219,10 @@ food/water logging; `NutritionGoal` adds per-user daily targets:
 - `GET /api/v1/nutrition/day?day=YYYY-MM-DD` — daily summary now includes `goal_*` and
   `remaining_*` fields (calories/protein/carbs/fat) whenever a goal is set, so the mobile app can
   render a "X kcal remaining" style progress bar without computing it client-side.
+
+Both web (`/nutrition`) and mobile (`NutritionLogScreen`) let users set/edit their goal and
+edit or delete individual logged entries, not just add new ones. Body measurements
+(`/api/v1/body-measurements/{id}` PATCH/DELETE) already had edit/delete UI on both platforms.
 
 ## Offline mode
 

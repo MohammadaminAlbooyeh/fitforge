@@ -127,19 +127,6 @@ export default function ExercisesPage() {
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {filtered.map((exercise) => (
               <div key={exercise.id} className="card relative flex flex-col gap-2 !p-3">
-                {exercise.video_url && (
-                  <a
-                    href={exercise.video_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-card text-primary shadow-[0_4px_12px_rgba(22,22,26,0.12)]"
-                    aria-label="Watch demo"
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                      <path d="M7 17 17 7M7 7h10v10" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                )}
                 <span className="grad-primary flex h-24 w-full items-center justify-center overflow-hidden rounded-2xl">
                   {exercise.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -165,6 +152,16 @@ export default function ExercisesPage() {
                   </span>
                   <span className="capitalize">{exercise.muscle_group}</span>
                 </div>
+                {exercise.video_url && (
+                  <a
+                    href={exercise.video_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-semibold text-primary hover:underline"
+                  >
+                    Watch the Demo
+                  </a>
+                )}
               </div>
             ))}
           </div>
