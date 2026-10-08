@@ -15,7 +15,7 @@ redis==5.2.1
 alembic==1.14.0
 
 # observability
-opentelemetry-sdk==1.29.0
+opentelemetry-sdk==1.44.0
 opentelemetry-instrumentation-fastapi==0.50b0
 opentelemetry-instrumentation-sqlalchemy==0.50b0
 opentelemetry-exporter-otlp-proto-grpc==1.29.0
