@@ -210,6 +210,7 @@ export interface WorkoutLogCreateContract {
   completed_at?: string | null;
   status?: 'completed' | 'partial';
   sets: LogSetInputContract[];
+  client_id?: string | null;
 }
 
 export interface WorkoutLogContract {

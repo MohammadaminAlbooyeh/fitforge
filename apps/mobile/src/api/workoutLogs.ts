@@ -1,9 +1,29 @@
 import { api } from './client';
 import { NextSetSuggestion, PersonalRecord, WorkoutLog, WorkoutLogCreateInput } from './types';
+import { enqueueWorkoutLog, isNetworkError } from '@/utils/offlineQueue';
 
-export async function createWorkoutLog(input: WorkoutLogCreateInput): Promise<WorkoutLog> {
-  const { data } = await api.post<WorkoutLog>('/workout-logs/', input);
-  return data;
+export interface CreateWorkoutLogResult {
+  log: WorkoutLog | null;
+  queuedOffline: boolean;
+}
+
+/** Logs a session; if the request fails because the device has no
+ * connectivity (not because the server rejected it), the log is persisted
+ * locally and retried automatically once the device is back online
+ * (see `utils/offlineSync`) instead of losing the user's session data. */
+export async function createWorkoutLog(
+  input: WorkoutLogCreateInput
+): Promise<CreateWorkoutLogResult> {
+  try {
+    const { data } = await api.post<WorkoutLog>('/workout-logs/', input);
+    return { log: data, queuedOffline: false };
+  } catch (error) {
+    if (isNetworkError(error)) {
+      await enqueueWorkoutLog(input);
+      return { log: null, queuedOffline: true };
+    }
+    throw error;
+  }
 }
 
 export async function listWorkoutLogs(): Promise<WorkoutLog[]> {

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { useAuthStore } from '@/store/authStore';
 import { theme } from '@/constants/theme';
+import { initOfflineSync, stopOfflineSync } from '@/utils/offlineSync';
 
 const navigationTheme = {
   ...DefaultTheme,
@@ -20,6 +21,11 @@ const navigationTheme = {
 
 export default function App() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  useEffect(() => {
+    initOfflineSync();
+    return () => stopOfflineSync();
+  }, []);
 
   return (
     <NavigationContainer theme={navigationTheme}>

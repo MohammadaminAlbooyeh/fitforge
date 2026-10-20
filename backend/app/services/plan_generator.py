@@ -12,8 +12,12 @@ weekly frequency). Fixed lookup table, no computed logic:
   3 upper days + 2 lower days, matching weekly training-day availability
   more heavily toward upper body)
 
-Experience level is intentionally NOT used to pick the split type (v2 concern);
-it only affects which difficulty tier of exercise gets selected.
+Experience level now also picks between split *variants* at the same
+days_per_week (not just the difficulty tier of exercise chosen within a
+day): beginner/intermediate users get the full-body/upper-lower progression
+above, while advanced users at 3 or 5 days get a Push/Pull/Legs-based split,
+which assumes enough training history to recover from the higher
+per-muscle-group frequency a PPL split implies.
 
 Each day type maps to a fixed list of exercise "slots" (one entry per exercise,
 duplicates mean that muscle group gets more than one exercise) matching the
@@ -22,13 +26,16 @@ target counts below:
   Full Body (7): quads, hamstrings, glutes, chest, back, shoulders, core
   Upper      (7): chest, back, shoulders, biceps, triceps, back, shoulders
   Lower      (7): quads, hamstrings, glutes, calves, core, quads, core
+  Push       (5): chest, chest, shoulders, triceps, triceps
+  Pull       (5): back, back, biceps, biceps, core
+  Legs       (6): quads, hamstrings, glutes, quads, calves, core
 
-  The two duplicated slots per split are deliberately picked from the
-  muscle groups with the deepest exercise pools (back/shoulders for
-  Upper, quads/core for Lower) rather than the thinnest ones (biceps,
-  hamstrings, glutes) -- doubling demand on a shallow pool is what
-  causes repeated exercises across a multi-day plan once the pool
-  runs out of beginner/equipment-filtered options.
+  The two duplicated slots per full-body/upper/lower split are deliberately
+  picked from the muscle groups with the deepest exercise pools (back/
+  shoulders for Upper, quads/core for Lower) rather than the thinnest ones
+  (biceps, hamstrings, glutes) -- doubling demand on a shallow pool is what
+  causes repeated exercises across a multi-day plan once the pool runs out
+  of beginner/equipment-filtered options.
 
 Within a day, slots are filled by querying the exercise library for that
 muscle group, filtered by the user's available equipment and capped at their
@@ -87,7 +94,31 @@ LOWER_SLOTS = [
     MuscleGroup.quads,
     MuscleGroup.core,
 ]
-# days_per_week -> (split_type, [(day_title, slot_list), ...])
+PUSH_SLOTS = [
+    MuscleGroup.chest,
+    MuscleGroup.chest,
+    MuscleGroup.shoulders,
+    MuscleGroup.triceps,
+    MuscleGroup.triceps,
+]
+PULL_SLOTS = [
+    MuscleGroup.back,
+    MuscleGroup.back,
+    MuscleGroup.biceps,
+    MuscleGroup.biceps,
+    MuscleGroup.core,
+]
+LEGS_SLOTS = [
+    MuscleGroup.quads,
+    MuscleGroup.hamstrings,
+    MuscleGroup.glutes,
+    MuscleGroup.quads,
+    MuscleGroup.calves,
+    MuscleGroup.core,
+]
+
+# days_per_week -> (split_type, [(day_title, slot_list), ...]) for
+# beginner/intermediate users.
 SPLIT_RULES: dict[int, tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]] = {
     1: (SplitType.full_body, [("Full Body", FULL_BODY_SLOTS)]),
     2: (
@@ -123,6 +154,29 @@ SPLIT_RULES: dict[int, tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]] = 
     ),
 }
 
+# days_per_week -> same shape, override for advanced users where a split
+# exists; days without an entry here fall back to SPLIT_RULES.
+ADVANCED_SPLIT_RULES: dict[int, tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]] = {
+    3: (
+        SplitType.push_pull_legs,
+        [
+            ("Push", PUSH_SLOTS),
+            ("Pull", PULL_SLOTS),
+            ("Legs", LEGS_SLOTS),
+        ],
+    ),
+    5: (
+        SplitType.push_pull_legs,
+        [
+            ("Push", PUSH_SLOTS),
+            ("Pull", PULL_SLOTS),
+            ("Legs", LEGS_SLOTS),
+            ("Upper", UPPER_SLOTS),
+            ("Lower", LOWER_SLOTS),
+        ],
+    ),
+}
+
 DEFAULT_EQUIPMENT = [EquipmentType.bodyweight]
 
 # Compound lifts get heavier/lower-rep working sets; isolation work stays
@@ -133,9 +187,13 @@ SET_SCHEME = {
 }
 
 
-def get_split_plan(days_per_week: int) -> tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]:
+def get_split_plan(
+    days_per_week: int, difficulty: DifficultyLevel = DifficultyLevel.beginner
+) -> tuple[SplitType, list[tuple[str, list[MuscleGroup]]]]:
     if days_per_week not in SPLIT_RULES:
         raise ValueError("days_per_week must be between 1 and 5")
+    if difficulty == DifficultyLevel.advanced and days_per_week in ADVANCED_SPLIT_RULES:
+        return ADVANCED_SPLIT_RULES[days_per_week]
     return SPLIT_RULES[days_per_week]
 
 
@@ -233,9 +291,9 @@ def generate_plan(db: Session, user: User, days_per_week: int) -> WorkoutPlan:
     if not 1 <= days_per_week <= 5:
         raise ConflictError("days_per_week must be between 1 and 5")
 
-    split_type, day_specs = get_split_plan(days_per_week)
-    equipment = _resolve_equipment(user)
     difficulty = _resolve_difficulty(user)
+    split_type, day_specs = get_split_plan(days_per_week, difficulty)
+    equipment = _resolve_equipment(user)
 
     workout_plan_repo.archive_active_plans(db, user.id)
     deprioritized_ids = workout_plan_repo.get_frequently_skipped_exercise_ids(db, user.id)

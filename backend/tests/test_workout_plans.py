@@ -104,6 +104,49 @@ def test_generate_plan_respects_equipment_and_experience(seeded, client, auth_he
     assert equipment_used <= {"barbell", "dumbbell", "cable", "bodyweight"}
 
 
+@pytest.mark.parametrize(
+    "days,expected_titles",
+    [
+        (3, ["Push", "Pull", "Legs"]),
+        (5, ["Push", "Pull", "Legs", "Upper", "Lower"]),
+    ],
+)
+def test_generate_plan_advanced_uses_push_pull_legs(
+    seeded, client, auth_headers, days, expected_titles
+):
+    client.patch(
+        "/api/v1/users/me",
+        headers=auth_headers,
+        json={"experience_level": "advanced"},
+    )
+    resp = client.post(
+        "/api/v1/workout-plans/generate", json={"days_per_week": days}, headers=auth_headers
+    )
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["split_type"] == "push_pull_legs"
+    assert [d["title"] for d in body["plan_days"]] == expected_titles
+
+
+@pytest.mark.parametrize("days", [1, 2, 4])
+def test_generate_plan_advanced_falls_back_without_ppl_variant(
+    seeded, client, auth_headers, days
+):
+    """Days without an advanced split variant (1/2/4) still use the
+    beginner/intermediate split rules even for advanced users."""
+    client.patch(
+        "/api/v1/users/me",
+        headers=auth_headers,
+        json={"experience_level": "advanced"},
+    )
+    resp = client.post(
+        "/api/v1/workout-plans/generate", json={"days_per_week": days}, headers=auth_headers
+    )
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["split_type"] != "push_pull_legs"
+
+
 def test_regenerated_plan_suggests_progressive_overload(seeded, client, auth_headers, monkeypatch):
     _no_shuffle(monkeypatch)
     plan = client.post(

@@ -135,19 +135,21 @@ kept as distinct tables so progressive-overload history can be computed from rea
   ```bash
   cd backend && python -m app.seed
   ```
-- **Split algorithm** (`app/services/plan_generator.py`): a fixed lookup table, no ML and no
-  branching on experience level (that's a v2 concern) — more available days means more
-  muscle-group specialization, fewer days means more full-body coverage per session:
-  | Days | Split | Days |
+- **Split algorithm** (`app/services/plan_generator.py`): a fixed lookup table, no ML — more
+  available days means more muscle-group specialization, fewer days means more full-body
+  coverage per session. `experience_level` now also picks between split *variants* at 3 and 5
+  days (not just the exercise difficulty tier, see below): beginner/intermediate users get the
+  full-body/upper-lower progression, advanced users get a Push/Pull/Legs-based split:
+  | Days | Beginner/Intermediate | Advanced |
   |---|---|---|
   | 1 | Full Body | Full Body |
-  | 2 | Full Body ×2 | Full Body A, Full Body B |
-  | 3 | Full Body ×3 | Full Body A/B/C |
-  | 4 | Upper/Lower ×2 | Upper A, Lower A, Upper B, Lower B |
-  | 5 | Push/Pull/Legs + Upper/Lower | Push, Pull, Legs, Upper, Lower |
+  | 2 | Full Body ×2 (A, B) | Full Body ×2 (A, B) |
+  | 3 | Full Body ×3 (A/B/C) | Push, Pull, Legs |
+  | 4 | Upper/Lower ×2 (Upper A, Lower A, Upper B, Lower B) | Upper/Lower ×2 (same) |
+  | 5 | Upper/Lower ×2.5 (Upper A, Lower A, Upper B, Lower B, Upper C) | Push, Pull, Legs, Upper, Lower |
 
   Each day type maps to a fixed exercise "slot" list (e.g. Full Body = quads, hamstrings,
-  chest, back, shoulders, core = 6 exercises; Push = chest×2, shoulders, triceps×2 = 5).
+  glutes, chest, back, shoulders, core = 7 exercises; Push = chest×2, shoulders, triceps×2 = 5).
   Slots are filled from the exercise library, filtered by the user's `available_equipment`
   and capped at their `experience_level` (set via `PATCH /api/v1/users/me`), preferring
   compound movements first and varying exercise choice across repeated day types (so
@@ -226,11 +228,16 @@ edit or delete individual logged entries, not just add new ones. Body measuremen
 
 ## Offline mode
 
-The mobile app itself isn't offline-first yet (that's a larger client-side effort — a local
-queue/cache, e.g. via `expo-sqlite` or `AsyncStorage`, plus a "sync on reconnect" flow), but the
-backend now supports it: `POST /api/v1/workout-logs/` accepts a client-generated `client_id`,
-making retries after reconnecting idempotent (see above) instead of creating duplicate logs when
-a queued request is replayed.
+The mobile app queues workout logs when there's no connectivity instead of losing them:
+`src/api/workoutLogs.ts` `createWorkoutLog` catches network-level failures (no HTTP response at
+all — as opposed to a server-side rejection), persists the log to an `AsyncStorage`-backed queue
+(`src/utils/offlineQueue.ts`) stamped with a generated `client_id`, and returns a `queuedOffline`
+flag so the UI (`DailyPlanScreen`) can tell the user it was saved locally instead of showing an
+error. `src/utils/offlineSync.ts` watches connectivity via `@react-native-community/netinfo` and
+flushes the queue automatically once the device is back online, retrying each entry against
+`POST /api/v1/workout-logs/`. That retry is safe to replay because the backend treats
+`client_id` as an idempotency key (see above) — resubmitting the same `client_id` after
+reconnecting returns the original log instead of creating a duplicate.
 
 ## API contracts
 

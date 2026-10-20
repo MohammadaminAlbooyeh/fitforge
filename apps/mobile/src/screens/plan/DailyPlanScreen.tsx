@@ -72,7 +72,7 @@ export function DailyPlanScreen({ navigation }: any) {
     }
     setLogging(true);
     try {
-      const log = await createWorkoutLog({
+      const result = await createWorkoutLog({
         plan_day_id: selectedDay.id,
         status: doneExercises.length === total ? 'completed' : 'partial',
         sets: doneExercises.map((pde) => ({
@@ -83,13 +83,20 @@ export function DailyPlanScreen({ navigation }: any) {
         })),
       });
       setChecked({});
-      const prCount = log.log_sets.filter((s) => s.is_personal_record).length;
-      Alert.alert(
-        'Session logged',
-        prCount > 0
-          ? `Nice work — this session was added to your history. 🏆 ${prCount} new personal record${prCount > 1 ? 's' : ''}!`
-          : 'Nice work — this session was added to your history.'
-      );
+      if (result.queuedOffline) {
+        Alert.alert(
+          'Saved offline',
+          "You're offline — this session was saved on your device and will sync automatically once you're back online."
+        );
+      } else {
+        const prCount = result.log!.log_sets.filter((s) => s.is_personal_record).length;
+        Alert.alert(
+          'Session logged',
+          prCount > 0
+            ? `Nice work — this session was added to your history. 🏆 ${prCount} new personal record${prCount > 1 ? 's' : ''}!`
+            : 'Nice work — this session was added to your history.'
+        );
+      }
     } catch (e: any) {
       Alert.alert('Could not log session', e?.message ?? 'Something went wrong.');
     } finally {
